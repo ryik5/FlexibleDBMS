@@ -222,21 +222,21 @@ namespace AutoAnalyse
 
     public class ParserRowToOwner
     {
-        private IRow owner;
-        private string _row;
+        private IRow model;
+        private string rowSource;
        
         public int[] numberColumns = new int[1];
         public string[] parsedColumns = new string[1];
         public string[] nameColumns = new string[1];
 
 
-        public ParserRowToOwner(string rowData)
-        { _row = rowData; }
+        public ParserRowToOwner(string rowSource)
+        { this.rowSource = rowSource; }
 
         public void ConvertRowToModel()
         {
-            parsedColumns = _row.Split('|');
-            owner = new Owner
+            parsedColumns = rowSource.Split('|');
+            model = new Owner
             {
                 Name = parsedColumns[numberColumns[0]],
                 Type = parsedColumns[numberColumns[3]]?.Length > 0 ? TypeOwner.Enterprise : TypeOwner.Person,
@@ -260,8 +260,8 @@ namespace AutoAnalyse
                 CodeOperation = parsedColumns[numberColumns[15]],
                 CodeDate = parsedColumns[numberColumns[16]]
             };
-            if (((Owner)owner).DRFO > 0)
-            { ((Owner)owner).Name = $"{((Owner)owner).F}\t{((Owner)owner).I}\t{((Owner)owner).O}"; }
+            if (((Owner)model).DRFO > 0)
+            { ((Owner)model).Name = $"{((Owner)model).F}\t{((Owner)model).I}\t{((Owner)model).O}"; }
         }
 
         public void SetOrderColumns(string nameColumnsInSource)
@@ -326,27 +326,27 @@ namespace AutoAnalyse
 
         public IRow Get()
         {
-            return owner;
+            return model;
         }
     }
 
     public class ParserRowToCar
     {
-        private IRow car;
-        private string _row;
+        private IRow model;
+        private string rowSource;
 
         public int[] numberColumns = new int[1];
         public string[] parsedColumns = new string[1];
         public string[] nameColumns = new string[1];
 
 
-        public ParserRowToCar(string rowData)
-        { _row = rowData; }
+        public ParserRowToCar(string rowSource)
+        { this.rowSource = rowSource; }
 
         public void ConvertRowToModel()
         {
-            parsedColumns = _row.Split('|');
-            car = new Car
+            parsedColumns = rowSource.Split('|');
+            model = new Car
             {
                 Plate = parsedColumns[numberColumns[0]],
                 Factory = parsedColumns[numberColumns[1]],
@@ -356,7 +356,7 @@ namespace AutoAnalyse
                 ChassisNumber = parsedColumns[numberColumns[5]],
                 EngineVolume = parsedColumns[numberColumns[6]]
             };
-            car.Name = car.ToString();
+            model.Name = model.ToString();
         }
 
         public void SetOrderColumns(string nameColumnsInSource)
@@ -416,7 +416,7 @@ namespace AutoAnalyse
 
         public IRow Get()
         {
-            return car;
+            return model;
         }
     }
 }
