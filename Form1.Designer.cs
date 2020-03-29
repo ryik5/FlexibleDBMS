@@ -34,7 +34,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(90, 73);
+            this.button1.Location = new System.Drawing.Point(90, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
@@ -43,11 +43,11 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(90, 131);
+            this.textBox1.Location = new System.Drawing.Point(12, 41);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox1.Size = new System.Drawing.Size(177, 169);
+            this.textBox1.Size = new System.Drawing.Size(787, 397);
             this.textBox1.TabIndex = 1;
             // 
             // Form1
