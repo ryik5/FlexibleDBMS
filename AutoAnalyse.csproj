@@ -62,14 +62,14 @@
   <ItemGroup>
     <Compile Include="Common\BoolEventArgs.cs" />
     <Compile Include="Common\ObservableCollectionExt.cs" />
-    <Compile Include="Common\StringExtensions.cs" />
+    <Compile Include="FileReader.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="GetModel.cs" />
+    <Compile Include="Models\GetModel.cs" />
     <Compile Include="Models\Model.cs" />
     <Compile Include="Models\ParserRowTo.cs" />
     <Compile Include="Program.cs" />

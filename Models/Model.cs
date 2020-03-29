@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace AutoAnalyse
 {
 
-    public class Car : IRow
+    public class Car : IAbstractModel
     {
         public int ID { get; set; }
         public string Plate { get; set; }
@@ -42,7 +42,7 @@ namespace AutoAnalyse
         }
     }
 
-    public class Owner : IRow
+    public class Owner : IAbstractModel
     {
         public int ID { get; set; }
         public string Name { get; set; }
@@ -101,7 +101,7 @@ namespace AutoAnalyse
         }
     }
 
-    public class CarAndOwner : IRow
+    public class CarAndOwner : IAbstractModel
     {
         public int ID { get; set; }
         public string Plate { get; set; }

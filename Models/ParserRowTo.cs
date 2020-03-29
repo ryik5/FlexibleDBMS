@@ -6,12 +6,17 @@ using System.Threading.Tasks;
 
 namespace AutoAnalyse
 {
+    public interface IParserRowTo
+    {
+        IAbstractModel ConvertRowToModel();
+
+        void SetOrderColumns();
+    }
 
     public class ParserRowToOwner
     {
         private string rowSource;
         private string nameColumnsInSource;
-
         public int[] numberColumns = new int[1];
 
         public ParserRowToOwner(string rowSource, string nameColumnsInSource)
@@ -19,10 +24,10 @@ namespace AutoAnalyse
             this.rowSource = rowSource;
             this.nameColumnsInSource = nameColumnsInSource;
         }
-        public IRow ConvertRowToModel()
+        public IAbstractModel ConvertRowToModel()
         {
             string[] parsedColumns = rowSource.Split('|');
-            IRow model = new Owner
+            IAbstractModel model = new Owner
             {
                 Name = parsedColumns[numberColumns[0]],
                 Type = parsedColumns[numberColumns[3]]?.Length > 0 ? TypeOwner.Enterprise : TypeOwner.Person,
@@ -124,10 +129,10 @@ namespace AutoAnalyse
             this.nameColumnsInSource = nameColumnsInSource;
         }
 
-        public IRow ConvertRowToModel()
+        public IAbstractModel ConvertRowToModel()
         {
             string[] parsedColumns = rowSource.Split('|');
-            IRow model = new Car
+            IAbstractModel model = new Car
             {
                 Plate = parsedColumns[numberColumns[0]],
                 Factory = parsedColumns[numberColumns[1]],
@@ -190,10 +195,10 @@ namespace AutoAnalyse
             this.nameColumnsInSource = nameColumnsInSource;
         }
 
-        public IRow ConvertRowToModel()
+        public IAbstractModel ConvertRowToModel()
         {
             string[] parsedColumns = rowSource.Split('|');
-            IRow model = new CarAndOwner
+            IAbstractModel model = new CarAndOwner
             {
                 Name = parsedColumns[numberColumns[0]],
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AutoAnalyse
 {
-    public static class GetModel<T> where T : IRow
+    public static class GetModel<T> where T : IAbstractModel
     {
 
         public static T ToModel(string source, string columns)
