@@ -16,16 +16,22 @@ namespace AutoAnalyse
 {
     public partial class Form1 : Form
     {
-        const int MAX_ELEMENTS_COLLECTION = 100000;
-        static string localAppFolderPath = Application.StartupPath; //Environment.CurrentDirectory
-        readonly string appRegistryKey = @"SOFTWARE\YuriRyabchenko\AutoAnalyse";
-        static string appDbPath = "MainDB.db";
-        string pathToQueryToCreateMainDb = System.IO.Path.Combine(localAppFolderPath, appDbPath); //System.IO.Path.GetFileNameWithoutExtension(appFilePath)
+        static readonly string localAppFolderPath = Application.StartupPath; //Environment.CurrentDirectory
+        static readonly System.Diagnostics.FileVersionInfo appFileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(Application.ExecutablePath);
+        static readonly string appRegistryKey = @"SOFTWARE\YuriRyabchenko\AutoAnalyse";
+         readonly Bitmap bmpLogo;
+        static  NotifyIcon notifyIcon;
+        static  ContextMenu contextMenu;
+        static readonly Byte[] byteLogo;
 
-        string sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
+        //  string pathToQueryToCreateMainDb = System.IO.Path.Combine(localAppFolderPath, appDbPath); //System.IO.Path.GetFileNameWithoutExtension(appFilePath)
+
+        static string appDbPath = "MainDB.db";
+        static string sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
         System.IO.FileInfo dbFileInfo = new FileInfo(appDbPath);
         SQLiteDBOperations dBOperations;
 
+        const int MAX_ELEMENTS_COLLECTION = 100000;
         FileReader<CarAndOwner> reader;
 
         DataGridView dgv;
@@ -37,6 +43,27 @@ namespace AutoAnalyse
 
             CheckInputParametersEnvironment();
 
+            //Main Application
+            bmpLogo = Properties.Resources.LogoRYIK;
+            Text = appFileVersionInfo.Comments;
+            Icon = Icon.FromHandle(bmpLogo.GetHicon());
+            //Context Menu for notification
+            contextMenu = new ContextMenu();  //Context Menu on notify Icon
+            contextMenu.MenuItems.Add("About", ApplicationAbout);
+            contextMenu.MenuItems.Add("-");
+            contextMenu.MenuItems.Add("Restart", ApplicationRestart);
+            contextMenu.MenuItems.Add("Exit", ApplicationExit);
+            //Notification
+            notifyIcon = new NotifyIcon
+            {
+                Icon = this.Icon,
+                Visible = true,
+                BalloonTipText = "Developed by " + appFileVersionInfo.LegalCopyright,
+                Text= appFileVersionInfo.ProductName + "\nv." + appFileVersionInfo.FileVersion  + "\n" + appFileVersionInfo.CompanyName,
+                ContextMenu= contextMenu                
+            };
+            notifyIcon.ShowBalloonTip(500);
+            
             administratorMenu.Text = "Administrator";
             createLocalDBMenuItem.Click += CreateLocalDBMenuItem_Click;
             importFromTextFileMenuItem.Click += ImportFromTextFileMenuItem_Click;
@@ -57,6 +84,34 @@ namespace AutoAnalyse
             //prepare sql connection at local SQLite DB
             dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
         }
+
+        private void ApplicationRestart(object sender, EventArgs e)
+        {
+            Application.Restart();
+        }
+
+        private void ApplicationAbout(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ApplicationExit(object sender, EventArgs e)
+        {
+              Text = @"Closing application...";
+
+                dgv = null;
+
+                bmpLogo?.Dispose();
+
+                notifyIcon?.Dispose();
+                contextMenu?.Dispose();
+
+                System.Threading.Thread.Sleep(500);
+
+                Application.Exit();
+            
+        }
+
 
         private void CreateLocalDBMenuItem_Click(object sender, EventArgs e)
         {
@@ -180,6 +235,8 @@ namespace AutoAnalyse
             {
                 administratorMenu.Enabled = false;
             }
+
+            sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
         }
 
         private async void ImportFromTextFileMenuItem_Click(object sender, EventArgs e)
@@ -188,7 +245,9 @@ namespace AutoAnalyse
             analysisDataMenu.Enabled = false;
             textBox1.Enabled = false;
 
+            StatusLabel1.Text = "Reading and importing data from text file...";
             await Task.Run(() => ImportData());
+            StatusLabel1.Text = "Finished!!!";
 
             administratorMenu.Enabled = true;
             analysisDataMenu.Enabled = true;
@@ -198,24 +257,19 @@ namespace AutoAnalyse
         public void ImportData()
         {
             reader = new FileReader<CarAndOwner>();
-            textBox1.AppendText("\r\n");
-            textBox1.AppendText("Reading and importing data from text file:\r\n");
-            textBox1.AppendText("\r\n");
+            textBox1.Clear();
 
-            // reader.collection.CollectionChanged += ReaderCollection_CollectionChanged;
             reader.EvntCollectionFull += Reader_collectionFull;
-
             reader.GetContent("11.txt", MAX_ELEMENTS_COLLECTION);
+            reader.EvntCollectionFull -= Reader_collectionFull;
 
             textBox1.AppendText("\r\n");
             textBox1.AppendText("CarAndOwner:\r\n");
-            textBox1.AppendText("importedRows: " + reader.importedRows + "\r\n");
-            textBox1.AppendText("\r\n");
-
-            textBox1.AppendText("\r\n");
-            textBox1.AppendText("Finished!!!" + "\r\n");
-            reader.EvntCollectionFull -= Reader_collectionFull;
+            textBox1.AppendText("Total imported Rows: " + reader.importedRows);
+            
             reader = null;
+            textBox1.AppendText("\r\n");
+            textBox1.AppendText("\r\n");
         }
 
         private void Reader_collectionFull(object sender, BoolEventArgs e)
