@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace AutoAnalyse
 {
 
-    public class Car : IAbstractModel
+    public class Car : IModel
     {
         public int ID { get; set; }
         public string Plate { get; set; }
@@ -42,7 +42,7 @@ namespace AutoAnalyse
         }
     }
 
-    public class Owner : IAbstractModel
+    public class Owner : IModel
     {
         public int ID { get; set; }
         public string Name { get; set; }
@@ -101,7 +101,7 @@ namespace AutoAnalyse
         }
     }
 
-    public class CarAndOwner : IAbstractModel
+    public class CarAndOwner : IModel
     {
         public int ID { get; set; }
         public string Plate { get; set; }
@@ -128,6 +128,8 @@ namespace AutoAnalyse
         public string Apartment { get; set; }
         public string CodeOperation { get; set; }
         public string CodeDate { get; set; }
+
+        public virtual List<CarAndOwner> CarAndOwners { get; set; }
 
         public override bool Equals(object obj)
         {

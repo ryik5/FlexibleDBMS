@@ -6,34 +6,29 @@ using System.Threading.Tasks;
 
 namespace AutoAnalyse
 {
-    public static class GetModel<T> where T : IAbstractModel
+    public static class GetModel<T> where T : IModel
     {
 
         public static T ToModel(string source, string columns)
         {
             string className = typeof(T).ToString().Replace(typeof(T).Namespace.ToString() + ".", ""); //Get name class without namespace
-            T row;
+            IParserRowTo model;
+
             switch (className)
             {
                 case "Car":
-                    ParserRowToCar model = new ParserRowToCar(source, columns);
-                    model.SetOrderColumns(); //first row
-                    row = (T)model.ConvertRowToModel();
+                    model = new ParserRowToCar(source, columns);
                     break;
                 case "Owner":
-                    ParserRowToOwner model1 = new ParserRowToOwner(source, columns);
-                    model1.SetOrderColumns(); //first row
-                    row = (T)model1.ConvertRowToModel();
+                    model = new ParserRowToOwner(source, columns);
                     break;
                 case "CarAndOwner":
                 default:
-                    ParserRowToCarAndOwner model2 = new ParserRowToCarAndOwner(source, columns);
-                    model2.SetOrderColumns(); //first row
-                    row = (T)model2.ConvertRowToModel();
+                    model = new ParserRowToCarAndOwner(source, columns);
                     break;
             }
 
-            return (T)row;
+            return (T)model.ConvertRowToModel();
         }
     }
 

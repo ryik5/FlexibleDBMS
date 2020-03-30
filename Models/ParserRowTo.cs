@@ -8,26 +8,27 @@ namespace AutoAnalyse
 {
     public interface IParserRowTo
     {
-        IAbstractModel ConvertRowToModel();
-
-        void SetOrderColumns();
+        IModel ConvertRowToModel();
     }
 
-    public class ParserRowToOwner
+    public class ParserRowToOwner: IParserRowTo
     {
         private string rowSource;
         private string nameColumnsInSource;
-        public int[] numberColumns = new int[1];
 
         public ParserRowToOwner(string rowSource, string nameColumnsInSource)
         {
             this.rowSource = rowSource;
             this.nameColumnsInSource = nameColumnsInSource;
         }
-        public IAbstractModel ConvertRowToModel()
+
+        public IModel ConvertRowToModel()
         {
+            int[] numberColumns = SetOrderColumns();
+
             string[] parsedColumns = rowSource.Split('|');
-            IAbstractModel model = new Owner
+
+            IModel model = new Owner
             {
                 Name = parsedColumns[numberColumns[0]],
                 Type = parsedColumns[numberColumns[3]]?.Length > 0 ? TypeOwner.Enterprise : TypeOwner.Person,
@@ -57,10 +58,10 @@ namespace AutoAnalyse
             return model;
         }
 
-        public void SetOrderColumns()
+        private int[] SetOrderColumns()
         {
             string[] parsedColumns = nameColumnsInSource.Split('|');
-            numberColumns = new int[17];
+            int[] numberColumns = new int[17];
 
             for (int i = 0; i < parsedColumns.Length; i++)
             {
@@ -114,14 +115,14 @@ namespace AutoAnalyse
                         break;
                 }
             }
+            return numberColumns;
         }
     }
 
-    public class ParserRowToCar
+    public class ParserRowToCar: IParserRowTo
     {
         private string rowSource;
         private string nameColumnsInSource;
-        public int[] numberColumns = new int[1];
 
         public ParserRowToCar(string rowSource, string nameColumnsInSource)
         {
@@ -129,10 +130,11 @@ namespace AutoAnalyse
             this.nameColumnsInSource = nameColumnsInSource;
         }
 
-        public IAbstractModel ConvertRowToModel()
+        public IModel ConvertRowToModel()
         {
+            int[] numberColumns = SetOrderColumns();
             string[] parsedColumns = rowSource.Split('|');
-            IAbstractModel model = new Car
+            IModel model = new Car
             {
                 Plate = parsedColumns[numberColumns[0]],
                 Factory = parsedColumns[numberColumns[1]],
@@ -147,10 +149,10 @@ namespace AutoAnalyse
             return model;
         }
 
-        public void SetOrderColumns()
+        private int[] SetOrderColumns()
         {
             string[] parsedColumns = nameColumnsInSource.Split('|');
-            numberColumns = new int[7];
+            int[] numberColumns = new int[7];
 
             for (int i = 0; i < parsedColumns.Length; i++)
             {
@@ -180,14 +182,15 @@ namespace AutoAnalyse
                         break;
                 }
             }
+        
+            return numberColumns;
         }
     }
 
-    public class ParserRowToCarAndOwner
+    public class ParserRowToCarAndOwner: IParserRowTo
     {
         private string rowSource;
         private string nameColumnsInSource;
-        public int[] numberColumns = new int[1];
 
         public ParserRowToCarAndOwner(string rowSource, string nameColumnsInSource)
         {
@@ -195,10 +198,11 @@ namespace AutoAnalyse
             this.nameColumnsInSource = nameColumnsInSource;
         }
 
-        public IAbstractModel ConvertRowToModel()
+        public IModel ConvertRowToModel()
         {
+            int[] numberColumns = SetOrderColumns();
             string[] parsedColumns = rowSource.Split('|');
-            IAbstractModel model = new CarAndOwner
+            IModel model = new CarAndOwner
             {
                 Name = parsedColumns[numberColumns[0]],
 
@@ -228,16 +232,14 @@ namespace AutoAnalyse
                 ChassisNumber = parsedColumns[numberColumns[22]],
                 EngineVolume = parsedColumns[numberColumns[23]]
             };
-            // if (((Owner)model).DRFO > 0)
-            //   { ((Owner)model).Name = $"{((Owner)model).F}\t{((Owner)model).I}\t{((Owner)model).O}"; }
 
             return model;
         }
 
-        public void SetOrderColumns()
+        private int[] SetOrderColumns()
         {
             string[] parsedColumns = nameColumnsInSource.Split('|');
-            numberColumns = new int[24];
+            int[] numberColumns = new int[24];
 
             for (int i = 0; i < parsedColumns.Length; i++)
             {
@@ -313,6 +315,8 @@ namespace AutoAnalyse
                         break;
                 }
             }
+
+            return numberColumns;
         }
     }
 

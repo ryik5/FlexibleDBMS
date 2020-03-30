@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AutoAnalyse
 {
-    public class FileReader<T> where T : IAbstractModel
+    public class FileReader<T> where T : IModel
     {
         private static readonly Encoding _encoding = Encoding.GetEncoding(1251);
         private const int DefaultBufferSize = 4096;
@@ -22,7 +22,7 @@ namespace AutoAnalyse
         public delegate void CollectionFull(object sender, BoolEventArgs e);
         public event CollectionFull EvntCollectionFull;
 
-        public async Task GetContent(string filePath, Encoding encoding, int maxElementsInDictionary)
+        public void GetContent(string filePath, Encoding encoding, int maxElementsInDictionary)
         {
             listModels = new List<T>(maxElementsInDictionary);
 
@@ -32,7 +32,7 @@ namespace AutoAnalyse
             {
                 using (var reader = new StreamReader(stream, encoding))
                 {
-                    while ((currentRow = await reader.ReadLineAsync())?.Trim()?.Length > 10)
+                    while ((currentRow =  reader.ReadLine())?.Trim()?.Length > 10)
                     {
                         if (nameColumns == null)
                         {
@@ -43,7 +43,7 @@ namespace AutoAnalyse
                         {
                             model = GetModel<T>.ToModel(currentRow, nameColumns);
 
-                            if (model != null && model?.ID > 0)
+                            if (model != null )
                             {
                                 importedRows++;
                                 listModels.Add(model);
@@ -52,7 +52,7 @@ namespace AutoAnalyse
                                 {
                                     EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//collection is full
 
-                                    await Task.Delay(10).ConfigureAwait(true);
+                                    Task.Delay(100);
 
                                     listModels = new List<T>(maxElementsInDictionary);
                                 }
@@ -66,14 +66,13 @@ namespace AutoAnalyse
             {
                 EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//last part of the collection
 
-                await Task.Delay(10).ConfigureAwait(true);
+                Task.Delay(10);
             }
-
         }
 
-        public async Task GetContent(string filePath, int maxElementsInDictionary)
+        public void GetContent(string filePath, int maxElementsInDictionary)
         {
-            await GetContent(filePath, _encoding, maxElementsInDictionary);
+            GetContent(filePath, _encoding, maxElementsInDictionary);
         }
     }
 
