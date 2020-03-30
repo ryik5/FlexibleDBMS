@@ -70,17 +70,17 @@ namespace AutoAnalyse
             importFromTextFileMenuItem.ToolTipText = "Import Text File in local DB";
             writeModelsListMenuItem.ToolTipText = "Write List with Models in DB";
 
-            analysisDataMenu.Text = "Analysis";
+            analysisDataMenu.Text = "Анализ данных";
             analysisDataMenu.Enabled = false;
             analysisDataMenu.Click += AnalysisDataMenu_Click;
             loadDataMenuItem.Click += LoadDataMenuItem_Click;
             schemeLocalDBMenuItem.Click += SchemaLocalDBMenuItem_Click;
-            getFIOMenuItem.Text = "Все ФИО в DB";
+            getFIOMenuItem.Text = "Все ФИО в БД";
             getFIOMenuItem.Click += GetFIOMenuItem_Click;
-            getEnterpriseMenuItem.Text = "Все предприятия in DB";
+            getEnterpriseMenuItem.Text = "Все предприятия в БД";
             getEnterpriseMenuItem.Click += GetEnterpriseMenuItem_Click;
 
-            dataMenu.Text = "Data";
+            dataMenu.Text = "Отображение данных";
             changeViewPanelviewMenuItem.Text = "Show as table";
             changeViewPanelviewMenuItem.Click += ChangeViewPanelviewMenuItem_Click;
 
@@ -88,10 +88,10 @@ namespace AutoAnalyse
 
             StatusLabel1.Text = "";
             btnImage.Image = bmpLogo;
-
+            DbSchema schemaDB=null;
             try
             {
-                DbSchema schemaDB = DbSchema.LoadDB(dbFileInfo.FullName);
+                schemaDB = DbSchema.LoadDB(dbFileInfo.FullName);
                 string tableName = null;
 
                 foreach (var table in schemaDB.Tables)
@@ -99,13 +99,33 @@ namespace AutoAnalyse
                     tableName += $" '{table.Value.TableName}'";
                 }
                 StatusLabellInfoDB.Text = $"Данные в таблице(ах) {tableName}";
+
+            dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
             }
             catch(Exception e) 
-            { StatusLabellInfoDB.Text = $"Ошибка в БД: {e.Message}"; }
-
-
-            //prepare sql connection at local SQLite DB
-            dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
+            {
+                dataMenu.Enabled = false;
+                StatusLabellInfoDB.Text = $"Ошибка в БД: {e.Message}";
+                if (!administratorMenu.Enabled)
+                {
+                    txtbQuery.Enabled = false;
+                    txtbResultShow.Text = "База данных пустая!\r\nПредварительно импортируйте данные";
+                    txtbResultShow.Enabled = false;
+                }
+            }
+            finally {
+                if (schemaDB.Tables.Count == 0)
+                {
+                    dataMenu.Enabled = false;
+                    if (!administratorMenu.Enabled)
+                    {
+                        txtbQuery.Enabled = false;
+                        txtbResultShow.Text = "База данных пустая!\r\nПредварительно импортируйте данные";
+                        txtbResultShow.Enabled = false;
+                    }
+                }
+                schemaDB = null; 
+            }
         }
 
         private async void GetEnterpriseMenuItem_Click(object sender, EventArgs e)
