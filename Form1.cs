@@ -19,9 +19,9 @@ namespace AutoAnalyse
         static readonly string localAppFolderPath = Application.StartupPath; //Environment.CurrentDirectory
         static readonly System.Diagnostics.FileVersionInfo appFileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(Application.ExecutablePath);
         static readonly string appRegistryKey = @"SOFTWARE\YuriRyabchenko\AutoAnalyse";
-         readonly Bitmap bmpLogo;
-        static  NotifyIcon notifyIcon;
-        static  ContextMenu contextMenu;
+        readonly Bitmap bmpLogo;
+        static NotifyIcon notifyIcon;
+        static ContextMenu contextMenu;
         static readonly Byte[] byteLogo;
 
         //  string pathToQueryToCreateMainDb = System.IO.Path.Combine(localAppFolderPath, appDbPath); //System.IO.Path.GetFileNameWithoutExtension(appFilePath)
@@ -59,11 +59,11 @@ namespace AutoAnalyse
                 Icon = this.Icon,
                 Visible = true,
                 BalloonTipText = "Developed by " + appFileVersionInfo.LegalCopyright,
-                Text= appFileVersionInfo.ProductName + "\nv." + appFileVersionInfo.FileVersion  + "\n" + appFileVersionInfo.CompanyName,
-                ContextMenu= contextMenu                
+                Text = appFileVersionInfo.ProductName + "\nv." + appFileVersionInfo.FileVersion + "\n" + appFileVersionInfo.CompanyName,
+                ContextMenu = contextMenu
             };
             notifyIcon.ShowBalloonTip(500);
-            
+
             administratorMenu.Text = "Administrator";
             createLocalDBMenuItem.Click += CreateLocalDBMenuItem_Click;
             importFromTextFileMenuItem.Click += ImportFromTextFileMenuItem_Click;
@@ -74,16 +74,106 @@ namespace AutoAnalyse
             analysisDataMenu.Enabled = false;
             analysisDataMenu.Click += AnalysisDataMenu_Click;
             loadDataMenuItem.Click += LoadDataMenuItem_Click;
+            schemeLocalDBMenuItem.Click += SchemaLocalDBMenuItem_Click;
+            getFIOMenuItem.Text = "Все ФИО в DB";
+            getFIOMenuItem.Click += GetFIOMenuItem_Click;
+            getEnterpriseMenuItem.Text = "Все предприятия in DB";
+            getEnterpriseMenuItem.Click += GetEnterpriseMenuItem_Click;
 
             dataMenu.Text = "Data";
             changeViewPanelviewMenuItem.Text = "Show as table";
             changeViewPanelviewMenuItem.Click += ChangeViewPanelviewMenuItem_Click;
 
+            txtbQuery.KeyPress += TxtbQuery_KeyPress;
+
             StatusLabel1.Text = "";
+            btnImage.Image = bmpLogo;
+            StatusLabellInfoDB.Text = "Данные в таблице CarAndOwner";
+
 
             //prepare sql connection at local SQLite DB
             dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
         }
+
+        private async void GetEnterpriseMenuItem_Click(object sender, EventArgs e)
+        {
+            string query = "select distinct name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou is not '0' group by edrpou order by amount desc";
+            await ShowDataInDataGridView(query);
+        }
+
+        private async void GetFIOMenuItem_Click(object sender, EventArgs e)
+        {
+            string query = "select distinct f,i,o,drfo,count(f) from CarAndOwner group by f,i,o order by drfo";
+            await ShowDataInDataGridView(query);
+        }
+
+        private void SchemaLocalDBMenuItem_Click(object sender, EventArgs e)
+        {
+            txtbResultShow.Visible = false;
+            ChangeViewPanelview();
+
+            DbSchema schemaDB = DbSchema.LoadDB(dbFileInfo.FullName);
+            txtbResultShow.AppendText("--------------------------------\r\n");
+            txtbResultShow.AppendText($"-  Scheme of local DB: '{dbFileInfo.FullName}':\r\n\r\n");
+
+            txtbResultShow.AppendText($"-=  tables: {schemaDB.Tables.Count}  =-\r\n");
+
+            foreach (var table in schemaDB.Tables)
+            {
+                txtbResultShow.AppendText($"-=     table: '{table.Value.TableName}    =-'\r\ncolumns:\r\n"); ;
+                txtbResultShow.AppendText($"-=  columns: {table.Value.Columns.Count}  =-\r\n");
+                foreach (var column in table.Value.Columns)
+                {
+                    txtbResultShow.AppendText($"'{column.ColumnName} '\t type: '{column.ColumnType}'\r\n");
+                }
+            }
+
+            txtbResultShow.AppendText($"\r\n-  End of Scheme of local DB: '{dbFileInfo.FullName}':\r\n");
+            txtbResultShow.AppendText("------------------------\r\n");
+        }
+
+        private async void TxtbQuery_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)13)//если нажата Enter
+            {
+                txtbResultShow.AppendText("--------------------------------\r\n");
+
+                string query = (sender as TextBox).Text.Trim();
+
+                txtbResultShow.AppendText("Query:\r\n" + query + "\r\n");
+                string[] arrQuery = query.Split(' ');
+
+                if (
+                    query.ToLower().StartsWith("select ") && arrQuery.Length > 3
+                    && arrQuery.Where(w => w.Contains("select")).Count() > 0
+                    && arrQuery.Where(w => w.Contains("from")).Count() > 0
+                    )
+                {
+                    DialogResult doQuery =
+                        MessageBox.Show($"Выполнить ваш запрос?\r\n{query}", "Проверьте свой запрос", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+
+                    if (doQuery == DialogResult.OK)
+                    {
+                        txtbResultShow.AppendText("Done!\r\n");
+
+                        txtbResultShow.Visible = true;
+                        ChangeViewPanelview();
+
+                        await ShowDataInDataGridView(query);
+                    }
+                    else
+                    {
+                        txtbResultShow.AppendText("Отмена задания.\r\n");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Разрешено использование только выборок без модификации БД!\r\nПроверьте свой запрос на правльность!",
+                        "Ошибка!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
+
 
         private void ApplicationRestart(object sender, EventArgs e)
         {
@@ -97,19 +187,19 @@ namespace AutoAnalyse
 
         private void ApplicationExit(object sender, EventArgs e)
         {
-              Text = @"Closing application...";
+            Text = @"Closing application...";
 
-                dgv = null;
+            dgv = null;
 
-                bmpLogo?.Dispose();
+            bmpLogo?.Dispose();
 
-                notifyIcon?.Dispose();
-                contextMenu?.Dispose();
+            notifyIcon?.Dispose();
+            contextMenu?.Dispose();
 
-                System.Threading.Thread.Sleep(500);
+            System.Threading.Thread.Sleep(500);
 
-                Application.Exit();
-            
+            Application.Exit();
+
         }
 
 
@@ -127,18 +217,22 @@ namespace AutoAnalyse
                             " group by edrpou, plate)" +
                             " group by edrpou";
 
-            analysisDataMenu.Enabled = false;
-            dataMenu.Enabled = false;
 
             await ShowDataInDataGridView(query);
-
-            analysisDataMenu.Enabled = true;
-            dataMenu.Enabled = true;
         }
 
         private async Task ShowDataInDataGridView(string query)
         {
+            txtbResultShow.AppendText("\r\nЗапрос:\r\n" + query);
+            bool analysisEnables = analysisDataMenu.Enabled;
+
+            if (analysisEnables)
+            { analysisDataMenu.Enabled = false; }
+            dataMenu.Enabled = false;
+            txtbResultShow.Enabled = false;
+
             StatusLabel1.Text = "Загрузка данных в таблицу...";
+
             if (dgv != null)
             {
                 dgv?.Hide();
@@ -159,15 +253,45 @@ namespace AutoAnalyse
             };
 
             DataTable dt = new DataTable();
-            await Task.Run(() => dt = dBOperations.GetTable(query));
+            try
+            {
+                await Task.Run(() => dt = dBOperations.GetTable(query));
 
-            dgv.DataSource = dt;
-            panel1.Controls.Add(dgv);
-            dgv.Update();
-            dgv.Refresh();
-            dgv.Show();
+                dgv.DataSource = dt;
+                panel1.Controls.Add(dgv);
+                dgv.Update();
+                dgv.Refresh();
+                dgv.Show();
 
-            StatusLabel1.Text = $"Количество записей: {dt.Rows.Count}";
+                txtbResultShow.AppendText($"Количество записей в базе: {dt.Rows.Count}\r\n");
+             //   foreach(var r in dt.Rows)
+             //   {
+             //   }
+                StatusLabel1.Text = $"Количество записей: {dt.Rows.Count}";
+            }
+            catch (SQLiteException dbsql)
+            {
+                txtbResultShow.AppendText("\r\nОшибка в запросе:\r\n-----\r\n" + dbsql.Message + "\r\n-----\r\n" + dbsql.ToString() + "\r\n");
+                StatusLabel1.Text = "Ошибка в запросе!";
+                ChangeViewPanelview();
+            }
+            catch (OutOfMemoryException e)
+            {
+                txtbResultShow.AppendText("\r\nВаш запрос очень общий и тяжелый для БД. Кокретизируйте запрашиваемые поля или уменьшите выборку:\r\n-----\r\n" + e.Message + "\r\n-----\r\n" + e.ToString() + "\r\n-----\r\n");
+                StatusLabel1.Text = "Ошибка в запросе!";
+                ChangeViewPanelview();
+            }
+            catch (Exception e)
+            {
+                txtbResultShow.AppendText("\r\nОбщая ошибка:\r\n-----\r\n" + e.ToString() + "\r\n-----\r\n");
+                StatusLabel1.Text = "Ошибка в запросе!";
+                ChangeViewPanelview();
+            }
+
+            if (analysisEnables)
+            { analysisDataMenu.Enabled = true; }
+            dataMenu.Enabled = true;
+            txtbResultShow.Enabled = true;
         }
 
         private void ChangeViewPanelviewMenuItem_Click(object sender, EventArgs e)
@@ -177,7 +301,7 @@ namespace AutoAnalyse
 
         private void ChangeViewPanelview()
         {
-            if (!textBox1.Visible)
+            if (!txtbResultShow.Visible)
             {
                 if (dgv != null)
                 {
@@ -189,12 +313,12 @@ namespace AutoAnalyse
                 }
 
                 analysisDataMenu.Enabled = false;
-                textBox1.Show();
+                txtbResultShow.Show();
                 changeViewPanelviewMenuItem.Text = "Show as table";
             }
             else
             {
-                textBox1.Hide();
+                txtbResultShow.Hide();
                 analysisDataMenu.Enabled = true;
                 changeViewPanelviewMenuItem.Text = "Show as text";
                 StatusLabel1.Text = $"доступны пункты меню Загрузки и Анализа данных";
@@ -202,9 +326,7 @@ namespace AutoAnalyse
         }
 
         private void AnalysisDataMenu_Click(object sender, EventArgs e)
-        {
-
-        }
+        { }
 
         /// <summary>
         /// show Import Text File Button: -y  
@@ -243,7 +365,7 @@ namespace AutoAnalyse
         {
             administratorMenu.Enabled = false;
             analysisDataMenu.Enabled = false;
-            textBox1.Enabled = false;
+            txtbResultShow.Enabled = false;
 
             StatusLabel1.Text = "Reading and importing data from text file...";
             await Task.Run(() => ImportData());
@@ -251,25 +373,25 @@ namespace AutoAnalyse
 
             administratorMenu.Enabled = true;
             analysisDataMenu.Enabled = true;
-            textBox1.Enabled = true;
+            txtbResultShow.Enabled = true;
         }
 
         public void ImportData()
         {
             reader = new FileReader<CarAndOwner>();
-            textBox1.Clear();
+            txtbResultShow.Clear();
 
             reader.EvntCollectionFull += Reader_collectionFull;
             reader.GetContent("11.txt", MAX_ELEMENTS_COLLECTION);
             reader.EvntCollectionFull -= Reader_collectionFull;
 
-            textBox1.AppendText("\r\n");
-            textBox1.AppendText("CarAndOwner:\r\n");
-            textBox1.AppendText("Total imported Rows: " + reader.importedRows);
-            
+            txtbResultShow.AppendText("\r\n");
+            txtbResultShow.AppendText("CarAndOwner:\r\n");
+            txtbResultShow.AppendText("Total imported Rows: " + reader.importedRows);
+
             reader = null;
-            textBox1.AppendText("\r\n");
-            textBox1.AppendText("\r\n");
+            txtbResultShow.AppendText("\r\n");
+            txtbResultShow.AppendText("\r\n");
         }
 
         private void Reader_collectionFull(object sender, BoolEventArgs e)
@@ -283,8 +405,8 @@ namespace AutoAnalyse
 
                 StatusLabel1.Text = $"Количество записей: {readRows}";
 
-                textBox1.AppendText($"First Element{1}: plate: {list.ElementAt(0).Plate} factory: {list.ElementAt(0).Factory}, model: {list.ElementAt(0).Model}\r\n");
-                textBox1.AppendText($"Last Element{list.Count - 1}: plate: {list.ElementAt(list.Count - 1).Plate} factory: {list.ElementAt(list.Count - 1).Factory}, model: {list.ElementAt(list.Count - 1).Model}\r\n");
+                txtbResultShow.AppendText($"First Element{1}: plate: {list.ElementAt(0).Plate} factory: {list.ElementAt(0).Factory}, model: {list.ElementAt(0).Model}\r\n");
+                txtbResultShow.AppendText($"Last Element{list.Count - 1}: plate: {list.ElementAt(list.Count - 1).Plate} factory: {list.ElementAt(list.Count - 1).Factory}, model: {list.ElementAt(list.Count - 1).Model}\r\n");
             }
         }
 
