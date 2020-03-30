@@ -88,7 +88,20 @@ namespace AutoAnalyse
 
             StatusLabel1.Text = "";
             btnImage.Image = bmpLogo;
-            StatusLabellInfoDB.Text = "Данные в таблице CarAndOwner";
+
+            try
+            {
+                DbSchema schemaDB = DbSchema.LoadDB(dbFileInfo.FullName);
+                string tableName = null;
+
+                foreach (var table in schemaDB.Tables)
+                {
+                    tableName += $" '{table.Value.TableName}'";
+                }
+                StatusLabellInfoDB.Text = $"Данные в таблице(ах) {tableName}";
+            }
+            catch(Exception e) 
+            { StatusLabellInfoDB.Text = $"Ошибка в БД: {e.Message}"; }
 
 
             //prepare sql connection at local SQLite DB
@@ -103,7 +116,7 @@ namespace AutoAnalyse
 
         private async void GetFIOMenuItem_Click(object sender, EventArgs e)
         {
-            string query = "select distinct f,i,o,drfo,count(f) from CarAndOwner group by f,i,o order by drfo";
+            string query = "select distinct f,i,o,drfo,count(f) as amount from CarAndOwner group by f,i,o order by drfo";
             await ShowDataInDataGridView(query);
         }
 
@@ -210,14 +223,13 @@ namespace AutoAnalyse
 
         private async void LoadDataMenuItem_Click(object sender, EventArgs e)
         {
-            string query = "select edrpou, count(plate)  as number from" +
+            string query = "select edrpou, count(plate)  as amount from" +
                             " (select distinct edrpou, plate" +
                             " from CarAndOwner" +
                             " where edrpou is not '0'" +
                             " group by edrpou, plate)" +
                             " group by edrpou";
-
-
+            
             await ShowDataInDataGridView(query);
         }
 
