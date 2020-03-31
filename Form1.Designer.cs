@@ -30,28 +30,37 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.txtbResultShow = new System.Windows.Forms.TextBox();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.administratorMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.createLocalDBMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.importFromTextFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.writeModelsListMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.analysisDataMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.analysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.changeViewPanelviewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.queryMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.addQueryExtraMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.queriesStandartMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.schemeLocalDBMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.analysisToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.loadDataMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getFIOMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dataMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.changeViewPanelviewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.schemeLocalDBMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.StatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.btnImage = new System.Windows.Forms.ToolStripDropDownButton();
-            this.StatusLabellInfoDB = new System.Windows.Forms.ToolStripStatusLabel();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.txtbQuery = new System.Windows.Forms.TextBox();
-            this.lblQuery = new System.Windows.Forms.Label();
             this.getEnterpriseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuStrip1.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.queriesExtraMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.StatusLabelMain = new System.Windows.Forms.ToolStripStatusLabel();
+            this.StatuslabelBtnImage = new System.Windows.Forms.ToolStripDropDownButton();
+            this.StatusLabelExtraInfo = new System.Windows.Forms.ToolStripStatusLabel();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.txtbBodyQuery = new System.Windows.Forms.TextBox();
+            this.txtbNameQuery = new System.Windows.Forms.TextBox();
+            this.removeQueryExtraMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStrip.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -60,29 +69,30 @@
             this.txtbResultShow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtbResultShow.Location = new System.Drawing.Point(0, 2);
+            this.txtbResultShow.Location = new System.Drawing.Point(0, 1);
             this.txtbResultShow.Multiline = true;
             this.txtbResultShow.Name = "txtbResultShow";
             this.txtbResultShow.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtbResultShow.Size = new System.Drawing.Size(800, 396);
+            this.txtbResultShow.Size = new System.Drawing.Size(798, 397);
             this.txtbResultShow.TabIndex = 1;
             // 
-            // menuStrip1
+            // menuStrip
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.administratorMenu,
-            this.analysisDataMenu,
-            this.dataMenu});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(800, 24);
-            this.menuStrip1.TabIndex = 3;
-            this.menuStrip1.Text = "menuStrip1";
+            this.viewMenu,
+            this.queryMenu});
+            this.menuStrip.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip.Name = "menuStrip";
+            this.menuStrip.Size = new System.Drawing.Size(800, 24);
+            this.menuStrip.TabIndex = 3;
+            this.menuStrip.Text = "menuStrip1";
             // 
             // administratorMenu
             // 
             this.administratorMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.createLocalDBMenuItem,
+            this.toolStripSeparator5,
             this.importFromTextFileMenuItem,
             this.writeModelsListMenuItem});
             this.administratorMenu.Name = "administratorMenu";
@@ -94,6 +104,11 @@
             this.createLocalDBMenuItem.Name = "createLocalDBMenuItem";
             this.createLocalDBMenuItem.Size = new System.Drawing.Size(181, 22);
             this.createLocalDBMenuItem.Text = "Create localDB";
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(178, 6);
             // 
             // importFromTextFileMenuItem
             // 
@@ -107,49 +122,57 @@
             this.writeModelsListMenuItem.Size = new System.Drawing.Size(181, 22);
             this.writeModelsListMenuItem.Text = "Write models List";
             // 
-            // analysisDataMenu
+            // viewMenu
             // 
-            this.analysisDataMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.analysisToolStripMenuItem,
-            this.loadDataMenuItem,
-            this.getFIOMenuItem,
-            this.getEnterpriseMenuItem});
-            this.analysisDataMenu.Name = "analysisDataMenu";
-            this.analysisDataMenu.Size = new System.Drawing.Size(62, 20);
-            this.analysisDataMenu.Text = "Analysis";
-            // 
-            // analysisToolStripMenuItem
-            // 
-            this.analysisToolStripMenuItem.Name = "analysisToolStripMenuItem";
-            this.analysisToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.analysisToolStripMenuItem.Text = "Analysis";
-            // 
-            // loadDataMenuItem
-            // 
-            this.loadDataMenuItem.Name = "loadDataMenuItem";
-            this.loadDataMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.loadDataMenuItem.Text = "Load data";
-            // 
-            // getFIOMenuItem
-            // 
-            this.getFIOMenuItem.Name = "getFIOMenuItem";
-            this.getFIOMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.getFIOMenuItem.Text = "Get FIO";
-            // 
-            // dataMenu
-            // 
-            this.dataMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.changeViewPanelviewMenuItem,
-            this.schemeLocalDBMenuItem});
-            this.dataMenu.Name = "dataMenu";
-            this.dataMenu.Size = new System.Drawing.Size(43, 20);
-            this.dataMenu.Text = "Data";
+            this.viewMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.changeViewPanelviewMenuItem});
+            this.viewMenu.Name = "viewMenu";
+            this.viewMenu.Size = new System.Drawing.Size(44, 20);
+            this.viewMenu.Text = "View";
             // 
             // changeViewPanelviewMenuItem
             // 
             this.changeViewPanelviewMenuItem.Name = "changeViewPanelviewMenuItem";
-            this.changeViewPanelviewMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.changeViewPanelviewMenuItem.Size = new System.Drawing.Size(132, 22);
             this.changeViewPanelviewMenuItem.Text = "Show table";
+            // 
+            // queryMenu
+            // 
+            this.queryMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addQueryExtraMenuItem,
+            this.toolStripSeparator1,
+            this.queriesStandartMenu,
+            this.queriesExtraMenu,
+            this.toolStripSeparator4,
+            this.removeQueryExtraMenuItem});
+            this.queryMenu.Name = "queryMenu";
+            this.queryMenu.Size = new System.Drawing.Size(51, 20);
+            this.queryMenu.Text = "Query";
+            // 
+            // addQueryExtraMenuItem
+            // 
+            this.addQueryExtraMenuItem.Name = "addQueryExtraMenuItem";
+            this.addQueryExtraMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addQueryExtraMenuItem.Text = "Add";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // queriesStandartMenu
+            // 
+            this.queriesStandartMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.schemeLocalDBMenuItem,
+            this.toolStripSeparator2,
+            this.analysisToolStripMenuItem1,
+            this.loadDataMenuItem,
+            this.getFIOMenuItem,
+            this.getEnterpriseMenuItem,
+            this.toolStripSeparator3});
+            this.queriesStandartMenu.Name = "queriesStandartMenu";
+            this.queriesStandartMenu.Size = new System.Drawing.Size(180, 22);
+            this.queriesStandartMenu.Text = "Standart queries";
             // 
             // schemeLocalDBMenuItem
             // 
@@ -157,42 +180,87 @@
             this.schemeLocalDBMenuItem.Size = new System.Drawing.Size(162, 22);
             this.schemeLocalDBMenuItem.Text = "Scheme local DB";
             // 
-            // statusStrip1
+            // toolStripSeparator2
             // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.StatusLabel1,
-            this.btnImage,
-            this.StatusLabellInfoDB});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 428);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(800, 22);
-            this.statusStrip1.TabIndex = 4;
-            this.statusStrip1.Text = "statusStrip1";
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(159, 6);
             // 
-            // StatusLabel1
+            // analysisToolStripMenuItem1
             // 
-            this.StatusLabel1.Name = "StatusLabel1";
-            this.StatusLabel1.Size = new System.Drawing.Size(668, 17);
-            this.StatusLabel1.Spring = true;
-            this.StatusLabel1.Text = "StatusLabel1";
-            this.StatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.analysisToolStripMenuItem1.Name = "analysisToolStripMenuItem1";
+            this.analysisToolStripMenuItem1.Size = new System.Drawing.Size(162, 22);
+            this.analysisToolStripMenuItem1.Text = "Analysis";
             // 
-            // btnImage
+            // loadDataMenuItem
             // 
-            this.btnImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnImage.Image = ((System.Drawing.Image)(resources.GetObject("btnImage.Image")));
-            this.btnImage.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnImage.Name = "btnImage";
-            this.btnImage.Size = new System.Drawing.Size(29, 20);
-            this.btnImage.Text = "toolStripDropDownButton1";
+            this.loadDataMenuItem.Name = "loadDataMenuItem";
+            this.loadDataMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.loadDataMenuItem.Text = "Load data";
             // 
-            // StatusLabellInfoDB
+            // getFIOMenuItem
             // 
-            this.StatusLabellInfoDB.Name = "StatusLabellInfoDB";
-            this.StatusLabellInfoDB.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.StatusLabellInfoDB.Size = new System.Drawing.Size(88, 17);
-            this.StatusLabellInfoDB.Text = "StatusLabelInfo";
-            this.StatusLabellInfoDB.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.getFIOMenuItem.Name = "getFIOMenuItem";
+            this.getFIOMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.getFIOMenuItem.Text = "Get FIO";
+            // 
+            // getEnterpriseMenuItem
+            // 
+            this.getEnterpriseMenuItem.Name = "getEnterpriseMenuItem";
+            this.getEnterpriseMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.getEnterpriseMenuItem.Text = "Get Enterprise";
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(159, 6);
+            // 
+            // queriesExtraMenu
+            // 
+            this.queriesExtraMenu.Name = "queriesExtraMenu";
+            this.queriesExtraMenu.Size = new System.Drawing.Size(180, 22);
+            this.queriesExtraMenu.Text = "Extra queries";
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            // 
+            // statusStrip
+            // 
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.StatusLabelMain,
+            this.StatuslabelBtnImage,
+            this.StatusLabelExtraInfo});
+            this.statusStrip.Location = new System.Drawing.Point(0, 428);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(800, 22);
+            this.statusStrip.TabIndex = 4;
+            this.statusStrip.Text = "statusStrip";
+            // 
+            // StatusLabelMain
+            // 
+            this.StatusLabelMain.Name = "StatusLabelMain";
+            this.StatusLabelMain.Size = new System.Drawing.Size(642, 17);
+            this.StatusLabelMain.Spring = true;
+            this.StatusLabelMain.Text = "StatusLabelMain";
+            this.StatusLabelMain.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // StatuslabelBtnImage
+            // 
+            this.StatuslabelBtnImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.StatuslabelBtnImage.Image = ((System.Drawing.Image)(resources.GetObject("StatuslabelBtnImage.Image")));
+            this.StatuslabelBtnImage.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.StatuslabelBtnImage.Name = "StatuslabelBtnImage";
+            this.StatuslabelBtnImage.Size = new System.Drawing.Size(29, 20);
+            this.StatuslabelBtnImage.Text = "toolStripDropDownButton1";
+            // 
+            // StatusLabelExtraInfo
+            // 
+            this.StatusLabelExtraInfo.Name = "StatusLabelExtraInfo";
+            this.StatusLabelExtraInfo.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.StatusLabelExtraInfo.Size = new System.Drawing.Size(114, 17);
+            this.StatusLabelExtraInfo.Text = "StatusLabelExtraInfo";
+            this.StatusLabelExtraInfo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // panel1
             // 
@@ -203,49 +271,48 @@
             this.panel1.Controls.Add(this.txtbResultShow);
             this.panel1.Location = new System.Drawing.Point(0, 28);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(803, 400);
+            this.panel1.Size = new System.Drawing.Size(803, 404);
             this.panel1.TabIndex = 5;
             // 
-            // txtbQuery
+            // txtbBodyQuery
             // 
-            this.txtbQuery.Location = new System.Drawing.Point(502, 3);
-            this.txtbQuery.Name = "txtbQuery";
-            this.txtbQuery.Size = new System.Drawing.Size(296, 20);
-            this.txtbQuery.TabIndex = 6;
+            this.txtbBodyQuery.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtbBodyQuery.Location = new System.Drawing.Point(502, 3);
+            this.txtbBodyQuery.Name = "txtbBodyQuery";
+            this.txtbBodyQuery.Size = new System.Drawing.Size(296, 20);
+            this.txtbBodyQuery.TabIndex = 6;
             // 
-            // lblQuery
+            // txtbNameQuery
             // 
-            this.lblQuery.AutoSize = true;
-            this.lblQuery.Location = new System.Drawing.Point(463, 8);
-            this.lblQuery.Name = "lblQuery";
-            this.lblQuery.Size = new System.Drawing.Size(35, 13);
-            this.lblQuery.TabIndex = 7;
-            this.lblQuery.Text = "Query";
-            this.lblQuery.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.txtbNameQuery.Location = new System.Drawing.Point(399, 3);
+            this.txtbNameQuery.Name = "txtbNameQuery";
+            this.txtbNameQuery.Size = new System.Drawing.Size(97, 20);
+            this.txtbNameQuery.TabIndex = 7;
             // 
-            // getEnterpriseToolStripMenuItem
+            // removeQueryExtraMenuItem
             // 
-            this.getEnterpriseMenuItem.Name = "getEnterpriseToolStripMenuItem";
-            this.getEnterpriseMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.getEnterpriseMenuItem.Text = "Get Enterprise";
+            this.removeQueryExtraMenuItem.Name = "removeQueryExtraMenuItem";
+            this.removeQueryExtraMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeQueryExtraMenuItem.Text = "Remove";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.lblQuery);
-            this.Controls.Add(this.txtbQuery);
+            this.Controls.Add(this.txtbNameQuery);
+            this.Controls.Add(this.txtbBodyQuery);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.menuStrip1);
-            this.MainMenuStrip = this.menuStrip1;
+            this.Controls.Add(this.statusStrip);
+            this.Controls.Add(this.menuStrip);
+            this.MainMenuStrip = this.menuStrip;
             this.Name = "Form1";
             this.Text = "Form1";
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
+            this.menuStrip.ResumeLayout(false);
+            this.menuStrip.PerformLayout();
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
@@ -256,26 +323,36 @@
         #endregion
 
         private System.Windows.Forms.TextBox txtbResultShow;
-        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem administratorMenu;
-        private System.Windows.Forms.ToolStripMenuItem analysisDataMenu;
-        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripMenuItem writeModelsListMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem dataMenu;
+        private System.Windows.Forms.ToolStripMenuItem viewMenu;
         private System.Windows.Forms.ToolStripMenuItem changeViewPanelviewMenuItem;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ToolStripMenuItem importFromTextFileMenuItem;
-        private System.Windows.Forms.ToolStripStatusLabel StatusLabel1;
+        private System.Windows.Forms.ToolStripStatusLabel StatusLabelMain;
         private System.Windows.Forms.ToolStripMenuItem createLocalDBMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem analysisToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem loadDataMenuItem;
-        private System.Windows.Forms.TextBox txtbQuery;
+        private System.Windows.Forms.TextBox txtbBodyQuery;
         private System.Windows.Forms.Label lblQuery;
-        private System.Windows.Forms.ToolStripStatusLabel StatusLabellInfoDB;
-        private System.Windows.Forms.ToolStripDropDownButton btnImage;
-        private System.Windows.Forms.ToolStripMenuItem schemeLocalDBMenuItem;
+        private System.Windows.Forms.ToolStripStatusLabel StatusLabelExtraInfo;
+        private System.Windows.Forms.ToolStripDropDownButton StatuslabelBtnImage;
+        private System.Windows.Forms.ToolStripMenuItem queryMenu;
+        private System.Windows.Forms.ToolStripMenuItem addQueryExtraMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem queriesStandartMenu;
+        private System.Windows.Forms.ToolStripMenuItem analysisToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem loadDataMenuItem;
         private System.Windows.Forms.ToolStripMenuItem getFIOMenuItem;
         private System.Windows.Forms.ToolStripMenuItem getEnterpriseMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem queriesExtraMenu;
+        private System.Windows.Forms.ToolStripMenuItem schemeLocalDBMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.TextBox txtbNameQuery;
+        private System.Windows.Forms.ToolStripMenuItem removeQueryExtraMenuItem;
     }
 }
 

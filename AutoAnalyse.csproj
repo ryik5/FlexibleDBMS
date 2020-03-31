@@ -80,6 +80,7 @@
     <Compile Include="EF\DbSchema.cs" />
     <Compile Include="EF\DbTable.cs" />
     <Compile Include="EF\DbUpgradeException.cs" />
+    <Compile Include="EF\MenuQuery.cs" />
     <Compile Include="EF\SQLiteDBOperation.cs" />
     <Compile Include="EF\SQLiteDBOperations.cs" />
     <Compile Include="FileReader.cs" />
