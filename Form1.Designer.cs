@@ -45,12 +45,15 @@
             this.schemeLocalDBMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.analysisToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadDataMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getFIOMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getEnterpriseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.loadDataMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadData1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadData2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.queriesExtraMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.removeQueryExtraMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.StatusLabelMain = new System.Windows.Forms.ToolStripStatusLabel();
             this.StatuslabelBtnImage = new System.Windows.Forms.ToolStripDropDownButton();
@@ -58,7 +61,6 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.txtbBodyQuery = new System.Windows.Forms.TextBox();
             this.txtbNameQuery = new System.Windows.Forms.TextBox();
-            this.removeQueryExtraMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -166,10 +168,12 @@
             this.schemeLocalDBMenuItem,
             this.toolStripSeparator2,
             this.analysisToolStripMenuItem1,
-            this.loadDataMenuItem,
             this.getFIOMenuItem,
             this.getEnterpriseMenuItem,
-            this.toolStripSeparator3});
+            this.toolStripSeparator3,
+            this.loadDataMenuItem,
+            this.loadData1ToolStripMenuItem,
+            this.loadData2ToolStripMenuItem});
             this.queriesStandartMenu.Name = "queriesStandartMenu";
             this.queriesStandartMenu.Size = new System.Drawing.Size(180, 22);
             this.queriesStandartMenu.Text = "Standart queries";
@@ -177,42 +181,54 @@
             // schemeLocalDBMenuItem
             // 
             this.schemeLocalDBMenuItem.Name = "schemeLocalDBMenuItem";
-            this.schemeLocalDBMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.schemeLocalDBMenuItem.Size = new System.Drawing.Size(180, 22);
             this.schemeLocalDBMenuItem.Text = "Scheme local DB";
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(159, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
             // analysisToolStripMenuItem1
             // 
             this.analysisToolStripMenuItem1.Name = "analysisToolStripMenuItem1";
-            this.analysisToolStripMenuItem1.Size = new System.Drawing.Size(162, 22);
+            this.analysisToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
             this.analysisToolStripMenuItem1.Text = "Analysis";
-            // 
-            // loadDataMenuItem
-            // 
-            this.loadDataMenuItem.Name = "loadDataMenuItem";
-            this.loadDataMenuItem.Size = new System.Drawing.Size(162, 22);
-            this.loadDataMenuItem.Text = "Load data";
             // 
             // getFIOMenuItem
             // 
             this.getFIOMenuItem.Name = "getFIOMenuItem";
-            this.getFIOMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.getFIOMenuItem.Size = new System.Drawing.Size(180, 22);
             this.getFIOMenuItem.Text = "Get FIO";
             // 
             // getEnterpriseMenuItem
             // 
             this.getEnterpriseMenuItem.Name = "getEnterpriseMenuItem";
-            this.getEnterpriseMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.getEnterpriseMenuItem.Size = new System.Drawing.Size(180, 22);
             this.getEnterpriseMenuItem.Text = "Get Enterprise";
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(159, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
+            // 
+            // loadDataMenuItem
+            // 
+            this.loadDataMenuItem.Name = "loadDataMenuItem";
+            this.loadDataMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadDataMenuItem.Text = "Load data";
+            // 
+            // loadData1ToolStripMenuItem
+            // 
+            this.loadData1ToolStripMenuItem.Name = "loadData1ToolStripMenuItem";
+            this.loadData1ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadData1ToolStripMenuItem.Text = "Load data1";
+            // 
+            // loadData2ToolStripMenuItem
+            // 
+            this.loadData2ToolStripMenuItem.Name = "loadData2ToolStripMenuItem";
+            this.loadData2ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadData2ToolStripMenuItem.Text = "Load data 2";
             // 
             // queriesExtraMenu
             // 
@@ -224,6 +240,12 @@
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
             this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            // 
+            // removeQueryExtraMenuItem
+            // 
+            this.removeQueryExtraMenuItem.Name = "removeQueryExtraMenuItem";
+            this.removeQueryExtraMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeQueryExtraMenuItem.Text = "Remove";
             // 
             // statusStrip
             // 
@@ -290,12 +312,6 @@
             this.txtbNameQuery.Size = new System.Drawing.Size(97, 20);
             this.txtbNameQuery.TabIndex = 7;
             // 
-            // removeQueryExtraMenuItem
-            // 
-            this.removeQueryExtraMenuItem.Name = "removeQueryExtraMenuItem";
-            this.removeQueryExtraMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.removeQueryExtraMenuItem.Text = "Remove";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -334,7 +350,6 @@
         private System.Windows.Forms.ToolStripStatusLabel StatusLabelMain;
         private System.Windows.Forms.ToolStripMenuItem createLocalDBMenuItem;
         private System.Windows.Forms.TextBox txtbBodyQuery;
-        private System.Windows.Forms.Label lblQuery;
         private System.Windows.Forms.ToolStripStatusLabel StatusLabelExtraInfo;
         private System.Windows.Forms.ToolStripDropDownButton StatuslabelBtnImage;
         private System.Windows.Forms.ToolStripMenuItem queryMenu;
@@ -353,6 +368,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.TextBox txtbNameQuery;
         private System.Windows.Forms.ToolStripMenuItem removeQueryExtraMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadData1ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadData2ToolStripMenuItem;
     }
 }
 

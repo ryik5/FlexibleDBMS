@@ -8,13 +8,13 @@ using System.Linq;
 
 namespace AutoAnalyse
 {   
-    public static class ObservableCollectionExtensions
-    {
-        public static void AddRange<T>(this ObservableCollection<T> collection, IEnumerable<T> items)
-        {
-            items.ToList().ForEach(collection.Add);
-        }
-    }
+    //public static class ObservableCollectionExtensions
+    //{
+    //    public static void AddRange<T>(this ObservableCollection<T> collection, IEnumerable<T> items)
+    //    {
+    //        items.ToList().ForEach(collection.Add);
+    //    }
+    //}
 
 
     //// http://stackoverflow.com/questions/13302933/how-to-avoid-firing-observablecollection-collectionchanged-multiple-times-when-r

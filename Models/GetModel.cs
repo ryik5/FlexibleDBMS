@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AutoAnalyse
+﻿namespace AutoAnalyse
 {
     public static class GetModel<T> where T : IModel
     {
-
         public static T ToModel(string source, string columns)
         {
             string className = typeof(T).ToString().Replace(typeof(T).Namespace.ToString() + ".", ""); //Get name class without namespace
@@ -31,5 +24,4 @@ namespace AutoAnalyse
             return (T)model.ConvertRowToModel();
         }
     }
-
 }
