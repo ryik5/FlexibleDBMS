@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {
  public   class CommandLineArguments
     {
@@ -15,17 +15,17 @@ namespace AutoAnalyse
 
        char FindUsedDelimiter(string text)
         {
-            char d='-';
+            char delimiter='-';
             if (text.Trim().StartsWith("-"))
             {
-                d = '-';
+                delimiter = '-';
             }
             else if (text.Trim().StartsWith("/"))
             {
-                d = '/';
+                delimiter = '/';
             }
 
-            return d;
+            return delimiter;
         }
 
         /// <summary>
@@ -34,25 +34,28 @@ namespace AutoAnalyse
         public IDictionary<string, string> CheckCommandLineArguments(string[] parameters)
         {
             IDictionary<string, string> dic = new Dictionary<string, string>();
-
+            string[] arguments = null;
             //Get args
             //  string args = ToString(Environment.GetCommandLineArgs());
-            
-            char delim = '-';
+
             string argumString = string.Empty;
             if (parameters?.Length > 0)
             {
                 for (int i = 1; i < parameters?.Length; i++)
                 {
-                    argumString += parameters[i] + " ";                    
+                    argumString += parameters[i] + " ";
                 }
+
+                char delim = FindUsedDelimiter(argumString);
+
+                arguments = argumString.Split(delim);
             }
 
-            string[] arguments = argumString.Split(delim);
-
-
-
             EvntInfoMessage.Invoke(this, new TextEventArgs(argumString));
+
+            arguments.Any(x => x.StartsWith("a")); //admin
+
+            arguments.Any(x => x.StartsWith("c")); //configuration db
 
             //if (args?.Length > 1)
             //{

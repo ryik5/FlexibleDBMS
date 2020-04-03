@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.AccessControl;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {
 
     public interface IRegistryWriteable

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {
     public class SQLiteDBOperations
     {
@@ -30,6 +30,41 @@ namespace AutoAnalyse
 
             return dt;
         }
+
+        /// <summary>
+        /// get only simple query like 'SELECT DISTINCT name_column FROM name_table'
+        /// </summary>
+        /// <param name="queryWithOneColumnOnly"></param>
+        /// <returns></returns>
+        public IList<string> GetList(string queryWithOneColumnOnly)
+        {
+            IList<string> result = null;
+            string table=string.Empty, column=string.Empty;
+            string[] word = queryWithOneColumnOnly.Split(' ');
+            
+            if (word?.Length < 4|| word?.Length >5)
+            {
+                Status?.Invoke(this, new TextEventArgs($"Запрос построен с ошибками: {queryWithOneColumnOnly}. Правильный формат 'SELECT DISTINCT name_column FROM name_table'"));
+                return result;
+            }
+
+            for (int i = 0; i < word.Length; i++)
+            {
+                if (word[i].ToLower().Equals("from"))
+                {
+                    table = word[i + 1];
+                    column = word[i - 1];
+                }
+            }
+
+            using (SqLiteDbWrapper readData = new SqLiteDbWrapper(sqLiteConnectionString, dbFileInfo))
+            {
+                result = readData.GetList(table, column);
+            }
+
+            return result;
+        }
+
 
         public void TryMakeLocalDB()
         {

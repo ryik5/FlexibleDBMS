@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {
 
     public class Car : IModel

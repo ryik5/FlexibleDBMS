@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {
     /// <summary>
     /// Used to notify about upgrader errors.

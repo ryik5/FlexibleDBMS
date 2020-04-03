@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {
     /// <summary>
     /// Represents a complete SQLite DB schema

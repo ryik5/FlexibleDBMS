@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {
     public partial class Form1 : Form
     {
@@ -24,11 +24,11 @@ namespace AutoAnalyse
 
         static string appDbPath = "MainDB.db";
         static string sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
-        FileInfo dbFileInfo = new FileInfo(appDbPath);
-        SQLiteDBOperations dBOperations;
-
+        static FileInfo dbFileInfo = new FileInfo(appDbPath);
+        SQLiteDBOperations dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
         DbSchema schemaDB = null;
         IList<string> tablesDB;
+
 
         FileReader<CarAndOwner> reader;
         const int MAX_ELEMENTS_COLLECTION = 100000;
@@ -54,7 +54,7 @@ namespace AutoAnalyse
             TurnUpToolStripMenuItems();
 
             //Check Up Local DB schema
-            CheckUpLocalDB();
+            CheckUpSelectedDB(dbFileInfo.FullName);
 
             //Turn Up StatusStrip
             TurnUpStatusStripMenuItems();
@@ -68,10 +68,11 @@ namespace AutoAnalyse
         /// </summary>
         private void TurnUpStatusStripMenuItems()
         {
-            StatusInfoMain.Text = "Программа";
+            StatusInfoMain.Text = "";
             SplitImage1.Image = bmpLogo;
             StatusInfoFilter.Text = "Фильтры";
             SplitImage2.Image = bmpLogo;
+            StatusApp.Text = $"{appFileVersionInfo.ProductName} ver.{appFileVersionInfo.ProductVersion}  ";
         }
 
         private void TurnUpAplication()
@@ -101,7 +102,7 @@ namespace AutoAnalyse
 
             //Other controls
             txtbBodyQuery.KeyPress += TxtbQuery_KeyPress;
-            tooltip.SetToolTip(txtbBodyQuery, "Вставьте(напишите) SQL-запрос к базе данных и нажмите ENTER");
+            tooltip.SetToolTip(txtbBodyQuery, "Составьте (напишите) SQL-запрос к базе данных и нажмите ENTER");
             txtbBodyQuery.LostFocus += SetToolTipFromTextBox;
             txtbNameQuery.LostFocus += SetToolTipFromTextBox;
 
@@ -111,9 +112,9 @@ namespace AutoAnalyse
                 Dock = DockStyle.Fill,
                 AutoGenerateColumns = true,
                 AllowUserToOrderColumns = true,
-                AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill,
-                AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedHeaders,
-                ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedHeaders,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
             };
             panel1.Controls.Add(dgv);
 
@@ -121,13 +122,16 @@ namespace AutoAnalyse
             regOperator = new RegistryManager(appRegistryKey);
             (regOperator as RegistryManager).EvntStatusInfo += AddLineAtTextboxLog;
 
-            dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
         }
 
         private void TurnUpToolStripMenuItems()
         {
             administratorMenu.Text = "Administrator";
             createLocalDBMenuItem.Click += CreateLocalDBMenuItem_Click;
+
+            selectNewDBMenuItem.Enabled = true;
+            selectNewDBMenuItem.Click += SelectNewDBMenuItem_Click;
+
             importFromTextFileMenuItem.Click += ImportFromTextFileMenuItem_Click;
             importFromTextFileMenuItem.ToolTipText = "Import Text File in local DB";
             writeModelsListMenuItem.ToolTipText = "Write List with Models in DB";
@@ -136,17 +140,25 @@ namespace AutoAnalyse
             viewMenu.ToolTipText = "Отобразить данные";
             changeViewPanelviewMenuItem.Text = "Табличный";
             changeViewPanelviewMenuItem.Click += ChangeViewPanelviewMenuItem_Click;
+
+            updateFiltersMenuItem.Text = "Обновить фильтры";
+            updateFiltersMenuItem.ToolTipText= "Процедура обновления фильтров длительная по времени(до 30 минут) и затратная по ресурсам!";
+            updateFiltersMenuItem.Click += UpdateFiltersMenuItem_Click;
+
+            allColumnsInTableQueryMenuItem.Text = "Все столбцы таблицы как запрос";
+            allColumnsInTableQueryMenuItem.Click += allColumnsInTableQueryMenuItem_Click;
+
             //query menu
             queryMenu.Text = "Запросы";
             queryMenu.ToolTipText = "Сохраненные запросы к БД";
             queryMenu.DropDownOpened += EnableAddQueryMenuItem_queryMenu_DropDownOpened;
             //add new query extra menu item
             addQueryExtraMenuItem.Text = "Добавить запрос в меню";
-            addQueryExtraMenuItem.ToolTipText = "Запомнить новый запрос и добавить его в меню";
+            addQueryExtraMenuItem.ToolTipText = "Составленный запрос запомнить и добавить его в Пользовательское меню";
             addQueryExtraMenuItem.Click += AddQueryExtraMenuItem_Click;
             //query standart menu
             queriesStandartMenu.Text = "Стандартные";
-            queriesStandartMenu.ToolTipText = "Исходный набор запросов";
+            queriesStandartMenu.ToolTipText = "Предустановленный набор запросов";
             //query standart menu items
             schemeLocalDBMenuItem.Click += GetSchemaLocalDBMenuItem_Click;
 
@@ -203,18 +215,59 @@ namespace AutoAnalyse
             //add additional Query Extra Menu items from Registry
             AddQueriesFromRegistryToToolStripMenu(regSubKeyMenu);
 
-            allColumnsInTableQueryMenuItem.Text = "Все столбцы таблицы как запрос";
-            allColumnsInTableQueryMenuItem.Click += allColumnsInTableQueryMenuItem_Click;
+        }
+
+        /// <summary>
+        /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void UpdateFiltersMenuItem_Click(object sender, EventArgs e)
+        {
+            string[] column = { "Factory", "Model", "ManufactureYear", "Name", "City", "District", "Street" };
+            string q = $"SELECT distinct Plate, Factory , Model, ManufactureYear, BodyNumber, ChassisNumber, EngineVolume, Type, DRFO, F, I, O, Birthday, EDRPOU, Name, City, District, Street, Building, BuildingBody, Apartment, CodeOperation, CodeDate FROM CarAndOwner";
+
+        }
+
+        private IList<string> GetList(string column)
+        {
+            //string  = "Factory";
+
+            string q = $"SELECT distinct Plate,{column} , Model, ManufactureYear, BodyNumber, ChassisNumber, EngineVolume, Type, DRFO, F, I, O, Birthday, EDRPOU, Name, City, District, Street, Building, BuildingBody, Apartment, CodeOperation, CodeDate FROM CarAndOwner";
+
+            IList<string> result = dBOperations.GetList(q);
+
+            return result;
         }
 
 
+        /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-        private void CheckUpLocalDB()
+        private void SelectNewDBMenuItem_Click(object sender, EventArgs e)
+        {
+            string filePath = string.Empty;
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                filePath = ofd.OpenFileDialogReturnPath();
+                if (filePath?.Length > 0)
+                {
+                    CheckUpSelectedDB(filePath);
+                }
+                else
+                {
+                    ShowLogViewTextbox(true);
+                    AddLineAtTextboxLog($"Не выбрана база данных.");
+                }
+            }
+        }
+
+        private void CheckUpSelectedDB(string filePath)
         {
             try
             {
-                schemaDB = DbSchema.LoadDB(dbFileInfo.FullName);
+                schemaDB = DbSchema.LoadDB(filePath);
                 tablesDB = new List<string>();
                 string tableName = null;
 
@@ -224,6 +277,11 @@ namespace AutoAnalyse
                     tablesDB.Add(table.Value.TableName);
                 }
                 StatusLabelExtraInfo.Text = $"Данные в таблице(ах) {tableName}";
+
+                appDbPath = filePath;
+                sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
+                dbFileInfo = new FileInfo(appDbPath);
+                dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
             }
             catch (Exception e)
             {
@@ -231,19 +289,17 @@ namespace AutoAnalyse
             }
             finally
             {
-                if (schemaDB.Tables.Count == 0)
+                if (schemaDB?.Tables?.Count == 0)
                 {
                     viewMenu.Enabled = false;
-                    if (!administratorMenu.Enabled)
-                    {
-                        txtbResultShow.Text =
-                            "\r\nПодключенная база данных пустая или же в ней отсутствуют какие-либо таблицы с данными!" +
-                            "\r\nПредварительно создайте базу данных, таблицы и импортируйте/добавьте в них данные..." +
-                            "\r\nЗаблокирован функционал по получению данных из таблиц...";
-                        txtbNameQuery.Enabled = false;
-                        txtbBodyQuery.Enabled = false;
-                        txtbResultShow.Enabled = false;
-                    }
+                    txtbResultShow.Clear();
+                    AddLineAtTextboxLog();
+                    AddLineAtTextboxLog("Подключенная база данных пустая или же в ней отсутствуют какие-либо таблицы с данными!");
+                    AddLineAtTextboxLog("Предварительно создайте базу данных, таблицы и импортируйте/добавьте в них данные...");
+                    AddLineAtTextboxLog("Заблокирован функционал по получению данных из таблиц...");
+                    txtbNameQuery.Enabled = false;
+                    txtbBodyQuery.Enabled = false;
+                    txtbResultShow.Enabled = false;
                 }
                 schemaDB = null;
             }
@@ -353,7 +409,7 @@ namespace AutoAnalyse
             string queryBody = (sender as ToolStripMenuItem).Tag.ToString();
             txtbNameQuery.Text = queryName;
             txtbBodyQuery.Text = queryBody;
-            StatusInfoMain.ToolTipText = $"Выполняется запрос {queryName}";
+            tooltip.SetToolTip(menuStrip, $"Выполняется запрос {queryName}");
 
             await GetData(queryBody);
         }
@@ -392,7 +448,6 @@ namespace AutoAnalyse
         {
             AddLineAtTextboxLog($"Запрос:\r\n{query}");
             StatusInfoMain.Text = "Выполняется отбор данных...";
-            StatusLabelExtraInfo.ToolTipText = $"Выполняется запрос:\r\n{query}";
 
             queriesStandartMenu.Enabled = false;
             queriesExtraMenu.Enabled = false;
@@ -437,8 +492,6 @@ namespace AutoAnalyse
             viewMenu.Enabled = true;
             txtbResultShow.Enabled = true;
             dgv.Enabled = true;
-
-            StatusLabelExtraInfo.ToolTipText = $"Последний запрос:\r\n{query}";
         }
 
 
@@ -481,19 +534,15 @@ namespace AutoAnalyse
         {
             ShowLogViewTextbox(true);
 
-            // TODO: => make class GetSchema as Ilist<table> where table is Ilist<column>
-
             schemaDB = DbSchema.LoadDB(dbFileInfo.FullName);
             tablesDB = new List<string>();
-            string query = string.Empty;
-            string columns = string.Empty;
 
             AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
             AddLineAtTextboxLog($"- Selected DB: '{dbFileInfo.FullName}'");
 
             foreach (var table in schemaDB.Tables)
             {
-                columns = string.Empty;
+                string columns = string.Empty;
 
                 tablesDB.Add(table.Value.TableName);
 
@@ -504,7 +553,7 @@ namespace AutoAnalyse
                 AddLineAtTextboxLog();
                 AddLineAtTextboxLog($" --- The Table: '{table.Value.TableName}' ---");
                 AddLineAtTextboxLog($" ---  ---");
-                query = $"SELECT {columns.TrimEnd().TrimEnd(',')} FROM {table.Value.TableName} LIMIT 3";
+                string query = $"SELECT {columns.TrimEnd().TrimEnd(',')} FROM {table.Value.TableName} LIMIT 3";
                 AddLineAtTextboxLog(query);
                 txtbBodyQuery.Text = query;
                 AddLineAtTextboxLog($" ---  ---");
@@ -691,7 +740,6 @@ namespace AutoAnalyse
             sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
 
             arguments.EvntInfoMessage -= AddLineAtTextboxLog;
-
         }
 
         string ToString(string[] array)

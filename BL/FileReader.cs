@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {
     public class FileReader<T> where T : IModel
     {

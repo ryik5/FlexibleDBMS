@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Windows.Forms;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {
   public static  class ModelsExtensions
     {

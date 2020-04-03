@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {
-    
+
     //SQLite
     public abstract class SQLiteDbAbstract : IDisposable
     {
@@ -120,6 +121,22 @@ namespace AutoAnalyse
             return dt;
         }
 
+        public IList<string> GetList(string table, string column)
+        {
+            //string  = "Factory";
+
+            IList<string> result = new List<string>();
+            string q = $"SELECT distinct {column} FROM {table}";
+
+            DataTable dt = GetTable(q);
+
+            foreach (DataRow r in dt.Rows)
+            {
+                result.Add(r[column].ToString());
+            }
+            return result;
+        }
+
         //Write Data or Execute query
         public void Execute(SQLiteCommand sqlCommand)
         {
@@ -146,7 +163,7 @@ namespace AutoAnalyse
 
         public void Execute(string query)
         {
-            if (query == null)
+            if (string.IsNullOrEmpty(query))
             {
                 Status?.Invoke(this, new TextEventArgs("Error. The query can not be empty or null!"));
                 new ArgumentNullException();
@@ -178,12 +195,11 @@ namespace AutoAnalyse
 
             try
             {
-              sqlCommand.ExecuteNonQuery();
-                Status?.Invoke(this, new TextEventArgs("Execute ExecuteBulk - Ok"));
+                sqlCommand.ExecuteNonQuery();
+                Status?.Invoke(this, new TextEventArgs("ExecuteBulk - Ok"));
             }
             catch (Exception expt)
-            { Status?.Invoke(this, new TextEventArgs("Execute -> Error! " + expt.ToString())); }
+            { Status?.Invoke(this, new TextEventArgs("ExecuteBulk -> Error! " + expt.ToString())); }
         }
     }
-
 }

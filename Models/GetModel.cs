@@ -1,4 +1,4 @@
-﻿namespace AutoAnalyse
+﻿namespace AutoAnalysis
 {
     public static class GetModel<T> where T : IModel
     {

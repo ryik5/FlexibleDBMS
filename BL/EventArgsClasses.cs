@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {
     public class BoolEventArgs : EventArgs
     {

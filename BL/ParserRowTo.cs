@@ -1,4 +1,4 @@
-﻿namespace AutoAnalyse
+﻿namespace AutoAnalysis
 {
     public interface IParserRowTo
     {

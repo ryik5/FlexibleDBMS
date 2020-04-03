@@ -6,7 +6,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 
-namespace AutoAnalyse
+namespace AutoAnalysis
 {   
     //public static class ObservableCollectionExtensions
     //{
