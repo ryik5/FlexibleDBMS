@@ -61,12 +61,39 @@ namespace AutoAnalyse.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to --------------------------------------------.
+        /// </summary>
+        internal static string DashedSymbols {
+            get {
+                return ResourceManager.GetString("DashedSymbols", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to =======================================================================================================================================================.
+        /// </summary>
+        internal static string EqualSymbols {
+            get {
+                return ResourceManager.GetString("EqualSymbols", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap LogoRYIK {
             get {
                 object obj = ResourceManager.GetObject("LogoRYIK", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Текстовые файлы (*.txt)|*.txt|All files (*.*)|*.*.
+        /// </summary>
+        internal static string OpenDialogTextFiles {
+            get {
+                return ResourceManager.GetString("OpenDialogTextFiles", resourceCulture);
             }
         }
     }

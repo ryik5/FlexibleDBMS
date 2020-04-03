@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace AutoAnalyse
 {
-  public static  class ModelsConvertor
+  public static  class ModelsExtensions
     {
         public static IList<MenuItem> ToMenuItemsList(this IList<ToolStripItem> items)
         {
@@ -109,5 +109,8 @@ namespace AutoAnalyse
 
             return toolMenuList;
         }
+    
+    
+    
     }
 }
