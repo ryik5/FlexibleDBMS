@@ -13,34 +13,42 @@ namespace AutoAnalysis
 {
     public partial class Form1 : Form
     {
+        //Application Modes
+        AppModes OperatingModes = AppModes.User;
+
+        //Application's Main interface Turn Up
         static readonly string localAppFolderPath = Application.StartupPath; //Environment.CurrentDirectory
         static readonly System.Diagnostics.FileVersionInfo appFileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(Application.ExecutablePath);
         static readonly string appRegistryKey = @"SOFTWARE\YuriRyabchenko\AutoAnalyse";
         Bitmap bmpLogo;
         static NotifyIcon notifyIcon;
         static ContextMenu contextMenu;
+        ToolTip tooltip = new ToolTip();
 
-        //  string pathToQueryToCreateMainDb = System.IO.Path.Combine(localAppFolderPath, appDbPath); //System.IO.Path.GetFileNameWithoutExtension(appFilePath)
-
+        //DB
         static string appDbPath = "MainDB.db";
         static string sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
         static FileInfo dbFileInfo = new FileInfo(appDbPath);
         SQLiteDBOperations dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
-
+        IModelDBable<ModelDBTable> db;
         DbSchema schemaDB = null;
         IList<string> tablesDB;
 
+        //SHow datatables in DataGridView
+        DataGridView dgv;
+        //datatable source
+        DataTable dt;
 
+        //import a txt file in DB
         FileReader<CarAndOwner> reader;
         const int MAX_ELEMENTS_COLLECTION = 100000;
 
-        DataGridView dgv;
-        ToolTip tooltip = new ToolTip();
-
+        //Registry
         static RegistryManager regOperator;
         readonly string regSubKeyMenu = "Menu";
 
-        AppModes OperatingModes = AppModes.User;
+
+
 
         public Form1()
         {
@@ -68,6 +76,8 @@ namespace AutoAnalysis
             ShowLogViewTextbox(true);
         }
 
+
+
         /// <summary>
         /// StatusStrip
         /// </summary>
@@ -79,6 +89,7 @@ namespace AutoAnalysis
             SplitImage2.Image = bmpLogo;
             StatusApp.Text = $"{appFileVersionInfo.ProductName} ver.{appFileVersionInfo.ProductVersion}  ";
         }
+
 
         private void TurnUpAplication()
         {
@@ -122,10 +133,10 @@ namespace AutoAnalysis
                 ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
             };
             panel1.Controls.Add(dgv);
-                       
+
             //registration manager RegestryWork
             regOperator = new RegistryManager(appRegistryKey);
-       
+
             if (OperatingModes == AppModes.Admin)
             { (regOperator as RegistryManager).EvntStatusInfo += AddLineAtTextboxLog; }
             else if (OperatingModes == AppModes.User)
@@ -156,6 +167,9 @@ namespace AutoAnalysis
             allColumnsInTableQueryMenuItem.Text = "Все столбцы таблицы как запрос";
             allColumnsInTableQueryMenuItem.Click += allColumnsInTableQueryMenuItem_Click;
 
+            exportMenuItem.Text = "Експорт в Excel";
+            exportMenuItem.Click += ExportMenuItem_Click;
+
             //query menu
             queryMenu.Text = "Запросы";
             queryMenu.ToolTipText = "Сохраненные запросы к БД";
@@ -170,33 +184,35 @@ namespace AutoAnalysis
             //query standart menu items
             schemeLocalDBMenuItem.Click += GetSchemaLocalDBMenuItem_Click;
 
-            loadDataMenuItem.Text = "Данные по крупным владельцам автопарков, limit 100";
-            loadDataMenuItem.Tag = "select distinct a.District,a.City,a.ManufactureYear,a.name, a.edrpou, a.factory, a.model, a.plate from CarAndOwner a " +
+            loadData0MenuItem.Text = "Данные по крупным владельцам автопарков, limit 100";
+            loadData0MenuItem.Tag = "select distinct a.District,a.City,a.ManufactureYear,a.name, a.edrpou, a.factory, a.model, a.plate from CarAndOwner a " +
                 "inner join " +
                 "(select District,City,ManufactureYear,name,edrpou,amount from " +
                 "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou > 1 group by edrpou order by amount desc) " +
                 "where amount > 50) b on a.edrpou=b.edrpou " +
                 "order by b.amount, a.edrpou, a.factory, a.model limit 100";
-            loadDataMenuItem.Click += QueryMenuItem_Click;
+            loadData0MenuItem.Click += QueryMenuItem_Click;
 
-            loadData1ToolStripMenuItem.Text = "Данные по крупным владельцам автопарков, limit 400";
-            loadData1ToolStripMenuItem.Tag = "select distinct a.District,a.City,a.ManufactureYear,a.name, a.edrpou, a.model, a.plate from CarAndOwner a " +
+            loadData1MenuItem.Text = "Данные по крупным владельцам автопарков, limit 400";
+
+            // "select a.city,a.name as 'наименование', a.edrpou, a.factory as 'марка',a.manufactureyear as 'год', count(*) as 'количество'  from carandowner a where edrpou > 1 group by a.city,a.name,a.factory limit 400"
+            loadData1MenuItem.Tag = "select distinct a.District,a.City,a.ManufactureYear,a.name, a.edrpou, a.model, a.plate from CarAndOwner a " +
                 "inner join " +
                 "(select District,City,ManufactureYear,name,edrpou,amount from " +
                 "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou > 1 group by edrpou order by amount desc) " +
                 "where amount > 50) b on a.edrpou=b.edrpou " +
                 "order by b.amount, a.edrpou, a.factory, a.model limit 400";
-            loadData1ToolStripMenuItem.Click += QueryMenuItem_Click;
+            loadData1MenuItem.Click += QueryMenuItem_Click;
 
-            loadData2ToolStripMenuItem.Text = "Данные по крупным владельцам автопарков, limit 1000";
-            loadData2ToolStripMenuItem.Tag = "select distinct a.District,a.City,a.ManufactureYear,a.name, a.edrpou, a.model, a.plate from CarAndOwner a " +
+            loadData2MenuItem.Text = "Данные по крупным владельцам автопарков, limit 1000";
+            loadData2MenuItem.Tag = "select distinct a.District,a.City,a.ManufactureYear,a.name, a.edrpou, a.model, a.plate from CarAndOwner a " +
                 "inner join " +
                 "(select District,City,ManufactureYear,name,edrpou,amount from " +
                 "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou is not '0' group by edrpou order by amount desc) " +
                 "where amount > 50) b on a.edrpou=b.edrpou " +
                 "order by b.amount, a.edrpou, a.factory, a.model limit 1000";
-            loadData2ToolStripMenuItem.Click += QueryMenuItem_Click;
-
+            loadData2MenuItem.Click += QueryMenuItem_Click;
+            
             getFIOMenuItem.Text = "Физлица в БД";
             getFIOMenuItem.Tag = "select distinct District,City,ManufactureYear,f,i,o,drfo,count(f) as amount " +
                 "from CarAndOwner " +
@@ -221,60 +237,31 @@ namespace AutoAnalysis
             removeQueryExtraMenuItem.Click += RemoveCheckedInQueryExtraMenuItem_Click;
         }
 
-
-
-        private void ToolStripMenuItem3_Click(object sender, EventArgs e)
+        private async  void ExportMenuItem_Click(object sender, EventArgs e)
         {
-            btnFilter2.Text = "Filter 3";
+            StatusInfoMain.Text = $"Идет генерация отчетов...";
+            dgv.Enabled = false;
+            viewMenu.Enabled = false;
+            queryMenu.Enabled = false;
+            txtbBodyQuery.Enabled = false;
+
+            await WriteDataTableInTableExcel(dt);
+
+            txtbBodyQuery.Enabled = true;
+            queryMenu.Enabled = true;
+            viewMenu.Enabled = true;
+            dgv.Enabled = true;
+            StatusInfoMain.Text = $"Готово!";
         }
 
-        private void Stat()
-        {
-            //Menu for StatusStrip/Filters
-            statusFilters.Items.AddRange(new ToolStripItem[] { btnFilter1 });
-            // 
-            // btnFilter1
-            // 
-            btnFilter1.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            btnFilter1.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItem3 });
-            btnFilter1.Image = Properties.Resources.LogoRYIK;
-            btnFilter1.ImageTransparentColor = Color.Magenta;
-            btnFilter1.Name = "btnFilter1";
-            btnFilter1.Size = new Size(73, 20);
-            btnFilter1.Text = "btnFilter1";
-            // 
-            // toolStripMenuItem3
-            // 
-            toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
-            toolStripMenuItem3.Text = "toolStripMenuItem3";
-            toolStripMenuItem3.Click += ToolStripMenuItem3_Click;
-        }
+        /*
+Вывод количества машин(задвоения по госномерам удалены):
+Select a.city as 'Город',a.name as 'наименование', a.edrpou as 'ЕДРПОУ', a.factory as 'марка',a.manufactureyear as 'год', count(*)as 'Количество' from  (Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  from carandowner a where edrpou > 1 group by a.city,a.name,a.factory,a.plate) a group by a.city,a.name, a.edrpou, a.factory,a.manufactureyear
 
-        private void AddMenu()
-        {
-            ToolStripSplitButton btnFilter1 = new ToolStripSplitButton();
 
-            //Menu for StatusStrip/Filters
-            statusFilters.Items.AddRange(new ToolStripItem[] { btnFilter1 });
-            // 
-            // btnFilter1
-            // 
-            btnFilter1.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            btnFilter1.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItem3 });
-            btnFilter1.Image = Properties.Resources.LogoRYIK;
-            btnFilter1.ImageTransparentColor = Color.Magenta;
-            btnFilter1.Name = "btnFilter1";
-            btnFilter1.Size = new Size(73, 20);
-            btnFilter1.Text = "btnFilter1";
-            // 
-            // toolStripMenuItem3
-            // 
-            toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
-            toolStripMenuItem3.Text = "toolStripMenuItem3";
-            toolStripMenuItem3.Click += ToolStripMenuItem3_Click;
-        }
+Вывод госномеров:
+Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  from carandowner a where edrpou > 1 group by a.city,a.name,a.factory,a.plate
+             */
 
         /// <summary>
         /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -283,38 +270,85 @@ namespace AutoAnalysis
         /// <param name="e"></param>
         private async void UpdateFiltersMenuItem_Click(object sender, EventArgs e)
         {
+            StatusInfoMain.Text="Построение фильтров...";
+            dgv.Enabled = false;
+            txtbResultShow.Enabled = false;
+            viewMenu.Enabled = false;
+            queryMenu.Enabled = false;
+            txtbBodyQuery.Enabled = false;
+            
             await BuildFilters();
+            await Task.Run(()=> BuildFiltersMenues(filtersTable));
+
+            txtbBodyQuery.Enabled = true;
+            txtbResultShow.Enabled = true;
+            queryMenu.Enabled = true;
+            viewMenu.Enabled = true;
+            dgv.Enabled = true;
+            StatusInfoMain.Text = "Построение фильтров завершено.";
         }
+
+
+        IModelDBable<ModelDBColumn> filtersTable = null;
+        IDictionary<string, string> dicTranslator=null;
 
         private async Task BuildFilters()
         {
-            string[] columns = { "Factory", "Model", "ManufactureYear", "Type", "DRFO", "EDRPOU", "Name", "City", "District", "Street" };
-            string q = $"SELECT distinct Plate, Factory , Model, ManufactureYear, BodyNumber, ChassisNumber, EngineVolume, Type, DRFO, F, I, O, Birthday, EDRPOU, Name, City, District, Street, Building, BuildingBody, Apartment, CodeOperation, CodeDate FROM CarAndOwner";
-            //            string q = $"SELECT distinct Plate,{column} , Model, ManufactureYear, BodyNumber, ChassisNumber, EngineVolume, Type, DRFO, F, I, O, Birthday, EDRPOU, Name, City, District, Street, Building, BuildingBody, Apartment, CodeOperation, CodeDate FROM {table}";
+            AddLineAtTextboxLog("Чтение базы и формирование библиотеки уникальных слов.");
+            string[] columns = { "District", "City", "Factory", "ManufactureYear", "Type"};
+            //Подписи колонок в меню
+            dicTranslator = new Dictionary<string, string>
+            {
+                { "District", "Область" },
+                { "City", "Город" },
+                { "Factory", "Марка" },
+                { "ManufactureYear", "Год" },
+                { "Type", "ЧЛ/Предприятие" }
+            };
+            
+            string phrase = string.Join(", ", dicTranslator.Values.ToArray());
+            AddLineAtTextboxLog("Фильтры строятся на основе данных колонок:");
+            AddLineAtTextboxLog(phrase);
+            AddLineAtTextboxLog();
 
-            IModelDBable<ModelDBColumn> filtersTable = null;
             await Task.Run(() => filtersTable = dBOperations.GetFilterList(columns, "CarAndOwner"));
 
             AddLineAtTextboxLog("Построение фильтров завершено");
-
-            foreach (var c in filtersTable.Collection)
-            {
-                AddLineAtTextboxLog($"{c?.Name}: {c?.Collection?.Count}");
-            }
         }
 
-        /*
-        where some_column is null or some_column = ''
-        or
-        where ifnull(some_column, '') = ''
-        or
-        where coalesce(some_column, '') = ''
-        of
-        where ifnull(length(some_column), 0) = 0
-        */
+
+        private void BuildFiltersMenues(IModelDBable<ModelDBColumn> filtersTable)
+        {
+            MenuFiltersMaker menuMaker;
+            ToolStripSplitButton filterSplitButton;
+            ToolStripMenuItem subFilterMenu;
+            //  Task.Run(() =>
+            //              {
+            foreach (var column in filtersTable.Collection.Take(5))
+            {
+                menuMaker = new MenuFiltersMaker(dicTranslator);
+                filterSplitButton = menuMaker.MakeFiltersMenu(column.Name);
+                statusFilters.Items.Add(filterSplitButton);
+
+                foreach (var f in column.Collection.Take(40))
+                {
+                    subFilterMenu = menuMaker.MakeFiltersSubMenu(f.Name);
+                 //   subFilterMenu.Click += SubFilterMenu_Click;
+                    filterSplitButton.DropDownItems.Add(subFilterMenu);
+                }
+            }            
+
+            //        });
+        }
+
+        private void SubFilterMenu_Click(object sender, EventArgs e)
+        {
+            string text = (sender as ToolStripMenuItem).Text;
+            string tag = (sender as ToolStripMenuItem).Tag.ToString();
+            (sender as ToolStripMenuItem).GetCurrentParent().Text = text;
+        }
 
         /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
         private void SelectNewDBMenuItem_Click(object sender, EventArgs e)
         {
@@ -359,10 +393,7 @@ namespace AutoAnalysis
 
             AddLineAtTextboxLog($"{result}");
         }
-
-
-
-        IModelDBable<ModelDBTable> db;
+        
 
         private void CheckUpSelectedDB(string filePath)
         {
@@ -402,7 +433,7 @@ namespace AutoAnalysis
                     tablesDB.Add(tbl.Value.TableName);
                 }
                 StatusLabelExtraInfo.Text = $"Данные в таблице(ах) {tableName}";
-                               
+
                 try { dBOperations.EvntInfoMessage -= AddLineAtTextboxLog; } catch { }
 
                 appDbPath = filePath;
@@ -451,9 +482,8 @@ namespace AutoAnalysis
 
             if (OperatingModes == AppModes.Admin)
             { (regOperator as RegistryManager).EvntStatusInfo -= AddLineAtTextboxLog; }
-         }
-
-
+        }
+        
 
         private async Task UpdateQueryExtraMenuInRegistry()
         {
@@ -464,7 +494,7 @@ namespace AutoAnalysis
 
             await Task.Run(() =>
             {
-                IDictionary<string, string> menuItems = queriesExtraMenu.ToDictionary(5);
+                IDictionary<string, string> menuItems = queriesExtraMenu.ToDictionary(30);
                 regOperator.Write(menuItems, regSubKeyMenu);
             });
         }
@@ -552,7 +582,7 @@ namespace AutoAnalysis
         {
             Application.Restart();
         }
-
+        
         private void ApplicationAbout(object sender, EventArgs e)
         {
 
@@ -562,8 +592,8 @@ namespace AutoAnalysis
         {
             Text = @"Closing application...";
 
+            dt?.Dispose();
             dgv?.Dispose();
-
             tooltip?.Dispose();
 
             bmpLogo?.Dispose();
@@ -574,6 +604,59 @@ namespace AutoAnalysis
             System.Threading.Thread.Sleep(500);
 
             Application.Exit();
+        }
+
+
+        private async Task WriteDataTableInTableExcel(DataTable source)
+        {
+            if (source != null || source?.Columns?.Count > 0 || source?.Rows?.Count > 0)
+            {
+                FileInfo fi = null;
+                DataTable dtTemp = null;
+                
+                //muliplier of skipping millions
+                int muliplier = (int)Math.Ceiling((decimal)source.Rows.Count / (decimal)1000000);
+
+                for (int part = 0; part < muliplier; part++)
+                {
+                    dtTemp = source.Clone();
+                    source.AsEnumerable()
+                        .Skip(part * 1000000)
+                        .Take(1000000)
+                        .CopyToDataTable(dtTemp, LoadOption.OverwriteChanges);
+                    fi = new FileInfo($"{appFileVersionInfo.ProductName}_{part}_export.xlsx");
+
+                    AddLineAtTextboxLog($"{fi.FullName}");
+
+                    await  ExportToFile(fi, dtTemp, appFileVersionInfo.FileVersion);
+
+                    dtTemp.Dispose();
+                    fi = null;
+                }
+            }
+            else
+            {
+                AddLineAtTextboxLog("Сначала отберите данные из БД");
+            }
+
+            ShowLogViewTextbox(true);
+        }
+
+        private async Task ExportToFile(FileInfo fi, DataTable dtTemp, string nameSheet)
+        {
+            try
+            {
+                 await Task.Run(() =>
+                dtTemp
+                 .ExportToExcel($"{fi.FullName}", nameSheet, TypeOfPivot.NonePivot, null, null, true));
+
+                AddLineAtTextboxLog($"Таблица данных экспортирована в файл: '{fi.FullName}' упешно.");
+            }
+            catch (Exception err)
+            {
+                AddLineAtTextboxLog(nameSheet);
+                AddLineAtTextboxLog(err.ToString());
+            }
         }
 
 
@@ -588,7 +671,8 @@ namespace AutoAnalysis
             txtbResultShow.Enabled = false;
             dgv.Enabled = false;
 
-            DataTable dt = new DataTable();
+            
+             dt = new DataTable();
             try
             {
                 await Task.Run(() => dt = dBOperations.GetTable(query));
@@ -736,15 +820,15 @@ namespace AutoAnalysis
             {
                 AddLineAtTextboxLog("--------------------------------");
 
-                string query = (sender as TextBox).Text.ToLower().Trim();
+                string query = (sender as TextBox).Text.Trim();
 
                 AddLineAtTextboxLog($"Query:\r\n{query}");
                 string[] arrQuery = query.Split(' ');
 
                 if (
-                    arrQuery[0] == "select" && arrQuery.Length > 3
-                    && arrQuery.Where(w => w.Contains("select")).Count() > 0
-                    && arrQuery.Where(w => w.Contains("from")).Count() > 0
+                    arrQuery[0].ToLower() == "select" && arrQuery.Length > 3
+                    && arrQuery.Where(w => w.ToLower().Contains("select")).Count() > 0
+                    && arrQuery.Where(w => w.ToLower().Contains("from")).Count() > 0
                     )
                 {
                     DialogResult doQuery =
@@ -875,17 +959,6 @@ namespace AutoAnalysis
             sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
 
             arguments.EvntInfoMessage -= AddLineAtTextboxLog;
-        }
-
-        string ToString(string[] array)
-        {
-            string text = string.Empty;
-
-            foreach (var s in array)
-            {
-                text += $"{s.ToString()}\r\n";
-            }
-            return text;
         }
 
 

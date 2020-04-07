@@ -41,6 +41,7 @@
             this.changeViewPanelviewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateFiltersMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.allColumnsInTableQueryMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.queryMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.addQueryExtraMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -51,9 +52,9 @@
             this.getFIOMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getEnterpriseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.loadDataMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadData1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadData2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadData0MenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadData1MenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadData2MenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.queriesExtraMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.removeQueryExtraMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -66,16 +67,6 @@
             this.statusFilters = new System.Windows.Forms.StatusStrip();
             this.StatusInfoFilter = new System.Windows.Forms.ToolStripStatusLabel();
             this.SplitImage2 = new System.Windows.Forms.ToolStripSplitButton();
-            this.btnFilter1 = new System.Windows.Forms.ToolStripSplitButton();
-            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnFilter2 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.btnFilter3 = new System.Windows.Forms.ToolStripSplitButton();
-            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnFilter4 = new System.Windows.Forms.ToolStripDropDownButton();
             this.txtbBodyQuery = new System.Windows.Forms.TextBox();
             this.txtbNameQuery = new System.Windows.Forms.TextBox();
             this.menuStrip.SuspendLayout();
@@ -154,7 +145,8 @@
             this.viewMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.changeViewPanelviewMenuItem,
             this.updateFiltersMenuItem,
-            this.allColumnsInTableQueryMenuItem});
+            this.allColumnsInTableQueryMenuItem,
+            this.exportMenuItem});
             this.viewMenu.Name = "viewMenu";
             this.viewMenu.Size = new System.Drawing.Size(44, 20);
             this.viewMenu.Text = "View";
@@ -176,6 +168,12 @@
             this.allColumnsInTableQueryMenuItem.Name = "allColumnsInTableQueryMenuItem";
             this.allColumnsInTableQueryMenuItem.Size = new System.Drawing.Size(201, 22);
             this.allColumnsInTableQueryMenuItem.Text = "All Columns in the table";
+            // 
+            // exportMenuItem
+            // 
+            this.exportMenuItem.Name = "exportMenuItem";
+            this.exportMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.exportMenuItem.Text = "Export";
             // 
             // queryMenu
             // 
@@ -210,9 +208,9 @@
             this.getFIOMenuItem,
             this.getEnterpriseMenuItem,
             this.toolStripSeparator3,
-            this.loadDataMenuItem,
-            this.loadData1ToolStripMenuItem,
-            this.loadData2ToolStripMenuItem});
+            this.loadData0MenuItem,
+            this.loadData1MenuItem,
+            this.loadData2MenuItem});
             this.queriesStandartMenu.Name = "queriesStandartMenu";
             this.queriesStandartMenu.Size = new System.Drawing.Size(159, 22);
             this.queriesStandartMenu.Text = "Standart queries";
@@ -251,23 +249,23 @@
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(159, 6);
             // 
-            // loadDataMenuItem
+            // loadData0MenuItem
             // 
-            this.loadDataMenuItem.Name = "loadDataMenuItem";
-            this.loadDataMenuItem.Size = new System.Drawing.Size(162, 22);
-            this.loadDataMenuItem.Text = "Load data";
+            this.loadData0MenuItem.Name = "loadData0MenuItem";
+            this.loadData0MenuItem.Size = new System.Drawing.Size(162, 22);
+            this.loadData0MenuItem.Text = "Load data";
             // 
-            // loadData1ToolStripMenuItem
+            // loadData1MenuItem
             // 
-            this.loadData1ToolStripMenuItem.Name = "loadData1ToolStripMenuItem";
-            this.loadData1ToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
-            this.loadData1ToolStripMenuItem.Text = "Load data1";
+            this.loadData1MenuItem.Name = "loadData1MenuItem";
+            this.loadData1MenuItem.Size = new System.Drawing.Size(162, 22);
+            this.loadData1MenuItem.Text = "Load data1";
             // 
-            // loadData2ToolStripMenuItem
+            // loadData2MenuItem
             // 
-            this.loadData2ToolStripMenuItem.Name = "loadData2ToolStripMenuItem";
-            this.loadData2ToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
-            this.loadData2ToolStripMenuItem.Text = "Load data 2";
+            this.loadData2MenuItem.Name = "loadData2MenuItem";
+            this.loadData2MenuItem.Size = new System.Drawing.Size(162, 22);
+            this.loadData2MenuItem.Text = "Load data 2";
             // 
             // queriesExtraMenu
             // 
@@ -346,11 +344,7 @@
             // 
             this.statusFilters.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.StatusInfoFilter,
-            this.SplitImage2,
-            this.btnFilter1,
-            this.btnFilter2,
-            this.btnFilter3,
-            this.btnFilter4});
+            this.SplitImage2});
             this.statusFilters.Location = new System.Drawing.Point(0, 406);
             this.statusFilters.Name = "statusFilters";
             this.statusFilters.Size = new System.Drawing.Size(800, 22);
@@ -371,93 +365,6 @@
             this.SplitImage2.Name = "SplitImage2";
             this.SplitImage2.Size = new System.Drawing.Size(32, 20);
             this.SplitImage2.Text = "toolStripSplitButton1";
-            // 
-            // btnFilter1
-            // 
-            this.btnFilter1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnFilter1.DoubleClickEnabled = true;
-            this.btnFilter1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem3,
-            this.toolStripMenuItem4});
-            this.btnFilter1.Image = ((System.Drawing.Image)(resources.GetObject("btnFilter1.Image")));
-            this.btnFilter1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnFilter1.Name = "btnFilter1";
-            this.btnFilter1.Size = new System.Drawing.Size(73, 20);
-            this.btnFilter1.Text = "btnFilter1";
-            // 
-            // toolStripMenuItem3
-            // 
-            this.toolStripMenuItem3.DoubleClickEnabled = true;
-            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItem3.Text = "toolStripMenuItem3";
-            // 
-            // toolStripMenuItem4
-            // 
-            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItem4.Text = "toolStripMenuItem4";
-            // 
-            // btnFilter2
-            // 
-            this.btnFilter2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnFilter2.Image = ((System.Drawing.Image)(resources.GetObject("btnFilter2.Image")));
-            this.btnFilter2.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnFilter2.Name = "btnFilter2";
-            this.btnFilter2.Size = new System.Drawing.Size(70, 20);
-            this.btnFilter2.Text = "btnFilter2";
-            // 
-            // btnFilter3
-            // 
-            this.btnFilter3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnFilter3.DoubleClickEnabled = true;
-            this.btnFilter3.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem5,
-            this.toolStripMenuItem2});
-            this.btnFilter3.Image = ((System.Drawing.Image)(resources.GetObject("btnFilter3.Image")));
-            this.btnFilter3.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnFilter3.Name = "btnFilter3";
-            this.btnFilter3.Size = new System.Drawing.Size(73, 20);
-            this.btnFilter3.Text = "btnFilter3";
-            // 
-            // toolStripMenuItem5
-            // 
-            this.toolStripMenuItem5.CheckOnClick = true;
-            this.toolStripMenuItem5.DoubleClickEnabled = true;
-            this.toolStripMenuItem5.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem6,
-            this.toolStripMenuItem7});
-            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItem5.Text = "2";
-            // 
-            // toolStripMenuItem6
-            // 
-            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(80, 22);
-            this.toolStripMenuItem6.Text = "3";
-            // 
-            // toolStripMenuItem7
-            // 
-            this.toolStripMenuItem7.Name = "toolStripMenuItem7";
-            this.toolStripMenuItem7.Size = new System.Drawing.Size(80, 22);
-            this.toolStripMenuItem7.Text = "4";
-            // 
-            // toolStripMenuItem2
-            // 
-            this.toolStripMenuItem2.DoubleClickEnabled = true;
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItem2.Text = "1";
-            // 
-            // btnFilter4
-            // 
-            this.btnFilter4.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnFilter4.Image = ((System.Drawing.Image)(resources.GetObject("btnFilter4.Image")));
-            this.btnFilter4.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnFilter4.Name = "btnFilter4";
-            this.btnFilter4.Size = new System.Drawing.Size(70, 20);
-            this.btnFilter4.Text = "btnFilter4";
             // 
             // txtbBodyQuery
             // 
@@ -522,7 +429,7 @@
         private System.Windows.Forms.ToolStripMenuItem addQueryExtraMenuItem;
         private System.Windows.Forms.ToolStripMenuItem queriesStandartMenu;
         private System.Windows.Forms.ToolStripMenuItem analysisToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem loadDataMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadData0MenuItem;
         private System.Windows.Forms.ToolStripMenuItem getFIOMenuItem;
         private System.Windows.Forms.ToolStripMenuItem getEnterpriseMenuItem;
         private System.Windows.Forms.ToolStripMenuItem queriesExtraMenu;
@@ -534,25 +441,16 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.TextBox txtbNameQuery;
         private System.Windows.Forms.ToolStripMenuItem removeQueryExtraMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem loadData1ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem loadData2ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadData1MenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadData2MenuItem;
         private System.Windows.Forms.StatusStrip statusFilters;
         private System.Windows.Forms.ToolStripStatusLabel StatusInfoFilter;
-        private System.Windows.Forms.ToolStripSplitButton btnFilter1;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem updateFiltersMenuItem;
         private System.Windows.Forms.ToolStripSplitButton SplitImage2;
-        private System.Windows.Forms.ToolStripDropDownButton btnFilter2;
-        private System.Windows.Forms.ToolStripSplitButton btnFilter3;
-        private System.Windows.Forms.ToolStripDropDownButton btnFilter4;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem6;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem7;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem allColumnsInTableQueryMenuItem;
         private System.Windows.Forms.ToolStripMenuItem selectNewDBMenuItem;
         private System.Windows.Forms.ToolStripStatusLabel StatusApp;
+        private System.Windows.Forms.ToolStripMenuItem exportMenuItem;
     }
 }
 

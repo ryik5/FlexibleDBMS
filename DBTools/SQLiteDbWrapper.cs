@@ -135,7 +135,7 @@ namespace AutoAnalysis
             modelDBColumn.Name = column;
             modelDBColumn.Collection = new List<ModelDBFilter>();
 
-            string q = $"SELECT distinct {column} FROM {table}";
+            string q = $"SELECT distinct {column}, COUNT(*) as amount FROM {table} WHERE LENGTH(TRIM({column}))>1 GROUP BY {column} ORDER BY amount DESC";
 
             DataTable dt = GetQueryResultAsTable(q);
 

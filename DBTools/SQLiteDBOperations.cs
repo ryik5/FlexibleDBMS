@@ -53,21 +53,22 @@ namespace AutoAnalysis
                 }
                 schemaDB = null;
             }
-           
-            if(isGood)
+
+            if (isGood)
             {
                 EvntInfoMessage?.Invoke(this, new TextEventArgs($"В базе данных {dbFileInfo.FullName} со структурой все в порядке"));
             }
 
             return isGood;
         }
-        
+
         public DataTable GetTable(string query)
         {
             DataTable dt = new DataTable();
 
             if (CheckUpDBStructure())
-            {  using (SqLiteDbWrapper readData = new SqLiteDbWrapper(sqLiteConnectionString, dbFileInfo))
+            {
+                using (SqLiteDbWrapper readData = new SqLiteDbWrapper(sqLiteConnectionString, dbFileInfo))
                 {
                     dt = readData.GetQueryResultAsTable(query);
                 }
@@ -84,21 +85,17 @@ namespace AutoAnalysis
         /// <returns></returns>
         public IModelDBable<ModelDBColumn> GetFilterList(string[] columns, string table)
         {
-            EvntInfoMessage?.Invoke(this, new TextEventArgs("В таблице: "+table+ " "+columns?.Length + " колонок "));
+            EvntInfoMessage?.Invoke(this, new TextEventArgs("В таблице: " + table + " " + columns?.Length + " колонок "));
 
             IModelDBable<ModelDBColumn> _table = new ModelDBTable();
             IModelDBable<ModelDBFilter> result;
             _table.Collection = new List<ModelDBColumn>();
-
+            _table.Collection.Add(new ModelDBColumn() { Name="Нет"});
             if (CheckUpDBStructure())
             {
                 //    EvntInfoMessage?.Invoke(this, new TextEventArgs("В таблице: " + table + " " + columns?.Length + " колонок "));
                 foreach (var column in columns)
                 {
-                    string q = $"SELECT DISTINCT {column} FROM {table} WHERE LENGTH(TRIM({column})) > 1 ORDER BY {column} ASC";
-
-                    EvntInfoMessage?.Invoke(this, new TextEventArgs(q));
-
                     //SQLiteDBOperations dBOperations
                     using (SqLiteDbWrapper readData = new SqLiteDbWrapper(sqLiteConnectionString, dbFileInfo))
                     {

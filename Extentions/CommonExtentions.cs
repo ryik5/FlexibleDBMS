@@ -10,26 +10,11 @@ namespace AutoAnalysis
   public static  class CommonExtesions
     {
 
-        public static string ToString(this string [] array)
+        public static string Translate(this string key, IDictionary<string, string> dic)
         {
-            string text = string.Empty;
+            string result = dic.TryGetValue(key, out string name) == false ? key : name;
 
-            foreach (var s in array)
-            {
-                text += $"{s.ToString()}\r\n";
-            }
-            return text;
-        }
-
-        public static string ToString(this IList<string> list)
-        {
-            string text = string.Empty;
-
-            foreach (var s in list)
-            {
-                text += $"{s.ToString()}\r\n";
-            }
-            return text;
+            return result;
         }
 
         public static string OpenFileDialogReturnPath(this OpenFileDialog ofd) //Return its name 
