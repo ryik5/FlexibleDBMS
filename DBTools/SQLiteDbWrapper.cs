@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
+using System.IO;
+using System.Linq;
 
 namespace AutoAnalysis
 {
@@ -18,7 +20,7 @@ namespace AutoAnalysis
         protected SQLiteDbAbstract(string dbConnectionString, System.IO.FileInfo dbFileInfo)
         {
             _dbConnectionString = dbConnectionString;
-            CheckDB(_dbConnectionString, dbFileInfo);
+            CheckUpDB(_dbConnectionString, dbFileInfo);
             ConnectToDB(_dbConnectionString);
         }
 
@@ -27,16 +29,16 @@ namespace AutoAnalysis
             return _dbConnectionString;
         }
 
-        private void CheckDB(string dbConnectionString, System.IO.FileInfo dbFileInfo)
+        public void CheckUpDB(string dbConnectionString, System.IO.FileInfo dbFileInfo)
         {
             if (!(dbFileInfo?.Name?.Length > 0))
-                throw new System.ArgumentException("dbFileInfo can not be null!");
+            { throw new System.ArgumentNullException("dbFileInfo can not be null!"); }
 
             if (!dbFileInfo.Exists)
-                throw new System.ArgumentException("dbFileInfo is not exist");
+            { throw new System.Exception("dbFileInfo is not exist"); }
 
             if (!(dbConnectionString?.Trim()?.Length > 0))
-                throw new System.ArgumentException("dbConnectionString string can not be Empty or short");
+            { throw new System.ArgumentNullException("dbConnectionString string can not be Empty or short"); }
         }
 
         private void ConnectToDB(string dbConnectionString)
@@ -96,20 +98,26 @@ namespace AutoAnalysis
     {
         public SqLiteDbWrapper(string dbConnectionString, System.IO.FileInfo dbFileInfo) :
             base(dbConnectionString, dbFileInfo)
-        { }
+        {
+        
+        }
 
         public event Message Status;
 
         //Read Data
-        public SQLiteDataReader GetDataReader(string query)
+        public SQLiteDataReader GetQueryResultAsDataReader(string query)
         {
+            CheckFormatQuery(query);
+
             Status?.Invoke(this, new TextEventArgs("query: " + query));
             using (var _sqlCommand = new SQLiteCommand(query, sqlConnection))
             { return _sqlCommand.ExecuteReader(); }
         }
 
-        public DataTable GetTable(string query)
+        public DataTable GetQueryResultAsTable(string query)
         {
+            CheckFormatQuery(query);
+
             DataTable dt = new DataTable();
 
             using (var sqlAdapter = new SQLiteDataAdapter(query, sqlConnection))
@@ -121,20 +129,21 @@ namespace AutoAnalysis
             return dt;
         }
 
-        public IList<string> GetList(string table, string column)
+        public IModelDBable<ModelDBFilter> GetColumnUniqueValuesList(string table, string column)
         {
-            //string  = "Factory";
+            IModelDBable<ModelDBFilter> modelDBColumn = new ModelDBColumn();
+            modelDBColumn.Name = column;
+            modelDBColumn.Collection = new List<ModelDBFilter>();
 
-            IList<string> result = new List<string>();
             string q = $"SELECT distinct {column} FROM {table}";
 
-            DataTable dt = GetTable(q);
+            DataTable dt = GetQueryResultAsTable(q);
 
             foreach (DataRow r in dt.Rows)
             {
-                result.Add(r[column].ToString());
+                modelDBColumn.Collection.Add(new ModelDBFilter() { Name = r[column].ToString() });
             }
-            return result;
+            return modelDBColumn;
         }
 
         //Write Data or Execute query
@@ -163,11 +172,7 @@ namespace AutoAnalysis
 
         public void Execute(string query)
         {
-            if (string.IsNullOrEmpty(query))
-            {
-                Status?.Invoke(this, new TextEventArgs("Error. The query can not be empty or null!"));
-                new ArgumentNullException();
-            }
+            CheckFormatQuery(query);
 
             using (var sqlCommand = new SQLiteCommand(query, sqlConnection))
             {
@@ -178,6 +183,42 @@ namespace AutoAnalysis
                 }
                 catch (Exception expt)
                 { Status?.Invoke(this, new TextEventArgs("query: " + query + " ->Error! " + expt.ToString())); }
+            }
+        }
+
+        /// <summary>
+        /// Check correctness of query
+        /// </summary>
+        /// <param name="query"> sql statement </param>
+        public void CheckFormatQuery(string query)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                Status?.Invoke(this, new TextEventArgs("Error. The query can not be empty or null!"));
+                new ArgumentNullException();
+            }
+
+            string[] word = query.Split(' ');
+            if (
+               !word[0].ToLower().Equals("select") ||
+               !word[0].ToLower().Equals("update") ||
+               !word[0].ToLower().Equals("insert") ||
+               !word[0].ToLower().Equals("create") ||
+               !word[0].ToLower().Equals("delete") ||
+               !word[0].ToLower().Equals("replace"))
+            {
+                Status?.Invoke(this, new TextEventArgs(
+                    "Query is wrong! It does not start with appropriate commands. Query must start with any these commands: " +
+                    $"'SELECT, UPDATE, INSERT, CREATE, DELETE, REPLACE'\r\nYour query:  {query.ToUpper()}"));
+                new ArgumentException();
+            }
+
+            if (word.Where(x => x.ToLower().Equals("from")).Count() == 0)
+            {
+                Status?.Invoke(this, new TextEventArgs(
+                    $"Query is wrong! It does not contain any source table. " +
+                    $"Check your expresion near 'FROM'\r\nYour query:  {query.ToUpper()}"));
+                new ArgumentException();
             }
         }
 

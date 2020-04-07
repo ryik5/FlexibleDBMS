@@ -42,20 +42,29 @@ namespace AutoAnalysis
         {
             RegistryEntity entity = new RegistryEntity();
             string errors = string.Empty;
-            using (RegistryKey EvUserKey = Registry.CurrentUser.OpenSubKey(appRegistryKey, RegistryKeyPermissionCheck.ReadSubTree, RegistryRights.ReadKey))
+            try
             {
-                try
+                using (RegistryKey EvUserKey = Registry.CurrentUser.OpenSubKey(appRegistryKey, RegistryKeyPermissionCheck.ReadSubTree, RegistryRights.ReadKey))
                 {
-                    entity.Key = key?.Trim();
-                    entity.Value = EvUserKey?.GetValue(key);
-                    entity.Type = EvUserKey.GetValueKind(key);
+                    try
+                    {
+                        entity.Key = key?.Trim();
+                        entity.Value = EvUserKey?.GetValue(key);
+                        entity.Type = EvUserKey.GetValueKind(key);
+                    }
+                    catch (Exception err)
+                    {
+                        EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't get value of '{key}' from Registry:\r\n{err.ToString()}"));
+                    }
                 }
-                catch (Exception err) { errors += ($"Can't get value of '{key}' from Registry:\r\n{err.ToString()}"); }
+
+                if (string.IsNullOrEmpty(errors)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"'{key}' was read in Registry")); }
+                else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading '{key}' in Registry:\r\n{errors}")); }
             }
-
-            if (string.IsNullOrEmpty(errors)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"'{key}' was read in Registry")); }
-            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading '{key}' in Registry:\r\n{errors}")); }
-
+            catch (Exception err)
+            {
+                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't find '{appRegistryKey}' in Registry:\r\n{err.ToString()}"));
+            }
             return entity;
         }
 
@@ -65,29 +74,40 @@ namespace AutoAnalysis
 
             string errors = string.Empty;
 
-            using (RegistryKey EvUserKey = Registry.CurrentUser.OpenSubKey(appRegistryKey, RegistryKeyPermissionCheck.ReadSubTree, RegistryRights.ReadKey))
+            try
             {
-                string[] subNames = EvUserKey.GetSubKeyNames();
-                foreach (string name in subNames)
+                using (RegistryKey EvUserKey = Registry.CurrentUser.OpenSubKey(appRegistryKey, RegistryKeyPermissionCheck.ReadSubTree, RegistryRights.ReadKey))
                 {
-                    string key = name?.Trim();
-                    if (key.Length > 0)
-                        try
-                        {
-                            RegistryEntity entity = new RegistryEntity
+                    string[] subNames = EvUserKey.GetSubKeyNames();
+                    foreach (string name in subNames)
+                    {
+                        string key = name?.Trim();
+                        if (key.Length > 0)
+                            try
                             {
-                                Key = key,
-                                Value = EvUserKey?.GetValue(name),
-                                Type = EvUserKey.GetValueKind(name)
-                            };
-                            list.Add(entity);
-                        }
-                        catch (Exception err) { errors += ($"Can't get value of '{name}' from Registry:\r\n{err.ToString()}"); }
-                }
-            }
+                                RegistryEntity entity = new RegistryEntity
+                                {
+                                    Key = key,
+                                    Value = EvUserKey?.GetValue(name),
+                                    Type = EvUserKey.GetValueKind(name)
+                                };
+                                list.Add(entity);
+                            }
+                            catch (Exception err)
+                            {
+                                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't get value of '{name}' from Registry:\r\n{err.ToString()}"));
+                            }
 
-            if (string.IsNullOrEmpty(errors)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"'{appRegistryKey}' was found to read keys in Registry")); }
-            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading '{appRegistryKey}' from Registry:\r\n{errors}")); }
+                    }
+                }
+
+                if (string.IsNullOrEmpty(errors)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"'{appRegistryKey}' was found to read keys in Registry")); }
+                else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading '{appRegistryKey}' from Registry:\r\n{errors}")); }
+            }
+            catch (Exception err)
+            {
+                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't find '{appRegistryKey}' in Registry:\r\n{err.ToString()}"));
+            }
 
             return list;
         }
@@ -97,49 +117,67 @@ namespace AutoAnalysis
             IList<RegistryEntity> list = new List<RegistryEntity>();
 
             string errors = string.Empty;
-
-            using (RegistryKey EvUserKey = Registry.CurrentUser.OpenSubKey(appRegistryKey, false))
+            try
             {
-                string[] names = EvUserKey.GetSubKeyNames();
-                foreach (var n in names)
+                using (RegistryKey EvUserKey = Registry.CurrentUser.OpenSubKey(appRegistryKey, false))
                 {
-                    if (n.Equals(subkey))
+                    string[] names = EvUserKey.GetSubKeyNames();
+                    foreach (var n in names)
                     {
-                        using (RegistryKey EvUserSubKey = EvUserKey.OpenSubKey(subkey, false))
+                        if (n.Equals(subkey))
                         {
-                            string[] subNames = EvUserSubKey.GetValueNames();
-
-                            foreach (string name in subNames)
+                            try
                             {
-                                string key = name?.Trim();
-                                if (key.Length > 0)
+                                using (RegistryKey EvUserSubKey = EvUserKey.OpenSubKey(subkey, false))
                                 {
-                                    try
-                                    {
-                                        RegistryEntity entity = new RegistryEntity
-                                        {
-                                            Key = key,
-                                            Value = EvUserSubKey.GetValue(name),
-                                            Type = EvUserSubKey.GetValueKind(name)
-                                        };
-                                        list.Add(entity);
-                                    }
+                                    string[] subNames = EvUserSubKey.GetValueNames();
 
-                                    catch (Exception err) { errors += $"Can't get value of '{name}' from Registry:\r\n{err.ToString()}"; }
+                                    foreach (string name in subNames)
+                                    {
+                                        string key = name?.Trim();
+                                        if (key.Length > 0)
+                                        {
+                                            try
+                                            {
+                                                RegistryEntity entity = new RegistryEntity
+                                                {
+                                                    Key = key,
+                                                    Value = EvUserSubKey.GetValue(name),
+                                                    Type = EvUserSubKey.GetValueKind(name)
+                                                };
+                                                list.Add(entity);
+                                            }
+
+                                            catch (Exception err)
+                                            {
+                                                errors += $"Can't get value of '{name}' from Registry:\r\n{err.ToString()}";
+                                            }
+                                        }
+                                    }
                                 }
                             }
+                            catch (Exception err)
+                            {
+                                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't find '{subkey}' in Registry:\r\n{err.ToString()}"));
+                            }
+                            break;
                         }
-                        break;
+                        else
+                        {
+                            errors += $"'{subkey}' was not found in Registry";
+                        }
                     }
-                    else { errors += $"'{subkey}' was not found in Registry"; }
                 }
+
+                if (string.IsNullOrEmpty(errors))
+                { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Under Registry subkey '{appRegistryKey}\\{subkey}' was read {list.Count} elements")); }
+                else
+                { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading '{appRegistryKey}' in Registry:\r\n{errors}")); }
             }
-
-            if (string.IsNullOrEmpty(errors))
-            { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Under Registry subkey '{appRegistryKey}\\{subkey}' was read {list.Count} elements")); }
-            else
-            { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading '{appRegistryKey}' in Registry:\r\n{errors}")); }
-
+            catch (Exception err)
+            {
+                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't find '{appRegistryKey}' in Registry:\r\n{err.ToString()}"));
+            }
             return list;
         }
 

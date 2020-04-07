@@ -7,13 +7,13 @@
         public MenuItem(string nameQuery, string bodyQuery)
         {
             number += 1;
-            Name = $"menu{number}";
-            NameQuery = nameQuery;
-            BodyQuery = bodyQuery;
+            Name = $"Menu{number}";
+            Text = nameQuery;
+            Tag = bodyQuery;
         }
 
         public string Name { get; }
-        public string NameQuery { get; }
-        public string BodyQuery { get; }
+        public string Text { get; }
+        public string Tag { get; }
     }
 }

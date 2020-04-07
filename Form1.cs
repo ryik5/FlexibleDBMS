@@ -26,6 +26,7 @@ namespace AutoAnalysis
         static string sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
         static FileInfo dbFileInfo = new FileInfo(appDbPath);
         SQLiteDBOperations dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
+
         DbSchema schemaDB = null;
         IList<string> tablesDB;
 
@@ -39,6 +40,7 @@ namespace AutoAnalysis
         static RegistryManager regOperator;
         readonly string regSubKeyMenu = "Menu";
 
+        AppModes OperatingModes = AppModes.User;
 
         public Form1()
         {
@@ -55,6 +57,9 @@ namespace AutoAnalysis
 
             //Check Up Local DB schema
             CheckUpSelectedDB(dbFileInfo.FullName);
+
+            //add additional Query Extra Menu items from Registry
+            AddQueriesFromRegistryToToolStripMenu(regSubKeyMenu);
 
             //Turn Up StatusStrip
             TurnUpStatusStripMenuItems();
@@ -117,11 +122,14 @@ namespace AutoAnalysis
                 ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
             };
             panel1.Controls.Add(dgv);
-
+                       
             //registration manager RegestryWork
             regOperator = new RegistryManager(appRegistryKey);
-            (regOperator as RegistryManager).EvntStatusInfo += AddLineAtTextboxLog;
-
+       
+            if (OperatingModes == AppModes.Admin)
+            { (regOperator as RegistryManager).EvntStatusInfo += AddLineAtTextboxLog; }
+            else if (OperatingModes == AppModes.User)
+            { try { (regOperator as RegistryManager).EvntStatusInfo -= AddLineAtTextboxLog; } catch { } }
         }
 
         private void TurnUpToolStripMenuItems()
@@ -142,7 +150,7 @@ namespace AutoAnalysis
             changeViewPanelviewMenuItem.Click += ChangeViewPanelviewMenuItem_Click;
 
             updateFiltersMenuItem.Text = "Обновить фильтры";
-            updateFiltersMenuItem.ToolTipText= "Процедура обновления фильтров длительная по времени(до 30 минут) и затратная по ресурсам!";
+            updateFiltersMenuItem.ToolTipText = "Процедура обновления фильтров длительная по времени(до 30 минут) и затратная по ресурсам!";
             updateFiltersMenuItem.Click += UpdateFiltersMenuItem_Click;
 
             allColumnsInTableQueryMenuItem.Text = "Все столбцы таблицы как запрос";
@@ -211,10 +219,61 @@ namespace AutoAnalysis
             removeQueryExtraMenuItem.Text = "Удалить отмеченные пользовательские запросы";
             removeQueryExtraMenuItem.ToolTipText = "Отметить можно только запросы созданные на данном ПК (подменю 'Пользовательские')";
             removeQueryExtraMenuItem.Click += RemoveCheckedInQueryExtraMenuItem_Click;
+        }
 
-            //add additional Query Extra Menu items from Registry
-            AddQueriesFromRegistryToToolStripMenu(regSubKeyMenu);
 
+
+        private void ToolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            btnFilter2.Text = "Filter 3";
+        }
+
+        private void Stat()
+        {
+            //Menu for StatusStrip/Filters
+            statusFilters.Items.AddRange(new ToolStripItem[] { btnFilter1 });
+            // 
+            // btnFilter1
+            // 
+            btnFilter1.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            btnFilter1.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItem3 });
+            btnFilter1.Image = Properties.Resources.LogoRYIK;
+            btnFilter1.ImageTransparentColor = Color.Magenta;
+            btnFilter1.Name = "btnFilter1";
+            btnFilter1.Size = new Size(73, 20);
+            btnFilter1.Text = "btnFilter1";
+            // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
+            toolStripMenuItem3.Text = "toolStripMenuItem3";
+            toolStripMenuItem3.Click += ToolStripMenuItem3_Click;
+        }
+
+        private void AddMenu()
+        {
+            ToolStripSplitButton btnFilter1 = new ToolStripSplitButton();
+
+            //Menu for StatusStrip/Filters
+            statusFilters.Items.AddRange(new ToolStripItem[] { btnFilter1 });
+            // 
+            // btnFilter1
+            // 
+            btnFilter1.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            btnFilter1.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItem3 });
+            btnFilter1.Image = Properties.Resources.LogoRYIK;
+            btnFilter1.ImageTransparentColor = Color.Magenta;
+            btnFilter1.Name = "btnFilter1";
+            btnFilter1.Size = new Size(73, 20);
+            btnFilter1.Text = "btnFilter1";
+            // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
+            toolStripMenuItem3.Text = "toolStripMenuItem3";
+            toolStripMenuItem3.Click += ToolStripMenuItem3_Click;
         }
 
         /// <summary>
@@ -222,25 +281,37 @@ namespace AutoAnalysis
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-
-        private void UpdateFiltersMenuItem_Click(object sender, EventArgs e)
+        private async void UpdateFiltersMenuItem_Click(object sender, EventArgs e)
         {
-            string[] column = { "Factory", "Model", "ManufactureYear", "Name", "City", "District", "Street" };
+            await BuildFilters();
+        }
+
+        private async Task BuildFilters()
+        {
+            string[] columns = { "Factory", "Model", "ManufactureYear", "Type", "DRFO", "EDRPOU", "Name", "City", "District", "Street" };
             string q = $"SELECT distinct Plate, Factory , Model, ManufactureYear, BodyNumber, ChassisNumber, EngineVolume, Type, DRFO, F, I, O, Birthday, EDRPOU, Name, City, District, Street, Building, BuildingBody, Apartment, CodeOperation, CodeDate FROM CarAndOwner";
+            //            string q = $"SELECT distinct Plate,{column} , Model, ManufactureYear, BodyNumber, ChassisNumber, EngineVolume, Type, DRFO, F, I, O, Birthday, EDRPOU, Name, City, District, Street, Building, BuildingBody, Apartment, CodeOperation, CodeDate FROM {table}";
 
+            IModelDBable<ModelDBColumn> filtersTable = null;
+            await Task.Run(() => filtersTable = dBOperations.GetFilterList(columns, "CarAndOwner"));
+
+            AddLineAtTextboxLog("Построение фильтров завершено");
+
+            foreach (var c in filtersTable.Collection)
+            {
+                AddLineAtTextboxLog($"{c?.Name}: {c?.Collection?.Count}");
+            }
         }
 
-        private IList<string> GetList(string column)
-        {
-            //string  = "Factory";
-
-            string q = $"SELECT distinct Plate,{column} , Model, ManufactureYear, BodyNumber, ChassisNumber, EngineVolume, Type, DRFO, F, I, O, Birthday, EDRPOU, Name, City, District, Street, Building, BuildingBody, Apartment, CodeOperation, CodeDate FROM CarAndOwner";
-
-            IList<string> result = dBOperations.GetList(q);
-
-            return result;
-        }
-
+        /*
+        where some_column is null or some_column = ''
+        or
+        where ifnull(some_column, '') = ''
+        or
+        where coalesce(some_column, '') = ''
+        of
+        where ifnull(length(some_column), 0) = 0
+        */
 
         /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -261,31 +332,92 @@ namespace AutoAnalysis
                     AddLineAtTextboxLog($"Не выбрана база данных.");
                 }
             }
+
+            //print db structure     IModelDBable<ModelDBTable> db ;
+            string result = string.Empty;
+            if (db.Collection?.Count > 0)
+            {
+                foreach (var t in db.Collection)
+                {
+                    result += "table: " + t.Name + "\r\n";
+                    if (t.Collection?.Count > 0)
+                    {
+                        foreach (var c in t.Collection)
+                        {
+                            result += "column: " + c.Name + ", тип: " + c.Type + "\r\n";
+                            if (c.Collection?.Count > 0)
+                            {
+                                foreach (var f in c.Collection)
+                                {
+                                    result += "filter: " + f.Name + "\r\n";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            AddLineAtTextboxLog($"{result}");
         }
+
+
+
+        IModelDBable<ModelDBTable> db;
 
         private void CheckUpSelectedDB(string filePath)
         {
+            IModelDBable<ModelDBColumn> table;
+            IModelDBable<ModelDBFilter> column;
+
+            db = new ModelDB();
+            db.Name = "currentDB";
+            db.Collection = new List<ModelDBTable>();
+            (db as ModelDB).FilePath = filePath;
+            (db as ModelDB).SqlConnectionString = $"Data Source = {filePath}; Version=3;";
+
             try
             {
                 schemaDB = DbSchema.LoadDB(filePath);
                 tablesDB = new List<string>();
                 string tableName = null;
 
-                foreach (var table in schemaDB.Tables)
+                foreach (var tbl in schemaDB.Tables)
                 {
-                    tableName += $" '{table.Value.TableName}'";
-                    tablesDB.Add(table.Value.TableName);
+                    table = new ModelDBTable();
+                    table.Name = tbl.Value.TableName;
+                    table.Collection = new List<ModelDBColumn>();
+
+                    foreach (var clmn in tbl.Value.Columns)
+                    {
+                        column = new ModelDBColumn();
+                        column.Name = clmn.ColumnName;
+                        (column as ModelDBColumn).Type = clmn.ColumnType.ToString();
+                        table.Collection.Add((ModelDBColumn)column);
+                    }
+
+                    db.Collection.Add((ModelDBTable)table);
+
+                    //old
+                    tableName += $" '{tbl.Value.TableName}'";
+                    tablesDB.Add(tbl.Value.TableName);
                 }
                 StatusLabelExtraInfo.Text = $"Данные в таблице(ах) {tableName}";
+                               
+                try { dBOperations.EvntInfoMessage -= AddLineAtTextboxLog; } catch { }
 
                 appDbPath = filePath;
                 sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
                 dbFileInfo = new FileInfo(appDbPath);
                 dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
+
+                if (OperatingModes == AppModes.Admin)
+                { dBOperations.EvntInfoMessage += AddLineAtTextboxLog; }
             }
             catch (Exception e)
             {
                 StatusLabelExtraInfo.Text = $"Ошибка в БД: {e.Message}";
+                AddLineAtTextboxLog($"Ошибка в БД: {e.Message}");
+                AddLineAtTextboxLog($"{e.ToString()}");
             }
             finally
             {
@@ -317,8 +449,9 @@ namespace AutoAnalysis
         {
             await Task.Delay(500);
 
-            (regOperator as RegistryManager).EvntStatusInfo -= AddLineAtTextboxLog;
-        }
+            if (OperatingModes == AppModes.Admin)
+            { (regOperator as RegistryManager).EvntStatusInfo -= AddLineAtTextboxLog; }
+         }
 
 
 
@@ -390,7 +523,7 @@ namespace AutoAnalysis
 
             MenuItem menuItem = new MenuItem(nameQuery, bodyQuery);
 
-            ToolStripMenuItem item = menuItem.ToToolStripMenuItem();
+            ToolStripMenuItem item = menuItem.ToExtentendedMenuToolStripMenuItem();
 
             queriesExtraMenu.DropDownItems.Add(item as ToolStripMenuItem);
             item.Click += QueryMenuItem_Click;
@@ -649,40 +782,39 @@ namespace AutoAnalysis
             ShowLogViewTextbox(true);
 
             StatusInfoMain.Text = "Reading and importing data from text file...";
-            await Task.Run(() => ImportData());
-            StatusInfoMain.Text = "Finished!!!";
+            string filePath;
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                filePath = ofd.OpenFileDialogReturnPath();
+                if (filePath?.Length > 0)
+                {
+                    await Task.Run(() => ImportData(filePath));
+                    StatusInfoMain.Text = "Finished!!!";
 
-            administratorMenu.Enabled = true;
-            queriesStandartMenu.Enabled = true;
-            queriesExtraMenu.Enabled = true;
-            txtbResultShow.Enabled = true;
+                    administratorMenu.Enabled = true;
+                    queriesStandartMenu.Enabled = true;
+                    queriesExtraMenu.Enabled = true;
+                    txtbResultShow.Enabled = true;
+                }
+                else { AddLineAtTextboxLog($"Файл '{filePath}' пустой или не выбран"); }
+            }
         }
 
-        public void ImportData()
+        public void ImportData(string filePath)
         {
-            string filepathLoadedData;
             reader = new FileReader<CarAndOwner>();
             txtbResultShow.Clear();
 
+            reader.EvntCollectionFull += Reader_collectionFull;
+            reader.GetContent(filePath, MAX_ELEMENTS_COLLECTION);
+            reader.EvntCollectionFull -= Reader_collectionFull;
 
-            using (OpenFileDialog ofd = new OpenFileDialog())
-            {
-                filepathLoadedData = ofd.OpenFileDialogReturnPath();
-                if (filepathLoadedData?.Length > 0)
-                {
-                    reader.EvntCollectionFull += Reader_collectionFull;
-                    reader.GetContent("11.txt", MAX_ELEMENTS_COLLECTION);
-                    reader.EvntCollectionFull -= Reader_collectionFull;
+            AddLineAtTextboxLog("");
+            AddLineAtTextboxLog("CarAndOwner:");
+            AddLineAtTextboxLog($"Total imported Rows: {reader.importedRows}");
 
-                    AddLineAtTextboxLog("");
-                    AddLineAtTextboxLog("CarAndOwner:");
-                    AddLineAtTextboxLog($"Total imported Rows: {reader.importedRows}");
-
-                    reader = null;
-                    AddLineAtTextboxLog("");
-                }
-                else { AddLineAtTextboxLog($"Файл '{filepathLoadedData}' пустой или не выбран"); }
-            }
+            reader = null;
+            AddLineAtTextboxLog("");
         }
 
         private void Reader_collectionFull(object sender, BoolEventArgs e)
@@ -721,6 +853,7 @@ namespace AutoAnalysis
                 string envParameter = args[1]?.Trim()?.TrimStart('-', '/')?.ToLower();
                 if (envParameter.StartsWith("y"))
                 {
+                    OperatingModes = AppModes.Admin;
                     administratorMenu.Enabled = true;
                 }
                 else if (envParameter.StartsWith("config"))
@@ -729,11 +862,13 @@ namespace AutoAnalysis
                 }
                 else if (envParameter.StartsWith("n"))
                 {
+                    OperatingModes = AppModes.User;
                     administratorMenu.Enabled = false;
                 }
             }
             else
             {
+                OperatingModes = AppModes.User;
                 administratorMenu.Enabled = false;
             }
 
@@ -790,33 +925,6 @@ namespace AutoAnalysis
             }
         }
 
-        private void Stat()
-        {
-            //Menu for StatusStrip/Filters
-            statusFilters.Items.AddRange(new ToolStripItem[] { btnFilter1 });
-            // 
-            // btnFilter1
-            // 
-            btnFilter1.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            btnFilter1.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItem3 });
-            btnFilter1.Image = Properties.Resources.LogoRYIK;
-            btnFilter1.ImageTransparentColor = Color.Magenta;
-            btnFilter1.Name = "btnFilter1";
-            btnFilter1.Size = new Size(73, 20);
-            btnFilter1.Text = "btnFilter1";
-            // 
-            // toolStripMenuItem3
-            // 
-            toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
-            toolStripMenuItem3.Text = "toolStripMenuItem3";
-            toolStripMenuItem3.Click += ToolStripMenuItem3_Click;
-        }
-
-        private void ToolStripMenuItem3_Click(object sender, EventArgs e)
-        {
-            btnFilter2.Text = "Filter 3";
-        }
 
     }
 }
