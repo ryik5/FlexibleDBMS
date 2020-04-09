@@ -1079,8 +1079,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             else
             { ShowLogViewTextbox(MainViewMode.Textbox); logView = true; }
         }
-
-
+        
         private void ShowLogViewTextbox(MainViewMode mode)
         {
             switch (mode)
@@ -1121,8 +1120,6 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     }
             }
         }
-
-
     }
 
     public enum MainViewMode
