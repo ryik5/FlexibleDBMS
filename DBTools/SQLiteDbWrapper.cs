@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.IO;
 using System.Linq;
 
 namespace AutoAnalysis
@@ -99,7 +98,7 @@ namespace AutoAnalysis
         public SqLiteDbWrapper(string dbConnectionString, System.IO.FileInfo dbFileInfo) :
             base(dbConnectionString, dbFileInfo)
         {
-        
+
         }
 
         public event Message Status;
@@ -129,11 +128,13 @@ namespace AutoAnalysis
             return dt;
         }
 
-        public IModelDBable<ModelDBFilter> GetColumnUniqueValuesList(string table, string column)
+        public IModelDBable<ModelDBFilter> GetColumnUniqueValuesList(string table, string column, string alias)
         {
             IModelDBable<ModelDBFilter> modelDBColumn = new ModelDBColumn();
             modelDBColumn.Name = column;
+            modelDBColumn.Alias = alias;
             modelDBColumn.Collection = new List<ModelDBFilter>();
+            modelDBColumn.Collection.Add(new ModelDBFilter() { Name = "Нет" });
 
             string q = $"SELECT distinct {column}, COUNT(*) as amount FROM {table} WHERE LENGTH(TRIM({column}))>1 GROUP BY {column} ORDER BY amount DESC";
 

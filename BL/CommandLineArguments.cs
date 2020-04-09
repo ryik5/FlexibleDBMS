@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AutoAnalysis
 {
- public   class CommandLineArguments
+    public class CommandLineArguments
     {
 
         public delegate void InfoMessage(object sender, TextEventArgs e);
         public event InfoMessage EvntInfoMessage;
 
 
-       char FindUsedDelimiter(string text)
+        char FindUsedDelimiter(string text)
         {
-            char delimiter='-';
+            char delimiter = '-';
             if (text.Trim().StartsWith("-"))
             {
                 delimiter = '-';

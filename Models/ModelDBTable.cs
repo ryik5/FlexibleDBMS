@@ -5,6 +5,7 @@ namespace AutoAnalysis
     public interface IModelDBable<T>
     {
         string Name { get; set; }
+        string Alias { get; set; }
         IList<T> Collection { get; set; }
     }
 
@@ -14,6 +15,11 @@ namespace AutoAnalysis
     public class ModelDB : IModelDBable<ModelDBTable>
     {
         public string Name { get; set; }
+
+        /// <summary>
+        /// Alias of Name
+        /// </summary>
+        public string Alias { get; set; }
         public string FilePath { get; set; }
         public string SqlConnectionString { get; set; }
 
@@ -29,6 +35,11 @@ namespace AutoAnalysis
     public class ModelDBTable : IModelDBable<ModelDBColumn>
     {
         public string Name { get; set; }
+        
+        /// <summary>
+        /// Alias of Name
+        /// </summary>
+        public string Alias { get; set; }
 
         /// <summary>
         /// Columns
@@ -45,6 +56,11 @@ namespace AutoAnalysis
         /// Name of the column
         /// </summary>
         public string Name { get; set; }
+        
+        /// <summary>
+        /// Alias of Name
+        /// </summary>
+        public string Alias { get; set; }
 
         /// <summary>
         /// Type of data the column
@@ -63,5 +79,10 @@ namespace AutoAnalysis
     public class ModelDBFilter
     {
         public string Name { get; set; }
+       
+        /// <summary>
+        /// Alias of Name
+        /// </summary>
+        public string Alias { get; set; }
     }
 }

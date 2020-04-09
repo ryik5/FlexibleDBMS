@@ -83,14 +83,13 @@ namespace AutoAnalysis
         /// <param name="table"></param>
         /// <param name="columns"></param>
         /// <returns></returns>
-        public IModelDBable<ModelDBColumn> GetFilterList(string[] columns, string table)
+        public IModelDBable<ModelDBColumn> GetFilterList(IDictionary<string, string> columns, string table)
         {
-            EvntInfoMessage?.Invoke(this, new TextEventArgs("В таблице: " + table + " " + columns?.Length + " колонок "));
+            EvntInfoMessage?.Invoke(this, new TextEventArgs("В таблице: " + table + " " + columns?.Keys?.Count + " колонок "));
 
             IModelDBable<ModelDBColumn> _table = new ModelDBTable();
             IModelDBable<ModelDBFilter> result;
             _table.Collection = new List<ModelDBColumn>();
-            _table.Collection.Add(new ModelDBColumn() { Name="Нет"});
             if (CheckUpDBStructure())
             {
                 //    EvntInfoMessage?.Invoke(this, new TextEventArgs("В таблице: " + table + " " + columns?.Length + " колонок "));
@@ -99,7 +98,7 @@ namespace AutoAnalysis
                     //SQLiteDBOperations dBOperations
                     using (SqLiteDbWrapper readData = new SqLiteDbWrapper(sqLiteConnectionString, dbFileInfo))
                     {
-                        result = readData.GetColumnUniqueValuesList(table, column);
+                        result = readData.GetColumnUniqueValuesList(table, column.Key, column.Value);
                     }
 
                     EvntInfoMessage?.Invoke(this, new TextEventArgs($"Для фильтра отобрано {result.Collection.Count} строк"));
