@@ -5,8 +5,6 @@ using System.Data.SQLite;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -18,7 +16,7 @@ namespace AutoAnalysis
         AppModes OperatingModes = AppModes.User;
 
         //Application's Main interface Turn Up
-        static readonly string localAppFolderPath = Application.StartupPath; //Environment.CurrentDirectory
+       // static readonly string localAppFolderPath = Application.StartupPath; //Environment.CurrentDirectory
         static readonly System.Diagnostics.FileVersionInfo appFileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(Application.ExecutablePath);
         static readonly string appRegistryKey = @"SOFTWARE\YuriRyabchenko\AutoAnalyse";
         Bitmap bmpLogo;
@@ -30,9 +28,6 @@ namespace AutoAnalysis
         SelectDBForm selectDB;
         ISQLConnectionSettings connectionSettings = null;
 
-        //  static string appDbPath = "MainDB.db";
-        //// string sqLiteConnectionString;// = $"Data Source = {connectionSettings.Database}; Version=3;";
-        //  FileInfo dbFileInfo;// = new FileInfo(appDbPath);
         ISqlDbConnector dBOperations;// = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
         IModelDBable<ModelDBTable> db;
         DbSchema schemaDB = null;
@@ -53,9 +48,7 @@ namespace AutoAnalysis
         readonly string regSubKeyMenu = "Menu";
         readonly string regSubKeyRecent = "Recent";
 
-
-
-
+               
         public Form1()
         {
             InitializeComponent();
@@ -107,11 +100,14 @@ namespace AutoAnalysis
             {
                 GetNewConnection();
             }
-            else { CheckUpSelectedSQLiteDB(connectionSettings.Database); }            //Check Up Local DB schema
+            else
+            {
+                IList<ToolStripMenuItem> menuItems = regOperator.ReadRegistryKeys(regSubKeyRecent)?.ToToolStripMenuItemsList(ToolStripModes.RecentConnection);
+                AddQueriesFromRegistryToToolStripMenu(recentConnectionToolStripMenuItem, menuItems, ToolStripModes.RecentConnection);
 
-
-            IList<ToolStripMenuItem> menuItems = regOperator.ReadRegistryKeys(regSubKeyRecent)?.ToToolStripMenuItemsList(ToolStripModes.RecentConnection);
-            AddQueriesFromRegistryToToolStripMenu(recentConnectionToolStripMenuItem, menuItems, ToolStripModes.RecentConnection);
+                if (connectionSettings.ProviderName == SQLProvider.SQLite) //Check Up Local DB schema
+                { CheckUpSelectedSQLiteDB(connectionSettings.Database); }
+            }
         }
 
 
@@ -205,6 +201,8 @@ namespace AutoAnalysis
                 importFromTextFileMenuItem.Click += ImportFromTextFileMenuItem_Click;
                 importFromTextFileMenuItem.ToolTipText = "Import Text File in local DB";
                 writeModelsListMenuItem.ToolTipText = "Write List with Models in DB";
+
+                recentConnectionToolStripMenuItem.Enabled = true;
             }
 
             //view menu
@@ -338,12 +336,16 @@ namespace AutoAnalysis
         {
             connectionSettings = new SQLConnectionSettings(selectDB.settings);
             ReNewParametersDB(connectionSettings);
+         
+            //Write in Registry Last Connection and its parameters
+            await Task.Run(() => WriteConnection(connectionSettings));
 
 
             //Show Main Form
             Show();
             //Destroy SelectDB Form
             selectDB.Dispose();
+
 
 
             //Check Data
@@ -355,10 +357,6 @@ namespace AutoAnalysis
             AddLineAtTextboxLog($"Password: {connectionSettings.Password}");
             AddLineAtTextboxLog($"Database: {connectionSettings.Database}");
             AddLineAtTextboxLog($"Table: {connectionSettings.Table}");
-
-
-            //Write in Registry Last Connection and its parameters
-            await Task.Run(() => WriteConnection(connectionSettings));
         }
 
         /// <summary>
@@ -376,11 +374,15 @@ namespace AutoAnalysis
                 regOperator.Write(settings.Name, settings.Name, regSubKeyRecent);
         }
 
-        private void RecentMenuItems_Click(object sender, EventArgs e)
+        private async void RecentMenuItems_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem item = sender as ToolStripMenuItem;
             
             ReadLastConnectionFromRegistry(item.Text);
+
+
+            //Write in Registry Last Connection and its parameters
+            await Task.Run(() => WriteConnection(connectionSettings));
         }
 
         private void ReadLastConnectionFromRegistry(string text)
