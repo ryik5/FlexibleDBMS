@@ -89,7 +89,7 @@ namespace AutoAnalysis.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Текстовые файлы (*.txt)|*.txt|All files (*.*)|*.*.
+        ///   Looks up a localized string similar to Базы данных (*.db)|*.db|Текстовые файлы (*.txt)|*.txt|All files (*.*)|*.*.
         /// </summary>
         internal static string OpenDialogTextFiles {
             get {

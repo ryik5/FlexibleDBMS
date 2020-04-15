@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace AutoAnalysis
@@ -29,6 +31,82 @@ namespace AutoAnalysis
 
             return list;
         }
+        
+        public static IList<ToolStripMenuItem> ToToolStripMenuItemsList(this IList<RegistryEntity> list, ToolStripModes modes)
+        {
+            IList<ToolStripMenuItem> toolMenuList = new List<ToolStripMenuItem>();
+
+            MenuItem menuItem;
+            string text, tag;
+
+            if (list?.Count > 0)
+            {
+                foreach (var r in list)
+                {
+                    switch (modes)
+                    {
+                        case ToolStripModes.QueryExtra:
+                            {
+                                if (r.Type == Microsoft.Win32.RegistryValueKind.String)
+                                {
+                                    text = r?.Value?.ToString()?.Trim().Split(':')[0]?.Trim();
+                                    tag = r?.Value?.ToString()?.Trim().Split(':')[1]?.Trim();
+
+                                    menuItem = new MenuItem(text, tag);
+                                    if (text?.Length > 0 && tag?.Length > 0)
+                                    {
+                                        ToolStripMenuItem toolMenu = menuItem.ToExtentendedMenuToolStripMenuItem();
+                                        toolMenuList.Add(toolMenu);
+                                    }
+                                }
+                                break;
+                            }
+                        case ToolStripModes.RecentConnection:
+                            {
+                                text = r?.Value?.ToString()?.Trim();
+                                tag = r?.Key?.ToString()?.Trim();
+
+                                menuItem = new MenuItem(text, tag);
+                                if (text?.Length > 0 && tag?.Length > 0)
+                                {
+                                    ToolStripMenuItem toolMenu = menuItem.ToExtentendedMenuToolStripMenuItem();
+                                    toolMenuList.Add(toolMenu);
+                                }
+
+                                break;
+                            }
+                    }
+                }
+            }
+
+            return toolMenuList;
+        }
+
+        /// <summary>
+        /// Filter Menu Items
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static IList<ToolStripMenuItem> ToFilterToolStripMenuItemsList(this IList<string> list)
+        {
+            IList<ToolStripMenuItem> filterMenuList = new List<ToolStripMenuItem>();
+            MenuItem menuItem;
+
+            if (list?.Count > 0)
+            {
+                foreach (var r in list)
+                {
+                    if (r?.Length > 0)
+                    {
+                        menuItem = new MenuItem(r, "");
+                        ToolStripMenuItem toolMenu = menuItem.ToFilterToolStripMenuItem();
+                        filterMenuList.Add(toolMenu);
+                    }
+                }
+            }
+            return filterMenuList;
+        }
+
 
         /// <summary>
         /// Convert ToolStripDropDownItem to IDictionary<itemName,itemText: itemTag>
@@ -65,6 +143,96 @@ namespace AutoAnalysis
             return dic;
         }
 
+        public static IDictionary<string, string> GetPropertyValues(this object obj, int limitElementsMenu)
+        {
+            IDictionary<string, string> dic = new Dictionary<string, string>(limitElementsMenu);
+            
+            if (obj == null) return null;
+
+            Type t = obj.GetType();
+
+            PropertyInfo[] props = t.GetProperties();
+
+            if (props?.Length > 0)
+            {
+                foreach (var prop in props)
+                {
+                    if (prop.GetIndexParameters().Length == 0)
+                    { dic.Add(prop?.Name, prop?.GetValue(obj)?.ToString()); }
+                    else
+                    { dic.Add(prop?.Name, prop?.PropertyType?.Name); }
+                }
+            }
+
+            return dic;
+        }
+
+
+        public static ISQLConnectionSettings ToSQLConnectionSettings(this IList<RegistryEntity> entities)
+        {
+            ISQLConnectionSettings connectionSettings = new SQLConnectionSettings();
+
+            //if entities is empty or null
+            if (entities==null|| entities?.Count == 0)
+            {
+                return connectionSettings;
+            }
+
+            foreach (var entity in entities)
+            {
+                string key = entity?.Key;
+                switch (key)
+                {
+                    case "Name":
+                        {
+                            connectionSettings.Name = entity?.Value.ToString();
+                            break;
+                        }
+                    case "ProviderName":
+                        {
+                            connectionSettings.ProviderName = entity?.Value.ToString().GetSQLProvider();
+                            break;
+                        }
+                    case "Host":
+                        {
+                            connectionSettings.Host = entity?.Value.ToString();
+                            break;
+                        }
+                    case "Port":
+                        {
+                            connectionSettings.Port = int.TryParse(entity?.Value.ToString(), out int port) ? port : 0;
+                            break;
+                        }
+                    case "Username":
+                        {
+                            connectionSettings.Username = entity?.Value.ToString();
+                            break;
+                        }
+                    case "Password":
+                        {
+                            connectionSettings.Password = entity?.Value.ToString();
+                            break;
+                        }
+                    case "Database":
+                        {
+                            connectionSettings.Database = entity?.Value.ToString();
+                            break;
+                        }
+                    case "Table":
+                        {
+                            connectionSettings.Table = entity?.Value.ToString();
+                            break;
+                        }
+                    default:
+                        {
+                            break;
+                        }
+                }
+            }
+            
+            return connectionSettings;
+        }
+
         public static ToolStripMenuItem ToExtentendedMenuToolStripMenuItem(this MenuItem menuItem)
         {
             ToolStripMenuItem item = new ToolStripMenuItem()
@@ -80,37 +248,7 @@ namespace AutoAnalysis
             };
             return item;
         }
-
-        public static IList<ToolStripMenuItem> ToToolStripMenuItemsList(this IList<RegistryEntity> list)
-        {
-            IList<ToolStripMenuItem> toolMenuList = new List<ToolStripMenuItem>();
-
-            MenuItem menuItem;
-            string name, query;
-
-            if (list?.Count > 0)
-            {
-                foreach (var r in list)
-                {
-                    if (r.Type == Microsoft.Win32.RegistryValueKind.String)
-                    {
-                        name = r?.Value?.ToString()?.Trim().Split(':')[0]?.Trim();
-                        query = r?.Value?.ToString()?.Trim().Split(':')[1]?.Trim();
-
-                        menuItem = new MenuItem(name, query);
-                        if (name?.Length > 0 && query?.Length > 0)
-                        {
-                            ToolStripMenuItem toolMenu = menuItem.ToExtentendedMenuToolStripMenuItem();
-                            toolMenuList.Add(toolMenu);
-                        }
-                    }
-                }
-            }
-
-            return toolMenuList;
-        }
-
-
+        
         /// <summary>
         /// Filter Menu Item
         /// </summary>
@@ -127,31 +265,6 @@ namespace AutoAnalysis
             return item;
         }
 
-
-        /// <summary>
-        /// Filter Menu Items
-        /// </summary>
-        /// <param name="list"></param>
-        /// <returns></returns>
-        public static IList<ToolStripMenuItem> ToFilterToolStripMenuItemsList(this IList<string> list)
-        {
-            IList<ToolStripMenuItem> filterMenuList = new List<ToolStripMenuItem>();
-            MenuItem menuItem;
-
-            if (list?.Count > 0)
-            {
-                foreach (var r in list)
-                {
-                    if (r?.Length > 0)
-                    {
-                        menuItem = new MenuItem(r, "");
-                        ToolStripMenuItem toolMenu = menuItem.ToFilterToolStripMenuItem();
-                        filterMenuList.Add(toolMenu);
-                    }
-                }
-            }
-            return filterMenuList;
-        }
 
     }
 }

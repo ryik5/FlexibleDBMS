@@ -119,52 +119,31 @@ namespace AutoAnalysis
             string errors = string.Empty;
             try
             {
-                using (RegistryKey EvUserKey = Registry.CurrentUser.OpenSubKey(appRegistryKey, false))
+                using (RegistryKey EvUserKey = Registry.CurrentUser.OpenSubKey(appRegistryKey + "\\" + subkey, false))
                 {
-                    string[] names = EvUserKey.GetSubKeyNames();
-                    foreach (var n in names)
+                    string[] subNames = EvUserKey.GetValueNames();
+
+                    foreach (string name in subNames)
                     {
-                        if (n.Equals(subkey))
+                        string key = name?.Trim();
+                        if (key?.Length > 0)
                         {
                             try
                             {
-                                using (RegistryKey EvUserSubKey = EvUserKey.OpenSubKey(subkey, false))
+                                RegistryEntity entity = new RegistryEntity
                                 {
-                                    string[] subNames = EvUserSubKey.GetValueNames();
+                                    Key = key,
+                                    Value = EvUserKey?.GetValue(key),
+                                    Type = EvUserKey.GetValueKind(key)
+                                };
 
-                                    foreach (string name in subNames)
-                                    {
-                                        string key = name?.Trim();
-                                        if (key.Length > 0)
-                                        {
-                                            try
-                                            {
-                                                RegistryEntity entity = new RegistryEntity
-                                                {
-                                                    Key = key,
-                                                    Value = EvUserSubKey.GetValue(name),
-                                                    Type = EvUserSubKey.GetValueKind(name)
-                                                };
-                                                list.Add(entity);
-                                            }
-
-                                            catch (Exception err)
-                                            {
-                                                errors += $"Can't get value of '{name}' from Registry:\r\n{err.ToString()}";
-                                            }
-                                        }
-                                    }
-                                }
+                                list.Add(entity);
                             }
+
                             catch (Exception err)
                             {
-                                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't find '{subkey}' in Registry:\r\n{err.ToString()}"));
+                                errors += $"Can't get value of '{name}' from Registry:\r\n{err.ToString()}";
                             }
-                            break;
-                        }
-                        else
-                        {
-                            errors += $"'{subkey}' was not found in Registry";
                         }
                     }
                 }

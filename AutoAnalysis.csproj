@@ -63,6 +63,9 @@
     <Reference Include="EPPlus, Version=5.1.0.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
       <HintPath>packages\EPPlus.5.1.0\lib\net45\EPPlus.dll</HintPath>
     </Reference>
+    <Reference Include="MySql.Data, Version=6.9.12.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>packages\MySql.Data.6.9.12\lib\net45\MySql.Data.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -78,11 +81,17 @@
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BL\AppModes.cs" />
+    <Compile Include="DBTools\ISqlDbConnector.cs" />
+    <Compile Include="DBTools\SQLProvider.cs" />
+    <Compile Include="DBTools\MySQLUtils.cs" />
+    <Compile Include="DBTools\SQLConnectionSettings.cs" />
+    <Compile Include="Extentions\EnumExtensions.cs" />
+    <Compile Include="Views\AppModes.cs" />
     <Compile Include="BL\CommandLineArguments.cs" />
     <Compile Include="BL\EventArgsClasses.cs" />
     <Compile Include="BL\ExportDataTableToFileExtension.cs" />
@@ -97,10 +106,10 @@
     <Compile Include="DBTools\SQLiteDBOperations.cs" />
     <Compile Include="BL\FileReader.cs" />
     <Compile Include="Extentions\CommonExtentions.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="Views\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
+    <Compile Include="Views\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Extentions\ModelsExtentions.cs" />
@@ -115,7 +124,21 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BL\RegistryManager.cs" />
-    <EmbeddedResource Include="Form1.resx">
+    <Compile Include="Views\HelpForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\HelpForm.Designer.cs">
+      <DependentUpon>HelpForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MainViewMode.cs" />
+    <Compile Include="Views\SelectDBForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\SelectDBForm.Designer.cs">
+      <DependentUpon>SelectDBForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ToolStripModes.cs" />
+    <EmbeddedResource Include="Views\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -128,6 +151,12 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="Views\HelpForm.resx">
+      <DependentUpon>HelpForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\SelectDBForm.resx">
+      <DependentUpon>SelectDBForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

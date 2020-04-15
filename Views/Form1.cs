@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,10 +27,13 @@ namespace AutoAnalysis
         ToolTip tooltip = new ToolTip();
 
         //DB
-        static string appDbPath = "MainDB.db";
-        static string sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
-        static FileInfo dbFileInfo = new FileInfo(appDbPath);
-        SQLiteDBOperations dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
+        SelectDBForm selectDB;
+        ISQLConnectionSettings connectionSettings = null;
+
+        //  static string appDbPath = "MainDB.db";
+        //// string sqLiteConnectionString;// = $"Data Source = {connectionSettings.Database}; Version=3;";
+        //  FileInfo dbFileInfo;// = new FileInfo(appDbPath);
+        ISqlDbConnector dBOperations;// = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
         IModelDBable<ModelDBTable> db;
         DbSchema schemaDB = null;
         IList<string> tablesDB;
@@ -47,6 +51,7 @@ namespace AutoAnalysis
         //Registry
         static RegistryManager regOperator;
         readonly string regSubKeyMenu = "Menu";
+        readonly string regSubKeyRecent = "Recent";
 
 
 
@@ -64,11 +69,7 @@ namespace AutoAnalysis
             //Turn Up Menu
             TurnUpToolStripMenuItems();
 
-            //Check Up Local DB schema
-            CheckUpSelectedDB(dbFileInfo.FullName);
-
-            //add additional Query Extra Menu items from Registry
-            AddQueriesFromRegistryToToolStripMenu(regSubKeyMenu);
+            ReadLastSettingsFromRegistry();
 
             //Turn Up StatusStrip
             TurnUpStatusStripMenuItems();
@@ -77,6 +78,41 @@ namespace AutoAnalysis
             ShowLogViewTextbox(MainViewMode.Textbox);
         }
 
+        private void ReadLastSettingsFromRegistry()
+        {
+            IList<RegistryEntity> registryEntity = regOperator.ReadRegistryKeys();
+            string key;
+
+            bool firstRun = registryEntity.Select(x => x.Key.Contains("Recent")).Count() == 0;
+
+            foreach (var entry in registryEntity)
+            {
+                key = entry?.Key;
+                switch (key)
+                {
+                    case "Recent":
+                        {
+                            ReadLastConnectionFromRegistry(entry?.Value?.ToString());
+                            break;
+                        }
+                    default:
+                        {
+                            AddLineAtTextboxLog($"Найдены неизвестные настройки в реестре: {key} : {entry.Value}");
+                            break;
+                        }
+                }
+            }
+
+            if (firstRun)
+            {
+                GetNewConnection();
+            }
+            else { CheckUpSelectedSQLiteDB(connectionSettings.Database); }            //Check Up Local DB schema
+
+
+            IList<ToolStripMenuItem> menuItems = regOperator.ReadRegistryKeys(regSubKeyRecent)?.ToToolStripMenuItemsList(ToolStripModes.RecentConnection);
+            AddQueriesFromRegistryToToolStripMenu(recentConnectionToolStripMenuItem, menuItems, ToolStripModes.RecentConnection);
+        }
 
 
         /// <summary>
@@ -88,9 +124,7 @@ namespace AutoAnalysis
 
             SplitImage1.Image = bmpLogo;
             StatusInfoFilter.Text = "Фильтры";
-
-            DropDownImage1.ToolTipText = "Чтоб использовать фильтры предварительно необходимо выбрать пункт меню 'Вид', а затем -'Обновить фильтры'";
-            DropDownImage1.Image = bmpLogo;
+            StatusInfoFilter.ToolTipText = "Чтоб использовать фильтры предварительно необходимо выбрать пункт меню 'Вид', а затем -'Обновить фильтры'";
 
             StatusApp.Text = $"{appFileVersionInfo.ProductName} ver.{appFileVersionInfo.ProductVersion}  ";
         }
@@ -113,7 +147,7 @@ namespace AutoAnalysis
             //Notification
             notifyIcon = new NotifyIcon
             {
-                Icon = this.Icon,
+                Icon = Icon,
                 Visible = true,
                 BalloonTipText = "Developed by " + appFileVersionInfo.LegalCopyright,
                 Text = appFileVersionInfo.ProductName + "\nv." + appFileVersionInfo.FileVersion + "\n" + appFileVersionInfo.CompanyName,
@@ -122,9 +156,9 @@ namespace AutoAnalysis
             notifyIcon.ShowBalloonTip(500);
 
             //Other controls
-            txtbBodyQuery.KeyPress += TxtbQuery_KeyPress;
-            tooltip.SetToolTip(txtbBodyQuery, "Составьте (напишите) SQL-запрос к базе данных и нажмите ENTER");
-            txtbBodyQuery.LostFocus += SetToolTipFromTextBox;
+            txtBodyQuery.KeyPress += TxtbQuery_KeyPress;
+            tooltip.SetToolTip(txtBodyQuery, "Составьте (напишите) SQL-запрос к базе данных и нажмите ENTER");
+            txtBodyQuery.LostFocus += SetToolTipFromTextBox;
             txtbNameQuery.LostFocus += SetToolTipFromTextBox;
 
             //init DataGridView
@@ -146,107 +180,307 @@ namespace AutoAnalysis
             { (regOperator as RegistryManager).EvntStatusInfo += AddLineAtTextboxLog; }
             else if (OperatingModes == AppModes.User)
             { try { (regOperator as RegistryManager).EvntStatusInfo -= AddLineAtTextboxLog; } catch { } }
+
+            connectionSettings = new SQLConnectionSettings
+            {
+                Name = "default",
+                Host = "local",
+                ProviderName = SQLProvider.SQLite
+            };
         }
 
         private void TurnUpToolStripMenuItems()
         {
-            administratorMenu.Text = "Administrator";
-            createLocalDBMenuItem.Click += CreateLocalDBMenuItem_Click;
+            //Administrator
+            {
+                administratorMenu.Text = "Administrator";
+                createLocalDBMenuItem.Click += CreateLocalDBMenuItem_Click;
 
-            selectNewDBMenuItem.Enabled = true;
-            selectNewDBMenuItem.Click += SelectNewDBMenuItem_Click;
+                selectNewDBMenuItem.Enabled = true;
+                selectNewDBMenuItem.Click += SelectNewDBMenuItem_Click;
 
-            importFromTextFileMenuItem.Click += ImportFromTextFileMenuItem_Click;
-            importFromTextFileMenuItem.ToolTipText = "Import Text File in local DB";
-            writeModelsListMenuItem.ToolTipText = "Write List with Models in DB";
+                connectToSQLServerToolStripMenuItem.Text = "Select DB (SQL server)";
+                connectToSQLServerToolStripMenuItem.Click += ConnectToSQLServerToolStripMenuItem_Click;
+
+                importFromTextFileMenuItem.Click += ImportFromTextFileMenuItem_Click;
+                importFromTextFileMenuItem.ToolTipText = "Import Text File in local DB";
+                writeModelsListMenuItem.ToolTipText = "Write List with Models in DB";
+            }
+
             //view menu
-            viewMenu.Text = "Вид";
-            viewMenu.ToolTipText = "Отобразить данные";
-            changeViewPanelviewMenuItem.Text = "Табличный";
-            changeViewPanelviewMenuItem.Click += ChangeViewPanelviewMenuItem_Click;
+            {
+                viewMenu.Text = "Вид";
+                viewMenu.ToolTipText = "Отобразить данные";
+                changeViewPanelviewMenuItem.Text = "Табличный";
+                changeViewPanelviewMenuItem.Click += ChangeViewPanelviewMenuItem_Click;
 
-            updateFiltersMenuItem.Text = "Обновить фильтры";
-            updateFiltersMenuItem.ToolTipText = "Процедура обновления фильтров длительная по времени(до 30 минут) и затратная по ресурсам!";
-            updateFiltersMenuItem.Click += UpdateFiltersMenuItem_Click;
+                updateFiltersMenuItem.Text = "Обновить фильтры";
+                updateFiltersMenuItem.ToolTipText = "Процедура обновления фильтров длительная по времени(до 30 минут) и затратная по ресурсам!";
+                updateFiltersMenuItem.Click += UpdateFiltersMenuItem_Click;
 
-            allColumnsInTableQueryMenuItem.Text = "Все столбцы таблицы как запрос";
-            allColumnsInTableQueryMenuItem.Click += allColumnsInTableQueryMenuItem_Click;
+                allColumnsInTableQueryMenuItem.Text = "Все столбцы таблицы как запрос";
+                allColumnsInTableQueryMenuItem.Click += allColumnsInTableQueryMenuItem_Click;
 
-            exportMenuItem.Text = "Експорт в Excel";
-            exportMenuItem.Click += ExportMenuItem_Click;
-            recoverDataTableAfterQueryMenuItem.Text = "Восстановить таблицу до применнения фильтров";
-            recoverDataTableAfterQueryMenuItem.Click += RecoverDataTableAfterQueryMenuItem_Click;
-
+                exportMenuItem.Text = "Експорт в Excel";
+                exportMenuItem.Click += ExportMenuItem_Click;
+                recoverDataTableAfterQueryMenuItem.Text = "Восстановить таблицу до применнения фильтров";
+                recoverDataTableAfterQueryMenuItem.Click += RecoverDataTableAfterQueryMenuItem_Click;
+            }
 
             //query menu
-            queryMenu.Text = "Запросы";
-            queryMenu.ToolTipText = "Сохраненные запросы к БД";
-            queryMenu.DropDownOpened += EnableAddQueryMenuItem_queryMenu_DropDownOpened;
-            //add new query extra menu item
-            addQueryExtraMenuItem.Text = "Добавить запрос в меню";
-            addQueryExtraMenuItem.ToolTipText = "Составленный запрос запомнить и добавить его в Пользовательское меню";
-            addQueryExtraMenuItem.Click += AddQueryExtraMenuItem_Click;
-            //query standart menu
-            queriesStandartMenu.Text = "Стандартные";
-            queriesStandartMenu.ToolTipText = "Предустановленный набор запросов";
-            //query standart menu items
-            schemeLocalDBMenuItem.Click += GetSchemaLocalDBMenuItem_Click;
+            {
+                queryMenu.Text = "Найти";
+                queryMenu.ToolTipText = "Сохраненные поисковые запросы";
+                queryMenu.Click += EnableAddQueryMenuItem_queryMenu_DropDownOpened;
+                //add new query extra menu item
+                addQueryExtraMenuItem.Text = "Добавить поисковый запрос в меню";
+                addQueryExtraMenuItem.ToolTipText = "Составленный запрос запомнить и добавить его в Пользовательское меню";
+                addQueryExtraMenuItem.Click += AddQueryExtraMenuItem_Click;
 
-            loadData0MenuItem.Text = "Данные по крупным владельцам автопарков, limit 100";
-            loadData0MenuItem.Tag = "select distinct a.District,a.City,a.ManufactureYear,a.name, a.edrpou, a.factory, a.model, a.plate from CarAndOwner a " +
-                "inner join " +
-                "(select District,City,ManufactureYear,name,edrpou,amount from " +
-                "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou > 1 group by edrpou order by amount desc) " +
-                "where amount > 50) b on a.edrpou=b.edrpou " +
-                "order by b.amount, a.edrpou, a.factory, a.model limit 100";
-            loadData0MenuItem.Click += QueryMenuItem_Click;
+                //query standart menu
+                {
+                    queriesStandartMenu.Text = "Стандартные";
+                    queriesStandartMenu.ToolTipText = "Предустановленные поисковые запросы";
+                    //query standart menu items
+                    schemeLocalDBMenuItem.Click += GetSchemaLocalDBMenuItem_Click;
 
-            loadData1MenuItem.Text = "Данные по крупным владельцам автопарков, limit 400";
+                    loadData0MenuItem.Text = "Данные по крупным владельцам автопарков, limit 100";
+                    loadData0MenuItem.Tag = "select distinct a.City,a.District,a.ManufactureYear,a.name, a.edrpou, a.factory, a.model, a.plate from CarAndOwner a " +
+                        "inner join " +
+                        "(select District,City,ManufactureYear,name,edrpou,amount from " +
+                        "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou > 1 group by edrpou order by amount desc) " +
+                        "where amount > 50) b on a.edrpou=b.edrpou " +
+                        "order by b.amount, a.edrpou, a.factory, a.model limit 100";
+                    loadData0MenuItem.Click += QueryMenuItem_Click;
 
-            // "select a.city,a.name as 'наименование', a.edrpou, a.factory as 'марка',a.manufactureyear as 'год', count(*) as 'количество'  from carandowner a where edrpou > 1 group by a.city,a.name,a.factory limit 400"
-            loadData1MenuItem.Tag = "select distinct a.District,a.City,a.ManufactureYear,a.name, a.edrpou, a.model, a.plate from CarAndOwner a " +
-                "inner join " +
-                "(select District,City,ManufactureYear,name,edrpou,amount from " +
-                "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou > 1 group by edrpou order by amount desc) " +
-                "where amount > 50) b on a.edrpou=b.edrpou " +
-                "order by b.amount, a.edrpou, a.factory, a.model limit 400";
-            loadData1MenuItem.Click += QueryMenuItem_Click;
+                    loadData1MenuItem.Text = "Данные по крупным владельцам автопарков, limit 400";
 
-            loadData2MenuItem.Text = "Данные по крупным владельцам автопарков, limit 1000";
-            loadData2MenuItem.Tag = "select distinct a.District,a.City,a.ManufactureYear,a.name, a.edrpou, a.model, a.plate from CarAndOwner a " +
-                "inner join " +
-                "(select District,City,ManufactureYear,name,edrpou,amount from " +
-                "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou is not '0' group by edrpou order by amount desc) " +
-                "where amount > 50) b on a.edrpou=b.edrpou " +
-                "order by b.amount, a.edrpou, a.factory, a.model limit 1000";
-            loadData2MenuItem.Click += QueryMenuItem_Click;
+                    // "select a.city,a.name as 'наименование', a.edrpou, a.factory as 'марка',a.manufactureyear as 'год', count(*) as 'количество'  from carandowner a where edrpou > 1 group by a.city,a.name,a.factory limit 400"
+                    loadData1MenuItem.Tag = "select distinct a.City,a.District,a.ManufactureYear,a.name, a.edrpou, a.model, a.plate from CarAndOwner a " +
+                        "inner join " +
+                        "(select District,City,ManufactureYear,name,edrpou,amount from " +
+                        "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou > 1 group by edrpou order by amount desc) " +
+                        "where amount > 50) b on a.edrpou=b.edrpou " +
+                        "order by b.amount, a.edrpou, a.factory, a.model limit 400";
+                    loadData1MenuItem.Click += QueryMenuItem_Click;
 
-            getFIOMenuItem.Text = "Физлица в БД";
-            getFIOMenuItem.Tag = "select distinct District,City,ManufactureYear,f,i,o,drfo,count(f) as amount " +
-                "from CarAndOwner " +
-                "group by f,i,o order by amount desc " +
-                "limit 200";
-            getFIOMenuItem.Click += QueryMenuItem_Click;
+                    loadData2MenuItem.Text = "Данные по крупным владельцам автопарков, limit 1000";
+                    loadData2MenuItem.Tag = "select distinct a.City,a.District,a.ManufactureYear,a.name, a.edrpou, a.model, a.plate from CarAndOwner a " +
+                        "inner join " +
+                        "(select District,City,ManufactureYear,name,edrpou,amount from " +
+                        "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou is not '0' group by edrpou order by amount desc) " +
+                        "where amount > 50) b on a.edrpou=b.edrpou " +
+                        "order by b.amount, a.edrpou, a.factory, a.model limit 1000";
+                    loadData2MenuItem.Click += QueryMenuItem_Click;
 
-            getEnterpriseMenuItem.Text = "Предприятия в БД, limit 100";
-            getEnterpriseMenuItem.Tag = "select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount " +
-                "from CarAndOwner where edrpou > 0 " +
-                "group by edrpou order by amount desc " +
-                "limit 100";
-            getEnterpriseMenuItem.Click += QueryMenuItem_Click;
+                    getFIOMenuItem.Text = "Физлица в БД";
+                    getFIOMenuItem.Tag = "select distinct City,District,ManufactureYear,f,i,o,drfo,count(f) as amount " +
+                        "from CarAndOwner " +
+                        "group by f,i,o order by amount desc " +
+                        "limit 200";
+                    getFIOMenuItem.Click += QueryMenuItem_Click;
 
-            //query extra menu 
-            queriesExtraMenu.Text = "Пользовательские";
-            queriesExtraMenu.ToolTipText = "Запросы созданные на данном ПК";
-            // queriesExtraMenu.DropDown.Closing += (o, e) => { e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked; };//не закрывать меню при отметке
+                    getEnterpriseMenuItem.Text = "Предприятия в БД, limit 100";
+                    getEnterpriseMenuItem.Tag = "select distinct City,District,ManufactureYear,name,edrpou,count(edrpou) as amount " +
+                        "from CarAndOwner where edrpou > 0 " +
+                        "group by edrpou order by amount desc " +
+                        "limit 100";
+                    getEnterpriseMenuItem.Click += QueryMenuItem_Click;
+                    
+                    //look for
+                    {
+                        lookForFamiliyNameToolStripMenuItem.Text = "Искать машины зарегистрированные за введенными фамилией/именем"; ;
+                        lookForFamiliyNameToolStripMenuItem.Click += QueryMenuItem_Click;
 
-            removeQueryExtraMenuItem.Text = "Удалить отмеченные пользовательские запросы";
-            removeQueryExtraMenuItem.ToolTipText = "Отметить можно только запросы созданные на данном ПК (подменю 'Пользовательские')";
-            removeQueryExtraMenuItem.Click += RemoveCheckedInQueryExtraMenuItem_Click;
+                        lookForOrganizationToolStripMenuItem.Text = "Искать машины зарегистрированные за введенными названием организации";
+                        lookForOrganizationToolStripMenuItem.Click += QueryMenuItem_Click;
 
-            helpMenu.Text = "Помощь";
-            aboutMenuItem.Text = "О программе";
-            useApplicationMenuItem.Text = "Порядок использования программы";
+                        lookForNumberToolStripMenuItem.Text = "Искать машины по совпадению с введенным номером";
+                        lookForNumberToolStripMenuItem.Click += QueryMenuItem_Click;
+                    }
+                }
+
+                //query extra menu 
+                queriesExtraMenu.Text = "Пользовательские";
+                queriesExtraMenu.ToolTipText = "Запросы созданные на данном ПК";
+                // queriesExtraMenu.DropDown.Closing += (o, e) => { e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked; };//не закрывать меню при отметке
+
+                removeQueryExtraMenuItem.Text = "Удалить отмеченные пользовательские запросы";
+                removeQueryExtraMenuItem.ToolTipText = "Отметить можно только запросы созданные на данном ПК (подменю 'Пользовательские')";
+                removeQueryExtraMenuItem.Click += RemoveCheckedInQueryExtraMenuItem_Click;
+            }
+                       
+            //help menu
+            {
+                helpMenu.Text = "Помощь";
+                aboutMenuItem.Text = "О программе";
+                aboutMenuItem.Click += ApplicationAbout;
+                useApplicationMenuItem.Text = "Порядок использования программы";
+            }
+        }
+
+        private void ConnectToSQLServerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GetNewConnection();
+        }
+
+        private void GetNewConnection()
+        {
+            selectDB = new SelectDBForm();
+            selectDB.Icon = Icon.FromHandle(bmpLogo.GetHicon());
+            selectDB.Text = appFileVersionInfo.Comments + " " + appFileVersionInfo.LegalCopyright;
+            selectDB.Show();
+            Hide();
+            selectDB.FormClosing += SelectDB_FormClosing;
+        }
+
+        private async void SelectDB_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            connectionSettings = new SQLConnectionSettings(selectDB.settings);
+            ReNewParametersDB(connectionSettings);
+
+
+            //Show Main Form
+            Show();
+            //Destroy SelectDB Form
+            selectDB.Dispose();
+
+
+            //Check Data
+            AddLineAtTextboxLog($"Name: {connectionSettings.Name}");
+            AddLineAtTextboxLog($"ProviderName: {connectionSettings.ProviderName}");
+            AddLineAtTextboxLog($"Host: {connectionSettings.Host}");
+            AddLineAtTextboxLog($"Port: {connectionSettings.Port}");
+            AddLineAtTextboxLog($"Username: {connectionSettings.Username}");
+            AddLineAtTextboxLog($"Password: {connectionSettings.Password}");
+            AddLineAtTextboxLog($"Database: {connectionSettings.Database}");
+            AddLineAtTextboxLog($"Table: {connectionSettings.Table}");
+
+
+            //Write in Registry Last Connection and its parameters
+            await Task.Run(() => WriteConnection(connectionSettings));
+        }
+
+        /// <summary>
+        /// /Write in Registry Last Connection and its parameters
+        /// </summary>
+        /// <param name="settings"></param>
+        private void WriteConnection(ISQLConnectionSettings settings)
+        {
+                 IDictionary<string, string> dic = settings.GetPropertyValues(20);
+                //write parameters of connection
+                regOperator.Write(dic, $"{regSubKeyRecent}\\{settings.Name}");
+                //write last connection' name
+                regOperator.Write(regSubKeyRecent, settings.Name);
+                //write connection and name as pair key-value
+                regOperator.Write(settings.Name, settings.Name, regSubKeyRecent);
+        }
+
+        private void RecentMenuItems_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+            
+            ReadLastConnectionFromRegistry(item.Text);
+        }
+
+        private void ReadLastConnectionFromRegistry(string text)
+        {
+            IList<RegistryEntity> entities = regOperator.ReadRegistryKeys($"{regSubKeyRecent}\\{text}");
+
+            connectionSettings = entities?.ToSQLConnectionSettings();
+                       
+            ReNewParametersDB(connectionSettings);
+
+
+
+            //Check correctness
+            IDictionary<string, string> dic = connectionSettings.GetPropertyValues(50);
+
+            foreach (var ent in dic)
+            {
+                AddLineAtTextboxLog(ent.Key + ": \t" + ent.Value);
+            }
+        }
+
+        private void ReNewParametersDB(ISQLConnectionSettings settings)
+        {
+            //DB
+            if (settings.ProviderName == SQLProvider.SQLite)
+            {
+                dBOperations = new SQLiteDBOperations(settings);
+            }
+            else if (settings.ProviderName == SQLProvider.My_SQL)
+            {
+                dBOperations = new MySQLUtils(settings);
+            }
+
+            StatusLabelExtraInfo.Text = $"Данные в таблице(ах) {settings.Table}";
+
+            //Registry
+            RemoveCheckedMenuItemFromMenuStrip(queriesExtraMenu, true);
+
+            //ReNew QueryExtra with this connection
+            IList<ToolStripMenuItem> menuItems = regOperator
+                .ReadRegistryKeys($"{regSubKeyMenu}\\{connectionSettings.Name}")
+                .ToToolStripMenuItemsList(ToolStripModes.QueryExtra);
+
+            AddQueriesFromRegistryToToolStripMenu(queriesExtraMenu, menuItems, ToolStripModes.QueryExtra);
+        }
+
+
+        private void EnableAddQueryMenuItem_queryMenu_DropDownOpened(object sender, EventArgs e)
+        {
+            string nameQuery = txtbNameQuery.Text.Trim();
+            string bodyQuery = txtBodyQuery.Text.Trim();
+            addQueryExtraMenuItem.Enabled = false;
+            lookForFamiliyNameToolStripMenuItem.Enabled = false;
+            lookForNumberToolStripMenuItem.Enabled = false;
+            lookForOrganizationToolStripMenuItem.Enabled = false;
+
+            if (bodyQuery?.Length > 0)
+            {
+                lookForNumberToolStripMenuItem.Enabled = true;
+                lookForFamiliyNameToolStripMenuItem.Enabled = true;
+                lookForOrganizationToolStripMenuItem.Enabled = true;
+
+                lookForNumberToolStripMenuItem.Tag = "select distinct " +
+                    $"City as Область,District as Район,f as Фамилия,i as Имя,o as Отчество,drfo,name,edrpou,factory as Марка,model as Модель,plate as Номер " +
+                    $"from CarAndOwner " +  //UPPER
+                    $"where ((length(f)+length(i)) > 0 OR (length(name)) > 0) " +
+                    //$"AND (plate like '%{bodyQuery}%' OR plate like '%{bodyQuery.ToUpper()}%' OR plate like '%{bodyQuery.ToLower()}%') " +
+                    $"AND (UPPER(plate) like '%{bodyQuery.ToUpper()}%') " +
+                    $"group by District,City,f,i,o,name " +
+                    $"order by District,City,f,i,o,name asc " +
+                    "limit 10000";
+                lookForFamiliyNameToolStripMenuItem.Tag = "select distinct " +
+                    $"City as Область,District as Район,f as Фамилия,i as Имя,o as Отчество,drfo,factory as Марка,model as Модель,plate as Номер " +
+                    $"from CarAndOwner " +
+                    $"where ((length(f)+length(i)) > 0 ) " +
+                    //$"AND (f like '%{bodyQuery}%' or i like '%{bodyQuery}%' OR f like '%{bodyQuery.ToUpper()}%' or i like '%{bodyQuery.ToUpper()}%' OR f like '%{bodyQuery.ToLower()}%' or i like '%{bodyQuery.ToLower()}%') " +
+                    $"AND (UPPER(f) like '%{bodyQuery.ToUpper()}%' OR UPPER(i) like '%{bodyQuery.ToUpper()}%') " +
+                    $"group by District,City,f,i,o " +
+                    $"order by District,City,f,i,o asc " +
+                    "limit 1000";
+                lookForOrganizationToolStripMenuItem.Tag = "select distinct " +
+                    $"City as Область,District as Район,name as Название,edrpou,factory as Марка,model as Модель,plate as Номер " +
+                    $"from CarAndOwner " +
+                    $"where (length(name) > 0) " +
+                    //$"AND (name like '%{bodyQuery}%' OR name like '%{bodyQuery.ToUpper()}%' OR name like '%{bodyQuery.ToLower()}%') " +
+                    $"AND (UPPER(name) like '%{bodyQuery.ToUpper()}%') " +
+                    $"group by District,City,name " +
+                    $"order by District,City,name asc " +
+                    "limit 1000";
+
+                lookForNumberToolStripMenuItem.ToolTipText = $"Искать машину у которой номер совпадает с - {bodyQuery}";
+                lookForFamiliyNameToolStripMenuItem.ToolTipText = $"Искать фамилию/организацию - {bodyQuery}";
+                lookForOrganizationToolStripMenuItem.ToolTipText = $"Искать фамилию/организацию - {bodyQuery}";
+
+                if (nameQuery?.Length > 0)
+                {
+                    addQueryExtraMenuItem.Enabled = true;
+                    addQueryExtraMenuItem.ToolTipText = $"Запомнить запрос: {nameQuery}\r\n{bodyQuery}";
+                }
+            }
         }
 
         private void RecoverDataTableAfterQueryMenuItem_Click(object sender, EventArgs e)
@@ -265,11 +499,11 @@ namespace AutoAnalysis
             dgv.Enabled = false;
             viewMenu.Enabled = false;
             queryMenu.Enabled = false;
-            txtbBodyQuery.Enabled = false;
+            txtBodyQuery.Enabled = false;
 
             await WriteDataTableInTableExcel(dtForShow);
 
-            txtbBodyQuery.Enabled = true;
+            txtBodyQuery.Enabled = true;
             queryMenu.Enabled = true;
             viewMenu.Enabled = true;
             dgv.Enabled = true;
@@ -297,7 +531,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             txtbResultShow.Enabled = false;
             viewMenu.Enabled = false;
             queryMenu.Enabled = false;
-            txtbBodyQuery.Enabled = false;
+            txtBodyQuery.Enabled = false;
 
             await BuildFilters();
             await Task.Run(() => BuildFiltersMenues(filtersTable));
@@ -310,7 +544,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             StatusInfoFilter.ToolTipText = "Поиск с использованием выбранных фильтров в текущей таблице";
             StatusInfoFilter.Click += new EventHandler(StatusInfoFilter_Click);
 
-            txtbBodyQuery.Enabled = true;
+            txtBodyQuery.Enabled = true;
             txtbResultShow.Enabled = true;
             queryMenu.Enabled = true;
             viewMenu.Enabled = true;
@@ -370,9 +604,8 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 }
             }
             //  System.Diagnostics.Process.Start("IEXPLORE.EXE", toolStripLabel1.Tag.ToString());
-            // Set the LinkVisited property to true to change the color.
+            //  Set the LinkVisited property to true to change the color.
             //  toolStripLabel1.LinkVisited = true;
-
         }
 
 
@@ -389,15 +622,15 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 { "District", "Район" },
                 { "City", "Область" },
                 { "Factory", "Марка" },
-                { "ManufactureYear", "Год" },
-                { "Type", "ЧЛ/Предприятие" }
+                { "ManufactureYear", "Год" }//,
+              //  { "Type", "ЧЛ/Предприятие" }
             };
 
             AddLineAtTextboxLog("Фильтры строятся на основе данных алиасов колонок:");
             AddLineAtTextboxLog(string.Join(", ", dicTranslator.Values.ToArray()));
             AddLineAtTextboxLog();
 
-            await Task.Run(() => filtersTable = dBOperations.GetFilterList(dicTranslator, "CarAndOwner"));
+            await Task.Run(() => filtersTable = (dBOperations as SQLiteDBOperations).GetFilterList(dicTranslator, "CarAndOwner"));
 
             AddLineAtTextboxLog("Построение фильтров завершено");
         }
@@ -458,7 +691,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 filePath = ofd.OpenFileDialogReturnPath();
                 if (filePath?.Length > 0)
                 {
-                    CheckUpSelectedDB(filePath);
+                    CheckUpSelectedSQLiteDB(filePath);
                 }
                 else
                 {
@@ -496,7 +729,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         }
 
 
-        private void CheckUpSelectedDB(string filePath)
+        private void CheckUpSelectedSQLiteDB(string filePath)
         {
             IModelDBable<ModelDBColumn> table;
             IModelDBable<ModelDBFilter> column;
@@ -533,17 +766,16 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     tableName += $" '{tbl.Value.TableName}'";
                     tablesDB.Add(tbl.Value.TableName);
                 }
+                
                 StatusLabelExtraInfo.Text = $"Данные в таблице(ах) {tableName}";
 
-                try { dBOperations.EvntInfoMessage -= AddLineAtTextboxLog; } catch { }
+                try { (dBOperations as SQLiteDBOperations).EvntInfoMessage -= AddLineAtTextboxLog; } catch { }
 
-                appDbPath = filePath;
-                sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
-                dbFileInfo = new FileInfo(appDbPath);
-                dBOperations = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
+                connectionSettings.Database = filePath;
+                ReNewParametersDB(connectionSettings);
 
                 if (OperatingModes == AppModes.Admin)
-                { dBOperations.EvntInfoMessage += AddLineAtTextboxLog; }
+                { (dBOperations as SQLiteDBOperations).EvntInfoMessage += AddLineAtTextboxLog; }
             }
             catch (Exception e)
             {
@@ -562,7 +794,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     AddLineAtTextboxLog("Предварительно создайте базу данных, таблицы и импортируйте/добавьте в них данные...");
                     AddLineAtTextboxLog("Заблокирован функционал по получению данных из таблиц...");
                     txtbNameQuery.Enabled = false;
-                    txtbBodyQuery.Enabled = false;
+                    txtBodyQuery.Enabled = false;
                     txtbResultShow.Enabled = false;
                 }
                 schemaDB = null;
@@ -572,10 +804,8 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
         private void AddLineAtTextboxLog(object sender, TextEventArgs text)
         { AddLineAtTextboxLog(text.Message); }
-        private void AddLineAtTextboxLog(string text)
+        private void AddLineAtTextboxLog(string text=null)
         { txtbResultShow.AppendLine($"{text}"); }
-        private void AddLineAtTextboxLog()
-        { txtbResultShow.AppendLine(); }
 
         private async void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -586,30 +816,40 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         }
 
 
+        
         private async Task UpdateQueryExtraMenuInRegistry()
         {
             //clear registry from menu entries
-            await Task.Run(() => regOperator.DeleteSubKeyTreeQueryExtraItems(regSubKeyMenu));
-
+            await Task.Run(() => regOperator.DeleteSubKeyTreeQueryExtraItems($"{regSubKeyMenu}\\{connectionSettings.Name}"));
+            
             await Task.Delay(500);
 
             await Task.Run(() =>
             {
                 IDictionary<string, string> menuItems = queriesExtraMenu.ToDictionary(30);
-                regOperator.Write(menuItems, regSubKeyMenu);
+                regOperator.Write(menuItems, $"{regSubKeyMenu}\\{connectionSettings.Name}");
             });
         }
 
-        private void AddQueriesFromRegistryToToolStripMenu(string subkey)
+        private void AddQueriesFromRegistryToToolStripMenu(ToolStripMenuItem item, IList<ToolStripMenuItem> menuItems, ToolStripModes toolStripModes)
         {
-            IList<ToolStripMenuItem> menuItems = regOperator.ReadRegistryKeys(subkey).ToToolStripMenuItemsList();
-
             if (menuItems.Count > 0)
             {
                 foreach (var m in menuItems.ToArray())
                 {
-                    m.Click += QueryMenuItem_Click;
-                    queriesExtraMenu.DropDownItems.Add(m);
+                    switch (toolStripModes) {
+                        case ToolStripModes.QueryExtra:
+                            {
+                                m.Click += QueryMenuItem_Click;
+                                break;
+                            }
+                        case ToolStripModes.RecentConnection:
+                            {
+                                m.Click += RecentMenuItems_Click;
+                                break;
+                            }
+                    }
+                    item.DropDownItems.Add(m);
                 }
                 StatusInfoMain.Text = $"В пользовательское меню добавлено {menuItems.Count} запросов";
 
@@ -617,11 +857,15 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 menuStrip.Refresh();
             }
         }
+        
 
-
-        private async void RemoveCheckedInQueryExtraMenuItem_Click(object sender, EventArgs e)
+        private  void RemoveCheckedInQueryExtraMenuItem_Click(object sender, EventArgs e)
         {
-            IList<ToolStripItem> listRemove = queriesExtraMenu.ToToolStripItemsList();
+             RemoveCheckedMenuItemFromMenuStrip(queriesExtraMenu);
+        }
+        private async void RemoveCheckedMenuItemFromMenuStrip(ToolStripMenuItem item,bool allMenuChecked=false)
+        {
+            IList<ToolStripItem> listRemove = item.ToToolStripItemsList();
 
             if (listRemove.Count > 0)
             {
@@ -629,10 +873,10 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
                 foreach (ToolStripMenuItem m in listRemove)
                 {
-                    if (m.Checked)
+                    if (m.Checked|| allMenuChecked)
                     {
                         result += $" '{m.Text}'";
-                        queriesExtraMenu.DropDownItems.Remove(m);
+                        item.DropDownItems.Remove(m);
                         m?.Dispose();
                     }
                 }
@@ -650,32 +894,44 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         private async void AddQueryExtraMenuItem_Click(object sender, EventArgs e)
         {
             string nameQuery = txtbNameQuery.Text.Trim();
-            string bodyQuery = txtbBodyQuery.Text.Trim();
+            string bodyQuery = txtBodyQuery.Text.Trim();
 
             MenuItem menuItem = new MenuItem(nameQuery, bodyQuery);
 
             ToolStripMenuItem item = menuItem.ToExtentendedMenuToolStripMenuItem();
+            
+                queriesExtraMenu.DropDownItems.Add(item as ToolStripMenuItem);
+                item.Click += QueryMenuItem_Click;
+                menuStrip.Update();
+                menuStrip.Refresh();
 
-            queriesExtraMenu.DropDownItems.Add(item as ToolStripMenuItem);
-            item.Click += QueryMenuItem_Click;
-            menuStrip.Update();
-            menuStrip.Refresh();
-
-            await Task.Run(() => UpdateQueryExtraMenuInRegistry());
+                await Task.Run(() => UpdateQueryExtraMenuInRegistry());
+            
 
             StatusInfoMain.Text = $"Запрос '{nameQuery}' в меню добавлен сохранен";
         }
 
         private async void QueryMenuItem_Click(object sender, EventArgs e)
         {
-            string queryMenu = (sender as ToolStripMenuItem).Name.ToString();
-            string queryName = (sender as ToolStripMenuItem).Text.ToString();
-            string queryBody = (sender as ToolStripMenuItem).Tag.ToString();
-            txtbNameQuery.Text = queryName;
-            txtbBodyQuery.Text = queryBody;
-            tooltip.SetToolTip(menuStrip, $"Выполняется запрос {queryName}");
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
 
-            await GetData(queryBody);
+            string queryName = item?.Text?.ToString();
+            string queryBody = item?.Tag?.ToString();
+
+            menuStrip.Update();
+            menuStrip.Refresh();
+
+            if (queryBody?.Length > 0)
+            {
+                if (queryName?.Length > 0)
+                {
+                    txtbNameQuery.Text = queryName;
+                    AddLineAtTextboxLog($"Выполняется запрос - '{queryName}':");
+                    //   tooltip.SetToolTip(menuStrip, $"Выполняется запрос {queryName}");
+                }
+
+                await GetData(queryBody);
+            }
         }
 
 
@@ -686,7 +942,8 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
         private void ApplicationAbout(object sender, EventArgs e)
         {
-
+            HelpForm help = new HelpForm();
+            help.Show();
         }
 
         private void ApplicationExit(object sender, EventArgs e)
@@ -764,7 +1021,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
         private async Task GetData(string query)
         {
-            AddLineAtTextboxLog($"Запрос:\r\n{query}");
+            AddLineAtTextboxLog($"Запрос:{Environment.NewLine}{query}");
             StatusInfoMain.Text = "Выполняется отбор данных...";
 
             queriesStandartMenu.Enabled = false;
@@ -787,7 +1044,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 AddLineAtTextboxLog($"Количество записей в базе: {dtForShow.Rows.Count}");
 
                 StatusInfoMain.Text = $"Количество записей: {dtForShow.Rows.Count}";
-                txtbBodyQuery.Text = query;
+
                 ShowLogViewTextbox(MainViewMode.DataGridView);
             }
             catch (SQLiteException dbsql)
@@ -821,93 +1078,85 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         private void GetSchemaLocalDBMenuItem_Click(object sender, EventArgs e)
         {
             ShowLogViewTextbox(MainViewMode.Textbox);
-
-            // TODO: => make class GetSchema as Ilist<table> where table is Ilist<column>
-
-            schemaDB = DbSchema.LoadDB(dbFileInfo.FullName);
-            tablesDB = new List<string>();
-
-            AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
-            AddLineAtTextboxLog($"-  Scheme of local DB: '{dbFileInfo.FullName}':");
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog($"-=  tables: {schemaDB.Tables.Count}  =-");
-
-            foreach (var table in schemaDB.Tables)
+            if (connectionSettings.ProviderName == SQLProvider.SQLite)
             {
-                tablesDB.Add(table.Value.TableName);
+                schemaDB = DbSchema.LoadDB(connectionSettings.Database);
+                tablesDB = new List<string>();
 
-                AddLineAtTextboxLog($"-=     table: '{table.Value.TableName}    =-'\r\ncolumns:");
-                AddLineAtTextboxLog($"-=  columns: {table.Value.Columns.Count}  =-");
-                foreach (var column in table.Value.Columns)
+                AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
+                AddLineAtTextboxLog($"-  Scheme of local DB: '{connectionSettings.Database}':");
+                AddLineAtTextboxLog();
+                AddLineAtTextboxLog();
+                AddLineAtTextboxLog($"-=  tables: {schemaDB.Tables.Count}  =-");
+
+                foreach (var table in schemaDB.Tables)
                 {
-                    AddLineAtTextboxLog($"'{column.ColumnName} '\t type: '{column.ColumnType}'");
+                    tablesDB.Add(table.Value.TableName);
+
+                    AddLineAtTextboxLog($"-=     table: '{table.Value.TableName}    =-'\r\ncolumns:");
+                    AddLineAtTextboxLog($"-=  columns: {table.Value.Columns.Count}  =-");
+                    foreach (var column in table.Value.Columns)
+                    {
+                        AddLineAtTextboxLog($"'{column.ColumnName} '\t type: '{column.ColumnType}'");
+                    }
                 }
+
+                schemaDB = null;
+                AddLineAtTextboxLog();
+                AddLineAtTextboxLog($"-  End of Scheme of local DB: '{connectionSettings.Database}':");
+                AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
             }
-
-            schemaDB = null;
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog($"-  End of Scheme of local DB: '{dbFileInfo.FullName}':");
-            AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
+            else
+            {
+                AddLineAtTextboxLog("Проверить схему можно только локальной БД SQLite");
+            }
         }
-
 
         private void allColumnsInTableQueryMenuItem_Click(object sender, EventArgs e)
         {
             ShowLogViewTextbox(MainViewMode.Textbox);
+            if (connectionSettings.ProviderName == SQLProvider.SQLite)
+            { schemaDB = DbSchema.LoadDB(connectionSettings.Database);
+                tablesDB = new List<string>();
 
-            schemaDB = DbSchema.LoadDB(dbFileInfo.FullName);
-            tablesDB = new List<string>();
+                AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
+                AddLineAtTextboxLog($"- Selected DB: '{connectionSettings.Database}'");
 
-            AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
-            AddLineAtTextboxLog($"- Selected DB: '{dbFileInfo.FullName}'");
-
-            foreach (var table in schemaDB.Tables)
-            {
-                string columns = string.Empty;
-
-                tablesDB.Add(table.Value.TableName);
-
-                foreach (var column in table.Value.Columns)
+                foreach (var table in schemaDB.Tables)
                 {
-                    columns += $"{column.ColumnName}, ";
-                }
-                AddLineAtTextboxLog();
-                AddLineAtTextboxLog($" --- The Table: '{table.Value.TableName}' ---");
-                AddLineAtTextboxLog($" ---  ---");
-                string query = $"SELECT {columns.TrimEnd().TrimEnd(',')} FROM {table.Value.TableName} LIMIT 3";
-                AddLineAtTextboxLog(query);
-                txtbBodyQuery.Text = query;
-                AddLineAtTextboxLog($" ---  ---");
-            }
+                    string columns = string.Empty;
 
-            AddLineAtTextboxLog($"-  The End  -:");
-            AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
-            AddLineAtTextboxLog();
+                    tablesDB.Add(table.Value.TableName);
+
+                    foreach (var column in table.Value.Columns)
+                    {
+                        columns += $"{column.ColumnName}, ";
+                    }
+                    AddLineAtTextboxLog();
+                    AddLineAtTextboxLog($" --- The Table: '{table.Value.TableName}' ---");
+                    AddLineAtTextboxLog($" ---  ---");
+                    string query = $"SELECT {columns.TrimEnd().TrimEnd(',')} FROM {table.Value.TableName} LIMIT 3";
+                    AddLineAtTextboxLog(query);
+
+                    AddLineAtTextboxLog($" ---  ---");
+                }
+
+                AddLineAtTextboxLog($"-  The End  -:");
+                AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
+                AddLineAtTextboxLog();
+            }
+            else
+            {
+                AddLineAtTextboxLog("Проверить схему можно только локальной БД SQLite");
+            }
         }
 
         private void CreateLocalDBMenuItem_Click(object sender, EventArgs e)
         {
-            dBOperations.TryMakeLocalDB();
+            (dBOperations as SQLiteDBOperations).TryMakeLocalDB();
         }
 
 
-
-        private void EnableAddQueryMenuItem_queryMenu_DropDownOpened(object sender, EventArgs e)
-        {
-            string nameQuery = txtbNameQuery.Text.Trim();
-            string bodyQuery = txtbBodyQuery.Text.Trim();
-
-            if (string.IsNullOrEmpty(nameQuery) || string.IsNullOrEmpty(bodyQuery))
-            {
-                addQueryExtraMenuItem.Enabled = false;
-            }
-            else if (!string.IsNullOrEmpty(nameQuery) && !string.IsNullOrEmpty(bodyQuery))
-            {
-                addQueryExtraMenuItem.Enabled = true;
-                addQueryExtraMenuItem.ToolTipText = $"Запомнить запрос: {nameQuery}\r\n{bodyQuery}";
-            }
-        }
 
         private void SetToolTipFromTextBox(object sender, EventArgs e)
         {
@@ -1013,7 +1262,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 IList<CarAndOwner> list = reader.listModels.ToList();
                 int readRows = reader.importedRows;
 
-                dBOperations.WriteListInDB(list);
+                (dBOperations as SQLiteDBOperations).WriteListInLocalDB(list);
 
                 StatusInfoMain.Text = $"Количество записей: {readRows}";
 
@@ -1026,7 +1275,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
 
         /// <summary>
-        /// show Import Text File Button: -y  
+        /// show Administrator Menu: -a  
         /// </summary>
         public void CheckCommandLineArguments()
         {
@@ -1041,33 +1290,23 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             {
                 //remove delimiters
                 string envParameter = args[1]?.Trim()?.TrimStart('-', '/')?.ToLower();
-                if (envParameter.StartsWith("y"))
+                if (envParameter.StartsWith("a"))
                 {
                     OperatingModes = AppModes.Admin;
                     administratorMenu.Enabled = true;
                 }
-                else if (envParameter.StartsWith("config"))
-                {
-                    appDbPath = envParameter.Trim('\\', '/', ':', ';', '|', ' ').Replace("config", "");
-                }
-                else if (envParameter.StartsWith("n"))
-                {
-                    OperatingModes = AppModes.User;
-                    administratorMenu.Enabled = false;
-                }
-            }
+             }
             else
             {
                 OperatingModes = AppModes.User;
                 administratorMenu.Enabled = false;
             }
 
-            sqLiteConnectionString = $"Data Source = {appDbPath}; Version=3;";
-
             arguments.EvntInfoMessage -= AddLineAtTextboxLog;
         }
 
 
+        //App View Mode
         private void ChangeViewPanelviewMenuItem_Click(object sender, EventArgs e)
         { ChangeViewPanelviewMenuItem(); }
 
@@ -1120,11 +1359,5 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     }
             }
         }
-    }
-
-    public enum MainViewMode
-    {
-        Textbox = 0,
-        DataGridView = 2
     }
 }

@@ -93,13 +93,11 @@ namespace AutoAnalysis
         #endregion IDisposable Support
     }
 
-    internal class SqLiteDbWrapper : SQLiteDbAbstract, IDisposable
+    public class SqLiteDbWrapper : SQLiteDbAbstract, IDisposable
     {
         public SqLiteDbWrapper(string dbConnectionString, System.IO.FileInfo dbFileInfo) :
             base(dbConnectionString, dbFileInfo)
-        {
-
-        }
+        {        }
 
         public event Message Status;
 
@@ -217,7 +215,7 @@ namespace AutoAnalysis
             if (word.Where(x => x.ToLower().Equals("from")).Count() == 0)
             {
                 Status?.Invoke(this, new TextEventArgs(
-                    $"Query is wrong! It does not contain any source table. " +
+                    $"Query is wrong! It does not contain any query to a table. " +
                     $"Check your expresion near 'FROM'\r\nYour query:  {query.ToUpper()}"));
                 new ArgumentException();
             }

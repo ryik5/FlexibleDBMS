@@ -2,21 +2,23 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
+using System.IO;
 
 namespace AutoAnalysis
 {
-    public class SQLiteDBOperations
+
+    public class SQLiteDBOperations: ISqlDbConnector
     {
         public delegate void Message(object sender, TextEventArgs e);
         public event Message EvntInfoMessage;
 
         string sqLiteConnectionString;
-        System.IO.FileInfo dbFileInfo;
+        FileInfo dbFileInfo;
 
-        public SQLiteDBOperations(string sqLiteConnectionString, System.IO.FileInfo dbFileInfo)
+        public SQLiteDBOperations(ISQLConnectionSettings settings)
         {
-            this.sqLiteConnectionString = sqLiteConnectionString;
-            this.dbFileInfo = dbFileInfo;
+            dbFileInfo = new FileInfo(settings.Database); 
+            sqLiteConnectionString = $"Data Source = {settings.Database}; Version=3;";
         }
 
         private bool CheckUpDBStructure()
@@ -75,6 +77,23 @@ namespace AutoAnalysis
             }
 
             return dt;
+        }
+
+        public IList<string> GetList(DataTable dt)
+        {
+            IList<string> list = new List<string>();
+            string text = string.Empty;
+            var myData = dt.Select();
+            for (int i = 0; i < myData.Length; i++)
+            {
+                text = string.Empty; 
+
+                for (int j = 0; j < myData[i].ItemArray.Length; j++)
+                    text += myData[i].ItemArray[j] + " ";
+                list.Add(text);
+            }
+
+            return list;
         }
 
         /// <summary>
@@ -136,7 +155,7 @@ namespace AutoAnalysis
             }
         }
 
-        public void WriteListInDB(IList<CarAndOwner> list)
+        public void WriteListInLocalDB(IList<CarAndOwner> list)
         {
             string query =
                 "INSERT OR REPLACE INTO 'CarAndOwner' (Plate, Factory, Model, ManufactureYear, BodyNumber, ChassisNumber, EngineVolume, Type, DRFO, F, I, O, Birthday, EDRPOU, " +
@@ -194,4 +213,5 @@ namespace AutoAnalysis
             }
         }
     }
+
 }

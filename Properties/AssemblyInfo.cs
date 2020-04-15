@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("AutoAnalysis")]
-[assembly: AssemblyDescription("Auto Analysis")]
+[assembly: AssemblyTitle("DBMS AutoAnalysis")]
+[assembly: AssemblyDescription("DBMS Auto Analysis")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Yuri Ryabchenko")]
-[assembly: AssemblyProduct("AutoAnalysis")]
+[assembly: AssemblyProduct("DBMS AutoAnalysis")]
 [assembly: AssemblyCopyright("©Yuri Ryabchenko  2020")]
 [assembly: AssemblyTrademark("©Yuri Ryabchenko")]
 [assembly: AssemblyCulture("")]
