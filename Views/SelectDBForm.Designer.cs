@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.tbResultShow = new System.Windows.Forms.TextBox();
             this.btnCheck = new System.Windows.Forms.Button();
             this.cmbSQLProvider = new System.Windows.Forms.ComboBox();
             this.tbHost = new System.Windows.Forms.TextBox();
@@ -44,13 +44,13 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(12, 184);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ReadOnly = true;
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox1.Size = new System.Drawing.Size(783, 254);
-            this.textBox1.TabIndex = 10;
+            this.tbResultShow.Location = new System.Drawing.Point(12, 184);
+            this.tbResultShow.Multiline = true;
+            this.tbResultShow.Name = "textBox1";
+            this.tbResultShow.ReadOnly = true;
+            this.tbResultShow.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.tbResultShow.Size = new System.Drawing.Size(783, 254);
+            this.tbResultShow.TabIndex = 10;
             // 
             // btnCheck
             // 
@@ -159,7 +159,7 @@
             this.Controls.Add(this.tbHost);
             this.Controls.Add(this.cmbSQLProvider);
             this.Controls.Add(this.btnCheck);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.tbResultShow);
             this.Name = "SelectDBForm";
             this.Text = "SelectDB";
             this.ResumeLayout(false);
@@ -169,7 +169,7 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox tbResultShow;
         private System.Windows.Forms.Button btnCheck;
         private System.Windows.Forms.ComboBox cmbSQLProvider;
         private System.Windows.Forms.TextBox tbHost;

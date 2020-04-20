@@ -1,28 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoAnalysis
 {
-    public class FileReader<T> where T : IModel
+    public class FileReader: IReadable
     {
-        private static readonly Encoding _encoding = Encoding.GetEncoding(1251);
-        private const int DefaultBufferSize = 4096;
-        private const FileOptions DefaultOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
-
+        int _maxElementsInDictionary = 1000;
+        Encoding _encoding = Encoding.GetEncoding(1251);
         public int importedRows = 0;
-        string nameColumns = null;
-        string currentRow;
-        T model;
+        public IList<string> Text;
+        public ConfigParameter config;
 
-        public IList<T> listModels;
         public delegate void CollectionFull(object sender, BoolEventArgs e);
         public event CollectionFull EvntCollectionFull;
 
-        public void GetContent(string filePath, Encoding encoding, int maxElementsInDictionary)
+        public delegate void InfoMessage(object sender, TextEventArgs e);
+        public event InfoMessage EvntInfoMessage;
+
+
+        public async Task Read(string filePath, Encoding encoding, int maxElementsInDictionary)
         {
-            listModels = new List<T>(maxElementsInDictionary);
+            Text = new List<string>(maxElementsInDictionary);
+
+            const int DefaultBufferSize = 4096;
+            const FileOptions DefaultOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
+
+            string currentRow;
 
             importedRows = 0;
 
@@ -30,48 +37,68 @@ namespace AutoAnalysis
             {
                 using (var reader = new StreamReader(stream, encoding))
                 {
-                    while ((currentRow =  reader.ReadLine())?.Trim()?.Length > 10)
+                    while ((currentRow = await reader.ReadLineAsync())?.Trim()?.Length > 1)
                     {
-                        if (nameColumns == null)
+                        Text.Add(currentRow);
+                        importedRows++;
+
+                        if (importedRows > 0 && importedRows % maxElementsInDictionary == 0)
                         {
-                            importedRows = 0;
-                            nameColumns = currentRow;
-                        } //first found not_empty_line containes name columns
-                        else
-                        {
-                            model = GetModel<T>.ToModel(currentRow, nameColumns);
+                            EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//collection is full
+                            await Task.Delay(TimeSpan.FromSeconds(0.2));
 
-                            if (model != null )
-                            {
-                                importedRows++;
-                                listModels.Add(model);
-
-                                if (importedRows > 0 && importedRows % maxElementsInDictionary == 0)
-                                {
-                                    EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//collection is full
-
-                                    Task.Delay(100);
-
-                                    listModels = new List<T>(maxElementsInDictionary);
-                                }
-                            }
+                            Text = new List<string>(maxElementsInDictionary);
                         }
                     }
                 }
             }
 
-            if (listModels?.Count > 0)
+            if (Text?.Count > 0)
             {
                 EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//last part of the collection
 
-                Task.Delay(10);
+                await Task.Delay(TimeSpan.FromSeconds(0.2));
             }
         }
 
-        public void GetContent(string filePath, int maxElementsInDictionary)
+        public async Task Read(string filePath, Encoding encoding)
         {
-            GetContent(filePath, _encoding, maxElementsInDictionary);
+            await Task.Run(() => Read(filePath, encoding, _maxElementsInDictionary));
+        }
+
+        public async Task Read(string filePath)
+        {
+            await Task.Run(() => Read(filePath,_maxElementsInDictionary));
+        }
+
+        public async Task Read(string filePath, int maxElementsInDictionary)
+        {
+            await Read(filePath, _encoding, maxElementsInDictionary);
+        }
+
+        public async Task ReadConfigAsync(string filePath)
+        {
+            await Task.Run(() => config = ReadConfig(filePath));
+        }
+
+        private ConfigParameter ReadConfig(string filePath)
+        {
+            ConfigParameter config = null;
+            BinaryFormatter formatter = new BinaryFormatter();
+            try
+            {
+                using (FileStream fs = new FileStream(filePath, FileMode.Open))
+                {
+                    config = (ConfigParameter)formatter.Deserialize(fs);
+                }
+            }
+            catch (Exception excpt)
+            {
+                EvntInfoMessage?.Invoke(this, new TextEventArgs($"{excpt.Message}"));
+            }
+            EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//collection is full
+
+            return config;
         }
     }
-
 }

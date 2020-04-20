@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AutoAnalysis
@@ -18,5 +15,10 @@ namespace AutoAnalysis
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
         }
+    }
+
+    internal static class SQLConnection
+    {
+        public static SQLConnectionSettings Settings { get; set; }
     }
 }

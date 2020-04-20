@@ -31,13 +31,15 @@ namespace AutoAnalysis
         public void CheckUpDB(string dbConnectionString, System.IO.FileInfo dbFileInfo)
         {
             if (!(dbFileInfo?.Name?.Length > 0))
-            { throw new System.ArgumentNullException("dbFileInfo can not be null!"); }
+            { throw new ArgumentNullException("dbFileInfo can not be null!"); }
 
             if (!dbFileInfo.Exists)
-            { throw new System.Exception("dbFileInfo is not exist"); }
+            {
+                SQLiteConnection.CreateFile(dbFileInfo.Name);
+            }
 
             if (!(dbConnectionString?.Trim()?.Length > 0))
-            { throw new System.ArgumentNullException("dbConnectionString string can not be Empty or short"); }
+            { throw new ArgumentNullException("dbConnectionString string can not be Empty or short"); }
         }
 
         private void ConnectToDB(string dbConnectionString)

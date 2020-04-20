@@ -38,6 +38,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -50,6 +51,7 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>true</Prefer32Bit>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
@@ -86,12 +88,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BL\IReadable.cs" />
+    <Compile Include="BL\IWriterable.cs" />
+    <Compile Include="Models\ConfigParameter.cs" />
+    <Compile Include="BL\FileReader.cs" />
+    <Compile Include="BL\FileWriter.cs" />
     <Compile Include="DBTools\ISqlDbConnector.cs" />
     <Compile Include="DBTools\SQLProvider.cs" />
     <Compile Include="DBTools\MySQLUtils.cs" />
-    <Compile Include="DBTools\SQLConnectionSettings.cs" />
+    <Compile Include="Models\SQLConnectionSettings.cs" />
+    <Compile Include="Enums\TypeConfig.cs" />
     <Compile Include="Extentions\EnumExtensions.cs" />
-    <Compile Include="Views\AppModes.cs" />
+    <Compile Include="Enums\AppModes.cs" />
     <Compile Include="BL\CommandLineArguments.cs" />
     <Compile Include="BL\EventArgsClasses.cs" />
     <Compile Include="BL\ExportDataTableToFileExtension.cs" />
@@ -104,19 +112,19 @@
     <Compile Include="DBTools\DbUpgradeException.cs" />
     <Compile Include="DBTools\SQLiteDbWrapper.cs" />
     <Compile Include="DBTools\SQLiteDBOperations.cs" />
-    <Compile Include="BL\FileReader.cs" />
+    <Compile Include="BL\FileReaderModels.cs" />
     <Compile Include="Extentions\CommonExtentions.cs" />
-    <Compile Include="Views\Form1.cs">
+    <Compile Include="Models\AbstractConfig.cs" />
+    <Compile Include="Views\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Views\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Views\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Extentions\ModelsExtentions.cs" />
     <Compile Include="Models\GetModel.cs" />
     <Compile Include="Models\IModel.cs" />
     <Compile Include="Models\MenuItem.cs" />
-    <Compile Include="Models\ModelCar.cs" />
     <Compile Include="BL\ParserRowTo.cs" />
     <Compile Include="Models\ModelCarAndOwner.cs" />
     <Compile Include="Models\ModelOwner.cs" />
@@ -130,16 +138,16 @@
     <Compile Include="Views\HelpForm.Designer.cs">
       <DependentUpon>HelpForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Views\MainViewMode.cs" />
+    <Compile Include="Enums\MainViewMode.cs" />
     <Compile Include="Views\SelectDBForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Views\SelectDBForm.Designer.cs">
       <DependentUpon>SelectDBForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Views\ToolStripModes.cs" />
-    <EmbeddedResource Include="Views\Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Enums\ToolStripModes.cs" />
+    <EmbeddedResource Include="Views\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -1,4 +1,6 @@
-﻿namespace AutoAnalysis
+﻿using System.Text;
+
+namespace AutoAnalysis
 {
     public interface IModel
     {

@@ -24,14 +24,19 @@ namespace AutoAnalysis
         {
             IList<ToolStripItem> list = new List<ToolStripItem>();
 
-            foreach (ToolStripMenuItem m in item.DropDownItems)
+            foreach (var v in item.DropDownItems)
             {
-                list.Add(m);
+                if (v is ToolStripMenuItem)
+                {
+                    ToolStripMenuItem m = v as ToolStripMenuItem;
+
+                    list.Add(m);
+                }
             }
 
             return list;
         }
-        
+
         public static IList<ToolStripMenuItem> ToToolStripMenuItemsList(this IList<RegistryEntity> list, ToolStripModes modes)
         {
             IList<ToolStripMenuItem> toolMenuList = new List<ToolStripMenuItem>();
@@ -113,29 +118,33 @@ namespace AutoAnalysis
         /// </summary>
         /// <param name="item">ToolStripDropDownItem, is used itemName, itemText and itemTag</param>
         /// <returns></returns>
-        public static IDictionary<string, string> ToDictionary(this ToolStripDropDownItem item, int limitElementsMenu)
+        public static IDictionary<string, string> ToDictionary(this ToolStripDropDownItem item, int limitElementsMenu = 40)
         {
             IDictionary<string, string> dic = new Dictionary<string, string>(limitElementsMenu);
             IList<string> queries = new List<string>();
             MenuItem menuItem;
             string name, query;
 
-            foreach (ToolStripMenuItem m in item.DropDownItems)
+            foreach (var v in item.DropDownItems)
             {
-                name = m.Text?.Replace(":", "")?.Replace("  ", " ")?.Trim();
-                query = m.Tag?.ToString()?.Replace(":", "")?.Replace("  ", " ")?.Trim();
-                if (name?.Length > 0 && query?.Length > 0)
+                if (v is ToolStripMenuItem)
                 {
-                    if (queries.Where(x => x.Equals(query)).Count() == 0)
+                    ToolStripMenuItem m = v as ToolStripMenuItem;
+                    name = m.Text?.Replace(":", "")?.Replace("  ", " ")?.Trim();
+                    query = m.Tag?.ToString()?.Replace(":", "")?.Replace("  ", " ")?.Trim();
+                    if (name?.Length > 0 && query?.Length > 0)
                     {
-                        if (limitElementsMenu < 1)
+                        if (queries.Where(x => x.Equals(query)).Count() == 0)
                         {
-                            continue;
+                            if (limitElementsMenu < 1)
+                            {
+                                continue;
+                            }
+                            menuItem = new MenuItem(name, query);
+                            queries.Add(query);
+                            dic.Add(menuItem.Name, $"{name}: {query}");
+                            limitElementsMenu--;
                         }
-                        menuItem = new MenuItem(name, query);
-                        queries.Add(query);
-                        dic.Add(menuItem.Name, $"{name}: {query}");
-                        limitElementsMenu--;
                     }
                 }
             }
@@ -143,10 +152,10 @@ namespace AutoAnalysis
             return dic;
         }
 
-        public static IDictionary<string, string> GetPropertyValues(this object obj, int limitElementsMenu)
+        public static IDictionary<string, string> GetPropertyValues(this object obj, int limitElementsMenu = 1000)
         {
             IDictionary<string, string> dic = new Dictionary<string, string>(limitElementsMenu);
-            
+
             if (obj == null) return null;
 
             Type t = obj.GetType();
@@ -165,6 +174,21 @@ namespace AutoAnalysis
             }
 
             return dic;
+        }
+
+
+        public static string AsString(this IDictionary<string, string> dic)
+        {
+            string text = string.Empty;
+            if (dic?.Count > 0)
+            {
+                foreach (var s in dic)
+                {
+                    text += $"{s.Key}:\t{s.Value}\r\n";
+                }
+            }
+
+            return text;
         }
 
 

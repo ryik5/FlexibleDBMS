@@ -124,7 +124,7 @@ namespace AutoAnalysis
                 connString += ";Port=" + settings.Port;
             }
 
-            connString += ";User Id=" + settings.Username + ";password=" + settings.Password;
+            connString += ";User Id=" + settings.Username + ";Password=" + settings.Password+ ";Connection Timeout=120";
 
             return connString;
         }

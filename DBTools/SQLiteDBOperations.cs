@@ -135,7 +135,7 @@ namespace AutoAnalysis
                 "Type TEXT, DRFO INTEGER, F TEXT, I TEXT, O TEXT, Birthday TEXT, " +
                 "EDRPOU INTEGER, Name TEXT, City TEXT, District TEXT, Street TEXT, Building TEXT, BuildingBody TEXT, Apartment TEXT, " +
                 "CodeOperation TEXT, CodeDate TEXT);";
-            if (!System.IO.File.Exists(dbFileInfo.Name))
+            if (!File.Exists(dbFileInfo.Name))
             {
                 SQLiteConnection.CreateFile(dbFileInfo.Name);
             }

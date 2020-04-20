@@ -1,4 +1,6 @@
-﻿namespace AutoAnalysis
+﻿using System;
+
+namespace AutoAnalysis
 {
     public interface ISQLConnectionSettings
     {
@@ -13,6 +15,7 @@
         bool IsGlobal { get; }
     }
 
+    [Serializable]
     public class SQLConnectionSettings : ISQLConnectionSettings
     {
         public string Host { get; set; } = "local";
@@ -21,7 +24,7 @@
         public string Table { get; set; } = "CarAndOwner";
         public string Username { get; set; } = "";
         public string Password { get; set; } = "";
-        public string Name { get; set; } = "local - Main.db";
+        public string Name { get; set; } = $"local - Main.db";
         public SQLProvider? ProviderName { get; set; } = SQLProvider.SQLite;
         public bool IsGlobal => false;
 
@@ -54,4 +57,5 @@
             };
         }
     }
+
 }

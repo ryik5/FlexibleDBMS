@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AutoAnalysis
@@ -19,24 +20,40 @@ namespace AutoAnalysis
         public SelectDBForm()
         {
             InitializeComponent();
+            settings = new SQLConnectionSettings(SQLConnection.Settings);
 
-            if (settings?.Database == null)
-            {
-                selectedDB = "mysql";
-            }
+            selectedDB = "mysql";
+
             btnCheck.Click += btnCheck_Click;
-            btnSave.Enabled = false;
             btnSave.Click += BtnSave_Click;
             btnCancel.Click += BtnCancel_Click;
-            cmbDataBases.SelectedIndexChanged += CmbDataBases_SelectedIndexChanged;
             cmbSQLProvider.SelectedIndexChanged += CmbSQLProvider_SelectedIndexChanged;
+            cmbDataBases.SelectedIndexChanged += CmbDataBases_SelectedIndexChanged;
+            cmbTables.SelectedIndexChanged += CmbTables_SelectedIndexChanged;
 
             SetStartedControls();
         }
 
+        private void CmbTables_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            tbName.Text = SetNameConnection();
+        }
+
+
+        private string SetNameConnection()
+        {
+            string name = string.Empty;
+            name += string.IsNullOrWhiteSpace(tbHost?.Text) ? null : $"{tbHost?.Text} - ";
+            name += string.IsNullOrWhiteSpace(cmbDataBases?.SelectedItem?.ToString()) ? null : $"{cmbDataBases?.SelectedItem?.ToString()} - ";
+            name += string.IsNullOrWhiteSpace(cmbTables?.SelectedItem?.ToString()) ? null : $"{cmbTables?.SelectedItem?.ToString()}";
+
+            return name;
+        }
 
         private void CmbSQLProvider_SelectedIndexChanged(object sender, EventArgs e)
         {
+            btnSave.Enabled = false;
+
             foreach (TextBox tb in this.Controls.OfType<TextBox>())
             {
                 tb.Enabled = true;
@@ -56,14 +73,10 @@ namespace AutoAnalysis
                     break;
 
                 case SQLProvider.SQLite:
-                    settings = new SQLConnectionSettings();
-                    tbName.Text = settings.Name;
-                    tbHost.Text=settings.Host ;
+                    tbHost.Text = "local";
                     tbPort.Text = "0";
                     foreach (TextBox tb in this.Controls.OfType<TextBox>())
-                    {
-                        tb.Enabled = false;
-                    }
+                    { tb.Enabled = false; }
                     tp.SetToolTip(tbPort, "Port doesn't set");
                     break;
                 case SQLProvider.None:
@@ -72,20 +85,21 @@ namespace AutoAnalysis
                     tp.SetToolTip(tbPort, "Port doesn't set");
                     break;
             }
+
+            tbName.Text = SetNameConnection();
         }
 
         private void CmbDataBases_SelectedIndexChanged(object sender, EventArgs e)
-        { ChangeDB(); }
+        {
+            ChangeDB();
+        }
 
         private void ChangeDB()
         {
-            textBox1.Clear();
             cmbTables.Enabled = false;
 
             if (!string.IsNullOrWhiteSpace(tbHost?.Text))
             {
-                settings = new SQLConnectionSettings();
-                settings.Name = tbName?.Text;
                 settings.Host = tbHost?.Text;
                 settings.Port = int.TryParse(tbPort?.Text, out int port) ? port : 0;
                 settings.Database = cmbDataBases?.Items?.Count > 0 ? cmbDataBases?.SelectedItem?.ToString() : selectedDB;
@@ -94,15 +108,14 @@ namespace AutoAnalysis
             }
             else
             {
-                textBox1.AppendLine("Check the correctness of the entered data:");
-                textBox1.AppendLine("Host: " + tbHost?.Text);
+                tbResultShow.AppendLine("Check the correctness of the entered data:");
+                tbResultShow.AppendLine("Host: " + tbHost?.Text);
                 return;
             }
 
-            MySQLUtils mySQL = new MySQLUtils(settings);
-
             try
             {
+                MySQLUtils mySQL = new MySQLUtils(settings);
                 DataTable dt = mySQL.GetTable("SHOW TABLES");
                 IList<string> list = new List<string>();
                 foreach (DataRow r in dt.Rows)
@@ -114,75 +127,101 @@ namespace AutoAnalysis
                 {
                     cmbTables.DataSource = list;
                     cmbTables.Enabled = true;
-                    cmbTables.SelectedIndex = 0;
 
                     settings.Table = cmbTables?.Items?.Count > 0 ? cmbTables?.SelectedItem?.ToString() : null;
 
-                    textBox1.Clear();
-
-                    textBox1.AppendLine($"DB exists and table {settings.Table} are selected.");
-                    textBox1.AppendLine("Please will select needed DataBase!");
-
-                    btnSave.Enabled = true;
+                    tbResultShow.AppendLine($"DB exists and table {settings.Table} are selected.");
+                    tbResultShow.AppendLine("Please will select needed DataBase!");
                 }
             }
             catch (MySqlException excpt)
             {
-                textBox1.AppendLine(excpt.Message + ":");
-                textBox1.AppendLine(excpt.ToString());
+                tbResultShow.AppendLine(excpt.Message + ":");
+                tbResultShow.AppendLine(excpt.ToString());
             }
             catch (Exception excpt)
             {
-                textBox1.AppendLine(excpt.Message + ":");
-                textBox1.AppendLine(excpt.ToString());
+                tbResultShow.AppendLine(excpt.Message + ":");
+                tbResultShow.AppendLine(excpt.ToString());
             }
+
+            tbName.Text = SetNameConnection();
         }
 
 
         private void CheckDB()
         {
-            SQLProvider selectedProvider=cmbSQLProvider.SelectedItem.ToString().GetSQLProvider();
- 
+            SQLProvider selectedProvider = cmbSQLProvider.SelectedItem.ToString().GetSQLProvider();
+
+            settings.ProviderName = selectedProvider;
+            bool existDB = false;
+
             switch (selectedProvider)
             {
                 case (SQLProvider.My_SQL):
                     {
                         if (!string.IsNullOrWhiteSpace(tbHost?.Text))
                         {
-                            settings = new SQLConnectionSettings();
-                            settings.Name = tbName?.Text;
                             settings.Host = tbHost?.Text;
                             settings.Port = int.TryParse(tbPort?.Text, out int port) ? port : 0;
-                            settings.Database = cmbDataBases?.Items?.Count > 0 ? cmbDataBases?.SelectedItem?.ToString() : selectedDB;
-                            settings.Table = cmbTables?.Items?.Count > 0 ? cmbTables?.SelectedItem?.ToString() : null;
-                            settings.ProviderName = selectedProvider;
+                            settings.Database = cmbDataBases?.Items?.Count > 1 ? cmbDataBases?.SelectedItem?.ToString() : selectedDB;
                             settings.Username = tbUserName?.Text;
                             settings.Password = tbPassword?.Text;
                         }
                         else
                         {
-                            textBox1.AppendLine("Check Host name: " + tbHost?.Text);
+                            tbResultShow.AppendLine("Check Host name: " + tbHost?.Text);
                             return;
                         }
 
-                        CheckMySQLDB(settings);
+                        existDB = CheckMySQLDB(settings);
                         break;
                     }
                 case SQLProvider.SQLite:
                     {
-                        settings = new SQLConnectionSettings();
-
                         settings.Database = CheckSQLiteDB();
-                        settings.Table = cmbTables?.Items?.Count > 0 ? cmbTables?.SelectedItem?.ToString() : null;
-                        settings.ProviderName = selectedProvider;
-                        cmbTables.Enabled = cmbTables?.Items?.Count > 1;
+
+                        if (string.IsNullOrWhiteSpace(settings?.Database))
+                        {
+                            DialogResult dialog = MessageBox.Show("Create new DB?", "DB is empty!", MessageBoxButtons.YesNo);
+
+                            if (dialog == DialogResult.Yes)
+                            {
+                                SQLiteDBOperations connector = new SQLiteDBOperations(settings);
+                                connector.TryMakeLocalDB();
+                                Task.Delay(100);
+                                settings.Database = CheckSQLiteDB();
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        existDB = !string.IsNullOrWhiteSpace(settings?.Database);
+
                         break;
                     }
-            }            
+                default:
+                    break;
+            }
+
+            if (existDB)
+            {
+                if (cmbTables?.Items?.Count > 0)
+                {
+                    settings.Table = cmbTables?.Items?.Count > 0 ? cmbTables?.SelectedItem?.ToString() : null;
+                    cmbTables.Enabled = cmbTables?.Items?.Count > 1;
+                }
+
+                btnSave.Enabled = true;
+            }
+
+            tbName.Text = SetNameConnection();
         }
 
-        private void CheckMySQLDB(ISQLConnectionSettings connectionSettings)
+        private bool CheckMySQLDB(ISQLConnectionSettings connectionSettings)
         {
+            bool existDB = false;
             MySQLUtils mySQL = new MySQLUtils(connectionSettings);
 
             try
@@ -199,43 +238,49 @@ namespace AutoAnalysis
                     {
                         cmbDataBases.DataSource = list;
                         cmbDataBases.Enabled = true;
-                        cmbDataBases.SelectedIndex = 0;
-                        textBox1.Clear();
 
-                        textBox1.AppendLine("The inputed data are correct.");
+                        tbResultShow.AppendLine("The inputed data are correct.");
 
-                        btnSave.Enabled = true;
+                        existDB = true;
                     }
                 }
             }
             catch (MySqlException excpt)
             {
-                textBox1.AppendLine("My SQL error - " + excpt.Message + ":");
-                textBox1.AppendLine(excpt.ToString());
+                tbResultShow.AppendLine("My SQL error - " + excpt.Message + ":");
+                tbResultShow.AppendLine(excpt.ToString());
             }
             catch (Exception excpt)
             {
-                textBox1.AppendLine(excpt.Message + ":");
-                textBox1.AppendLine(excpt.ToString());
+                tbResultShow.AppendLine(excpt.Message + ":");
+                tbResultShow.AppendLine(excpt.ToString());
             }
+
+            return existDB;
         }
 
         private string CheckSQLiteDB()
         {
             string filePath = string.Empty;
+            bool isDB = false;
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 filePath = ofd.OpenFileDialogReturnPath();
                 if (!string.IsNullOrWhiteSpace(filePath))
                 {
-                    CheckUpSelectedSQLiteDB(filePath);
+                    isDB = CheckUpSelectedSQLiteDB(filePath);
                 }
+            }
+            if (isDB == false)
+            {
+                filePath = null;
             }
             return filePath;
         }
 
-        private void CheckUpSelectedSQLiteDB(string filePath)
+        private bool CheckUpSelectedSQLiteDB(string filePath)
         {
+            bool isDB = false;
             DbSchema schemaDB = null;
             IList<string> tablesDB;
             ModelDB db = new ModelDB();
@@ -253,49 +298,85 @@ namespace AutoAnalysis
                 {
                     tablesDB.Add(tbl.Value.TableName);
                 }
-                
+
                 cmbDataBases.DataSource = new List<string>() { filePath };
                 cmbTables.DataSource = tablesDB;
-                cmbDataBases.SelectedIndex = 0;
-                btnSave.Enabled = true;
 
-                textBox1.Clear();
+                isDB = true;
 
-                textBox1.AppendLine("The inputed data are correct.");
+                tbResultShow.AppendLine("The inputed data are correct.");
             }
             catch (Exception e)
             {
-                textBox1.AppendLine($"Ошибка в БД: {e.Message}");
-                textBox1.AppendLine($"Ошибка в БД: {e.Message}");
-                textBox1.AppendLine($"{e.ToString()}");
+                tbResultShow.AppendLine($"Ошибка в БД: {e.Message}");
+                tbResultShow.AppendLine($"Ошибка в БД: {e.Message}");
+                tbResultShow.AppendLine($"{e.ToString()}");
             }
             finally
             {
                 if (schemaDB?.Tables?.Count == 0)
                 {
-                    textBox1.AppendLine("Подключенная база данных пустая или же в ней отсутствуют какие-либо таблицы с данными!");
-                    textBox1.AppendLine("Предварительно создайте базу данных, таблицы и импортируйте/добавьте в них данные...");
-                    textBox1.AppendLine("Заблокирован функционал по получению данных из таблиц...");
+                    tbResultShow.AppendLine("Подключенная база данных пустая или же в ней отсутствуют какие-либо таблицы с данными!");
+                    tbResultShow.AppendLine("Предварительно создайте базу данных, таблицы и импортируйте/добавьте в них данные...");
+                    tbResultShow.AppendLine("Заблокирован функционал по получению данных из таблиц...");
                 }
-                schemaDB = null;
+            }
+
+            return isDB;
+        }
+
+
+
+
+        private void ShowMessage(string message)
+        { MessageBox.Show(message); }
+
+
+
+        private void BtnCancel_Click(object sender, EventArgs e)
+        { ActiveForm.Close(); }
+
+        private void BtnSave_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(tbName?.Text) && !string.IsNullOrWhiteSpace(tbHost?.Text))
+            {
+                settings.Name = SetNameConnection();
+                settings.ProviderName = cmbSQLProvider.SelectedItem.ToString().GetSQLProvider();
+                settings.Host = tbHost?.Text;
+                settings.Port = int.TryParse(tbPort?.Text, out int port) ? port : 0;
+                settings.Username = tbUserName?.Text;
+                settings.Password = tbPassword?.Text;
+                settings.Database = cmbDataBases?.Items?.Count > 0 ? cmbDataBases?.SelectedItem?.ToString() : null;
+                settings.Table = cmbTables?.Items?.Count > 0 ? cmbTables?.SelectedItem?.ToString() : null;
+
+                SQLConnection.Settings = new SQLConnectionSettings(settings);
+
+                ActiveForm.Close();
+            }
+            else
+            {
+                tbResultShow.AppendLine("Check corectness inputed data:");
+                tbResultShow.AppendLine("Name: " + tbName?.Text);
+                tbResultShow.AppendLine("Host: " + tbHost?.Text);
+                tbResultShow.AppendLine("DataBase: " + cmbDataBases?.SelectedItem?.ToString());
+                return;
             }
         }
+
+        private void btnCheck_Click(object sender, EventArgs e)
+        { CheckDB(); }
 
 
 
         private void SetStartedControls()
         {
-            cmbSQLProvider.DataSource = SQLProviderManager.GetSQLProvider();
-            tp.SetToolTip(cmbSQLProvider, "Select SQL's Provider");
-
-            tp.SetToolTip(cmbDataBases, "Select DataBase");
-            cmbDataBases.Enabled = false;
-            cmbTables.Enabled = false;
-
             foreach (TextBox tb in this.Controls.OfType<TextBox>())
             {
                 SetDefaultFontTextBox(tb);
-                tb.Click += Reset_Click;
+
+                if (tb.Name != nameof(tbResultShow.Name))
+                { tb.Click += Reset_Click; }
+
                 tb.LostFocus += TbSetDefault_LostFocus;
 
                 if (tb.Name == nameof(tbPort))
@@ -311,64 +392,43 @@ namespace AutoAnalysis
 
                 tb.Refresh();
             }
-        }
 
+            cmbSQLProvider.DataSource = SQLProviderManager.GetSQLProvider();
 
-        private void ShowMessage(string message)
-        {
-            MessageBox.Show(message);
-        }
+            tbResultShow.AppendLine(settings.GetPropertyValues().AsString());
 
-
-
-
-
-        private void BtnCancel_Click(object sender, EventArgs e)
-        { ActiveForm.Close(); }
-
-        private void BtnSave_Click(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrWhiteSpace(tbName?.Text) && !string.IsNullOrWhiteSpace(tbHost?.Text))
+            if (settings != null)
             {
-                settings = new SQLConnectionSettings();
-                settings.Name = tbName?.Text;
-                settings.ProviderName = cmbSQLProvider.SelectedItem.ToString().GetSQLProvider();
-                settings.Host = tbHost?.Text;
-                settings.Port = int.TryParse(tbPort?.Text, out int port) ? port : 0;
-                settings.Username = tbUserName?.Text;
-                settings.Password = tbPassword?.Text;
-                settings.Database = cmbDataBases?.Items?.Count > 0 ? cmbDataBases?.SelectedItem?.ToString() : null;
-                settings.Table = cmbTables?.Items?.Count > 0 ? cmbTables?.SelectedItem?.ToString() : null;
-
-                ActiveForm.Close();
+                tbHost.Text = settings.Host;
+                tbPort.Text = settings.Port.ToString();
+                cmbDataBases.SelectedText = settings.Database;
+                cmbTables.SelectedText = settings.Table;
+                tbUserName.Text = settings.Username;
+                tbPassword.Text = settings.Password;
+                try { cmbSQLProvider.SelectedIndex = cmbSQLProvider.FindString(settings.ProviderName.ToString()); }
+                catch (Exception expt) { tbResultShow.AppendLine(expt.ToString()); }
             }
-            else
-            {
-                textBox1.AppendLine("Check corectness inputed data:");
-                textBox1.AppendLine("Name: " + tbName?.Text);
-                textBox1.AppendLine("Host: " + tbHost?.Text);
-                textBox1.AppendLine("DataBase: " + cmbDataBases?.SelectedItem?.ToString());
-                return;
-            }
-        }
 
-        private void btnCheck_Click(object sender, EventArgs e)
-        {
-            textBox1.Clear();
-            CheckDB();
+            cmbDataBases.Enabled = false;
+            cmbTables.Enabled = false;
+            btnSave.Enabled = false;
+            tbName.Enabled = false;
+            tbPassword.PasswordChar = '*';
+            tp.SetToolTip(cmbSQLProvider, "Select SQL's Provider");
+            tp.SetToolTip(cmbDataBases, "Select DataBase");
         }
-
 
         private void Reset_Click(object sender, EventArgs e)
         {
+            btnSave.Enabled = false;
+
             TextBox tb = (sender as TextBox);
 
             if (tb.Name == nameof(tbPort))
             { tb.Text = "0"; }
             else { tb.Clear(); }
 
-            tb.Font = new Font("Arial", 9, FontStyle.Bold);
-            tb.ForeColor = Color.Black;
+            SetCorrectFontTextBox(tb);
         }
 
         private void SetDefaultFontTextBox(TextBox tb)
@@ -425,8 +485,6 @@ namespace AutoAnalysis
 
         private void TbPort_KeyPress(object sender, KeyPressEventArgs e)
         {
-            int length = (sender as TextBox).Text.Trim().Length;
-
             if (e.KeyChar != 8 && (e.KeyChar < 48 || e.KeyChar > 57))
             {
                 ShowMessage("Номер порта может содержать только цифры!");

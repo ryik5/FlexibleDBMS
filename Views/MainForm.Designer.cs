@@ -39,6 +39,10 @@
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.importFromTextFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.writeModelsListMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
+            this.printConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.writeFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.changeViewPanelviewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
@@ -123,7 +127,11 @@
             this.recentConnectionToolStripMenuItem,
             this.toolStripSeparator5,
             this.importFromTextFileMenuItem,
-            this.writeModelsListMenuItem});
+            this.writeModelsListMenuItem,
+            this.toolStripSeparator11,
+            this.printConfigToolStripMenuItem,
+            this.readFileToolStripMenuItem,
+            this.writeFileToolStripMenuItem});
             this.administratorMenu.Name = "administratorMenu";
             this.administratorMenu.Size = new System.Drawing.Size(92, 20);
             this.administratorMenu.Text = "Administrator";
@@ -168,6 +176,29 @@
             this.writeModelsListMenuItem.Name = "writeModelsListMenuItem";
             this.writeModelsListMenuItem.Size = new System.Drawing.Size(191, 22);
             this.writeModelsListMenuItem.Text = "Write models List";
+            // 
+            // toolStripSeparator11
+            // 
+            this.toolStripSeparator11.Name = "toolStripSeparator11";
+            this.toolStripSeparator11.Size = new System.Drawing.Size(188, 6);
+            // 
+            // printConfigToolStripMenuItem
+            // 
+            this.printConfigToolStripMenuItem.Name = "printConfigToolStripMenuItem";
+            this.printConfigToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.printConfigToolStripMenuItem.Text = "PrintCurrentConfig";
+            // 
+            // readFileToolStripMenuItem
+            // 
+            this.readFileToolStripMenuItem.Name = "readFileToolStripMenuItem";
+            this.readFileToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.readFileToolStripMenuItem.Text = "ReadConfig";
+            // 
+            // writeFileToolStripMenuItem
+            // 
+            this.writeFileToolStripMenuItem.Name = "writeFileToolStripMenuItem";
+            this.writeFileToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.writeFileToolStripMenuItem.Text = "WriteConfig";
             // 
             // viewMenu
             // 
@@ -251,13 +282,13 @@
             // addQueryExtraMenuItem
             // 
             this.addQueryExtraMenuItem.Name = "addQueryExtraMenuItem";
-            this.addQueryExtraMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addQueryExtraMenuItem.Size = new System.Drawing.Size(159, 22);
             this.addQueryExtraMenuItem.Text = "Add";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(156, 6);
             // 
             // queriesStandartMenu
             // 
@@ -276,7 +307,7 @@
             this.lookForFamiliyNameToolStripMenuItem,
             this.lookForOrganizationToolStripMenuItem});
             this.queriesStandartMenu.Name = "queriesStandartMenu";
-            this.queriesStandartMenu.Size = new System.Drawing.Size(180, 22);
+            this.queriesStandartMenu.Size = new System.Drawing.Size(159, 22);
             this.queriesStandartMenu.Text = "Standart queries";
             // 
             // schemeLocalDBMenuItem
@@ -357,18 +388,18 @@
             // queriesExtraMenu
             // 
             this.queriesExtraMenu.Name = "queriesExtraMenu";
-            this.queriesExtraMenu.Size = new System.Drawing.Size(180, 22);
+            this.queriesExtraMenu.Size = new System.Drawing.Size(159, 22);
             this.queriesExtraMenu.Text = "Extra queries";
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(156, 6);
             // 
             // removeQueryExtraMenuItem
             // 
             this.removeQueryExtraMenuItem.Name = "removeQueryExtraMenuItem";
-            this.removeQueryExtraMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeQueryExtraMenuItem.Size = new System.Drawing.Size(159, 22);
             this.removeQueryExtraMenuItem.Text = "Remove";
             // 
             // helpMenu
@@ -569,6 +600,10 @@
         private System.Windows.Forms.ToolStripMenuItem lookForOrganizationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem connectToSQLServerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recentConnectionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
+        private System.Windows.Forms.ToolStripMenuItem readFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem writeFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem printConfigToolStripMenuItem;
     }
 }
 
