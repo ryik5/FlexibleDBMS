@@ -1,7 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
-using System;
 using System.Data;
-using System.Windows.Forms;
 
 namespace AutoAnalysis
 {
@@ -18,8 +16,8 @@ namespace AutoAnalysis
         public MySQLUtils(ISQLConnectionSettings settings)
         { SetSQLConnectionString(settings); }
 
-        public void SetSQLConnectionSettings(ISQLConnectionSettings settings)
-        { SetSQLConnectionString(settings); }
+        //public void SetSQLConnectionSettings(ISQLConnectionSettings settings)
+        //{ SetSQLConnectionString(settings); }
 
         private void SetSQLConnectionString(ISQLConnectionSettings settings)
         {
@@ -30,77 +28,82 @@ namespace AutoAnalysis
         public DataTable GetTable(string query)
         {
             DataTable dt = null;
-
-            using (MySqlConnection connection = new MySqlConnection(connString))
+        //    if (CommonExtesions.IsSqlQuery(query))
             {
-                using (MySqlCommand sqlCom = new MySqlCommand(query, connection))
+                using (MySqlConnection connection = new MySqlConnection(connString))
                 {
-                    connection.Open();
-                    sqlCom.ExecuteNonQuery();
-                    using (MySqlDataAdapter dataAdapter = new MySqlDataAdapter(sqlCom))
+                    using (MySqlCommand sqlCom = new MySqlCommand(query, connection))
                     {
-                        dt = new DataTable();
-                        dataAdapter.Fill(dt);
+                        connection.Open();
+                        sqlCom.ExecuteNonQuery();
+                        using (MySqlDataAdapter dataAdapter = new MySqlDataAdapter(sqlCom))
+                        {
+                            dt = new DataTable();
+                            dataAdapter.Fill(dt);
+                        }
                     }
                 }
             }
             return dt;
         }
 
-        public DataTable GetData(string query, ISQLConnectionSettings _settings)
-        {
-            SetSQLConnectionString(_settings);
+        //public DataTable GetData(string query, ISQLConnectionSettings _settings)
+        //{
+        //    SetSQLConnectionString(_settings);
 
-            using (var connection = new MySqlConnection(connString))
-            {
-                connection.Open();
+        //    using (var connection = new MySqlConnection(connString))
+        //    {
+        //        connection.Open();
 
-                DataTable dt = null;
-                // Insert some data
-                //using (var cmd = new MySqlCommand())
-                //{
-                //    cmd.Connection = conn;
-                //    cmd.CommandText = "INSERT INTO data (some_field) VALUES (@p)";
-                //    cmd.Parameters.AddWithValue("p", "Hello world");
-                //    await cmd.ExecuteNonQueryAsync();
-                //}
+        //        DataTable dt = null;
+        //        // Insert some data
+        //        //using (var cmd = new MySqlCommand())
+        //        //{
+        //        //    cmd.Connection = conn;
+        //        //    cmd.CommandText = "INSERT INTO data (some_field) VALUES (@p)";
+        //        //    cmd.Parameters.AddWithValue("p", "Hello world");
+        //        //    await cmd.ExecuteNonQueryAsync();
+        //        //}
 
-                // Retrieve all rows
-                using (MySqlDataAdapter dataAdapter = new MySqlDataAdapter(query, connection))
-                {
-                    dataAdapter.SelectCommand.CommandType = CommandType.Text;
+        //        // Retrieve all rows
+        //        if (CommonExtesions.IsSqlQuery(query))
+        //        {
+        //            using (MySqlDataAdapter dataAdapter = new MySqlDataAdapter(query, connection))
+        //            {
+        //                dataAdapter.SelectCommand.CommandType = CommandType.Text;
 
-                    dataAdapter.Fill(dt);
-                }
-                return dt;
-            }
-        }
+        //                dataAdapter.Fill(dt);
+        //            }
+        //        }
+        //        return dt;
+        //    }
+        //}
 
-        public void TestMySql()
-        {
-            string query = "show databases";
+        //public void TestMySql()
+        //{
+        //    string query = "show databases";
 
-            try
-            {
-                using (MySqlConnection dbCon = new MySqlConnection(connString))
-                {
-                    dbCon.Open();
-                    using (MySqlCommand cmd = new MySqlCommand(query, dbCon))
-                    {
-                        using (MySqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                if (reader.GetString(0) != null && reader.GetString(0).Length > 0)
-                                    reader.GetString(0);
-                            }
-                        }
-                    }
-                    dbCon.Close();
-                }
-            }
-            catch (Exception excpt) { MessageBox.Show(excpt.ToString()); }
-        }
+        //    try
+        //    {
+        //        using (MySqlConnection dbCon = new MySqlConnection(connString))
+        //        {
+        //            dbCon.Open();
+        //            using (MySqlCommand cmd = new MySqlCommand(query, dbCon))
+        //            {
+        //                using (MySqlDataReader reader = cmd.ExecuteReader())
+        //                {
+        //                    while (reader.Read())
+        //                    {
+        //                        if (reader.GetString(0) != null && reader.GetString(0).Length > 0)
+        //                            reader.GetString(0);
+        //                    }
+        //                }
+        //            }
+        //            dbCon.Close();
+        //        }
+        //    }
+        //    catch (Exception excpt) { MessageBox.Show(excpt.ToString()); }
+        //}
 
         public static string SetConnectionString(ISQLConnectionSettings settings)
         {
@@ -123,8 +126,9 @@ namespace AutoAnalysis
             {
                 connString += ";Port=" + settings.Port;
             }
+            ;
 
-            connString += ";User Id=" + settings.Username + ";Password=" + settings.Password+ ";Connection Timeout=120";
+            connString += ";User Id=" + settings.Username + ";Password=" + settings.Password+ ";Default Command Timeout=3600";
 
             return connString;
         }

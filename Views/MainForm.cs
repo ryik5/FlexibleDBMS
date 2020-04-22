@@ -65,7 +65,7 @@ namespace AutoAnalysis
         {
             
             InitializeComponent();
-
+            
             //Check Up Inputed Environment parameters
             CheckEnvironment();
 
@@ -132,9 +132,10 @@ namespace AutoAnalysis
             }
             else
             {
-                IList<ToolStripMenuItem> menuItems = regOperator.ReadRegistryKeys(regSubKeyRecent)?.ToToolStripMenuItemsList(ToolStripModes.RecentConnection);
-                AddQueriesFromRegistryToToolStripMenu(recentConnectionToolStripMenuItem, menuItems, ToolStripModes.RecentConnection);
-
+                IList<ToolStripMenuItem> menuItems = 
+                    regOperator.ReadRegistryKeys(regSubKeyRecent)?.ToToolStripMenuItemsList(ToolStripMenuType.RecentConnection);
+                AddQueriesFromRegistryToToolStripMenu(changeBaseToolStripMenuItem, menuItems, ToolStripMenuType.RecentConnection);
+                
                 if (connectionSettings.ProviderName == SQLProvider.SQLite) //Check Up Local DB schema
                 { CheckUpSelectedSQLiteDB(connectionSettings.Database); }
             }
@@ -217,20 +218,18 @@ namespace AutoAnalysis
         {
             //Administrator
             {
-                administratorMenu.Text = "Administrator";
+                administratorMenu.Text = "Администратор";
                 createLocalDBMenuItem.Click += CreateLocalDBMenuItem_Click;
 
                 selectNewDBMenuItem.Enabled = true;
                 selectNewDBMenuItem.Click += SelectNewDBMenuItem_Click;
 
-                connectToSQLServerToolStripMenuItem.Text = "Select DB (SQL server)";
+                connectToSQLServerToolStripMenuItem.Text = "Подключить новую базу данных";
                 connectToSQLServerToolStripMenuItem.Click += ConnectToSQLServerToolStripMenuItem_Click;
 
                 importFromTextFileMenuItem.Click += ImportFromTextFileMenuItem_Click;
                 importFromTextFileMenuItem.ToolTipText = "Import Text File in local DB";
                 writeModelsListMenuItem.ToolTipText = "Write List with Models in DB";
-
-                recentConnectionToolStripMenuItem.Enabled = true;
 
                 printConfigToolStripMenuItem.Click += PrintConfigToolStripMenuItem_Click;
                 readFileToolStripMenuItem.Click += ReadCfgFromFileMenuItem_Click;
@@ -260,17 +259,20 @@ namespace AutoAnalysis
             //query menu
             {
                 queryMenu.Text = "Найти";
-                queryMenu.ToolTipText = "Сохраненные поисковые запросы";
+                queryMenu.ToolTipText = "Сохраненные запросы";
                 queryMenu.Click += EnableAddQueryMenuItem_queryMenu_DropDownOpened;
-                //add new query extra menu item
-                addQueryExtraMenuItem.Text = "Добавить поисковый запрос в меню";
-                addQueryExtraMenuItem.ToolTipText = "Составленный запрос запомнить и добавить его в Пользовательское меню";
-                addQueryExtraMenuItem.Click += AddQueryExtraMenuItem_Click;
 
+                queriesStandartMenu.Text = "Стандартные";
+                queriesStandartMenu.ToolTipText = "Предустановленные поисковые запросы";
+                addToStandartMenuItem.Text= "Добавить новый запрос в Стандартное меню";
+                addToStandartMenuItem.ToolTipText = "Формат слова которое будет искаться - {}. Вставить в месте запроса";
+
+                addToExtraMenuItem.Text = "Добавить новый запрос в Пользовательское меню";
+                addToExtraMenuItem.ToolTipText = "Составленный запрос запомнить и добавить его в Пользовательское меню";
+                addToExtraMenuItem.Click += AddExtraQueryMenuItem_Click;
+               
                 //query standart menu
                 {
-                    queriesStandartMenu.Text = "Стандартные";
-                    queriesStandartMenu.ToolTipText = "Предустановленные поисковые запросы";
                     //query standart menu items
                     schemeLocalDBMenuItem.Click += GetSchemaLocalDBMenuItem_Click;
 
@@ -316,7 +318,7 @@ namespace AutoAnalysis
                         "group by edrpou order by amount desc " +
                         "limit 100";
                     getEnterpriseMenuItem.Click += QueryMenuItem_Click;
-                    
+
                     //look for
                     {
                         lookForFamiliyNameToolStripMenuItem.Text = "Искать машины зарегистрированные за введенными фамилией/именем"; ;
@@ -331,7 +333,7 @@ namespace AutoAnalysis
                 }
 
                 //query extra menu 
-                queriesExtraMenu.Text = "Пользовательские";
+                queriesExtraMenu.Text = "Пользовательские запросы";
                 queriesExtraMenu.ToolTipText = "Запросы созданные на данном ПК";
                 // queriesExtraMenu.DropDown.Closing += (o, e) => { e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked; };//не закрывать меню при отметке
 
@@ -339,7 +341,7 @@ namespace AutoAnalysis
                 removeQueryExtraMenuItem.ToolTipText = "Отметить можно только запросы созданные на данном ПК (подменю 'Пользовательские')";
                 removeQueryExtraMenuItem.Click += RemoveCheckedInQueryExtraMenuItem_Click;
             }
-                       
+
             //help menu
             {
                 helpMenu.Text = "Помощь";
@@ -347,6 +349,10 @@ namespace AutoAnalysis
                 aboutMenuItem.Click += ApplicationAbout;
                 useApplicationMenuItem.Text = "Порядок использования программы";
             }
+
+            //
+            changeBaseToolStripMenuItem.Text = "Сменить";
+            changeBaseToolStripMenuItem.ToolTipText = "Сменить банк";
         }
 
 
@@ -425,21 +431,22 @@ namespace AutoAnalysis
 
         private void ReadLastConnectionFromRegistry(string text)
         {
-            IList<RegistryEntity> entities = regOperator.ReadRegistryKeys($"{regSubKeyRecent}\\{text}");
-
-            connectionSettings = entities?.ToSQLConnectionSettings();
+            connectionSettings = regOperator?
+                                    .ReadRegistryKeys($"{regSubKeyRecent}\\{text}")?
+                                        .ToSQLConnectionSettings();
                        
             ReNewParametersDB(connectionSettings);
-
-
+            
 
             //Check correctness
             IDictionary<string, string> dic = connectionSettings.GetPropertyValues(50);
 
-            foreach (var ent in dic)
-            {
-                AddLineAtTextboxLog(ent.Key + ": \t" + ent.Value);
-            }
+            AddLineAtTextboxLog(dic.AsString());
+
+            //foreach (var ent in dic)
+            //{
+            //    AddLineAtTextboxLog(ent.Key + ": \t" + ent.Value);
+            //}
         }
 
         private void ReNewParametersDB(ISQLConnectionSettings settings)
@@ -462,9 +469,9 @@ namespace AutoAnalysis
             //ReNew QueryExtra with this connection
             IList<ToolStripMenuItem> menuItems = regOperator
                 .ReadRegistryKeys($"{regSubKeyMenu}\\{connectionSettings.Name}")
-                .ToToolStripMenuItemsList(ToolStripModes.QueryExtra);
+                .ToToolStripMenuItemsList(ToolStripMenuType.ExtraQuery);
 
-            AddQueriesFromRegistryToToolStripMenu(queriesExtraMenu, menuItems, ToolStripModes.QueryExtra);
+            AddQueriesFromRegistryToToolStripMenu(queriesExtraMenu, menuItems, ToolStripMenuType.ExtraQuery);
         }
 
 
@@ -472,12 +479,13 @@ namespace AutoAnalysis
         {
             string nameQuery = txtbNameQuery.Text.Trim();
             string bodyQuery = txtBodyQuery.Text.Trim();
-            addQueryExtraMenuItem.Enabled = false;
+            addToStandartMenuItem.Enabled = false;
+            addToExtraMenuItem.Enabled = false;
             lookForFamiliyNameToolStripMenuItem.Enabled = false;
             lookForNumberToolStripMenuItem.Enabled = false;
             lookForOrganizationToolStripMenuItem.Enabled = false;
 
-            if (bodyQuery?.Length > 0)
+            if (!string.IsNullOrWhiteSpace( bodyQuery))
             {
                 lookForNumberToolStripMenuItem.Enabled = true;
                 lookForFamiliyNameToolStripMenuItem.Enabled = true;
@@ -487,7 +495,6 @@ namespace AutoAnalysis
                     $"City as Область,District as Район,f as Фамилия,i as Имя,o as Отчество,drfo,name,edrpou,factory as Марка,model as Модель,plate as Номер " +
                     $"from CarAndOwner " +  //UPPER
                     $"where ((length(f)+length(i)) > 0 OR (length(name)) > 0) " +
-                    //$"AND (plate like '%{bodyQuery}%' OR plate like '%{bodyQuery.ToUpper()}%' OR plate like '%{bodyQuery.ToLower()}%') " +
                     $"AND (UPPER(plate) like '%{bodyQuery.ToUpper()}%') " +
                     $"group by District,City,f,i,o,name " +
                     $"order by District,City,f,i,o,name asc " +
@@ -496,7 +503,6 @@ namespace AutoAnalysis
                     $"City as Область,District as Район,f as Фамилия,i as Имя,o as Отчество,drfo,factory as Марка,model as Модель,plate as Номер " +
                     $"from CarAndOwner " +
                     $"where ((length(f)+length(i)) > 0 ) " +
-                    //$"AND (f like '%{bodyQuery}%' or i like '%{bodyQuery}%' OR f like '%{bodyQuery.ToUpper()}%' or i like '%{bodyQuery.ToUpper()}%' OR f like '%{bodyQuery.ToLower()}%' or i like '%{bodyQuery.ToLower()}%') " +
                     $"AND (UPPER(f) like '%{bodyQuery.ToUpper()}%' OR UPPER(i) like '%{bodyQuery.ToUpper()}%') " +
                     $"group by District,City,f,i,o " +
                     $"order by District,City,f,i,o asc " +
@@ -505,7 +511,6 @@ namespace AutoAnalysis
                     $"City as Область,District as Район,name as Название,edrpou,factory as Марка,model as Модель,plate as Номер " +
                     $"from CarAndOwner " +
                     $"where (length(name) > 0) " +
-                    //$"AND (name like '%{bodyQuery}%' OR name like '%{bodyQuery.ToUpper()}%' OR name like '%{bodyQuery.ToLower()}%') " +
                     $"AND (UPPER(name) like '%{bodyQuery.ToUpper()}%') " +
                     $"group by District,City,name " +
                     $"order by District,City,name asc " +
@@ -515,10 +520,16 @@ namespace AutoAnalysis
                 lookForFamiliyNameToolStripMenuItem.ToolTipText = $"Искать фамилию/организацию - {bodyQuery}";
                 lookForOrganizationToolStripMenuItem.ToolTipText = $"Искать фамилию/организацию - {bodyQuery}";
 
-                if (nameQuery?.Length > 0)
+                if (!string.IsNullOrWhiteSpace(nameQuery))
                 {
-                    addQueryExtraMenuItem.Enabled = true;
-                    addQueryExtraMenuItem.ToolTipText = $"Запомнить запрос: {nameQuery}\r\n{bodyQuery}";
+                    addToExtraMenuItem.Enabled = true;
+                    addToExtraMenuItem.ToolTipText = $"Запомнить запрос: {nameQuery}{Environment.NewLine}{bodyQuery}";
+
+                    if (nameQuery.Contains("{}"))
+                    {
+                        addToStandartMenuItem.Enabled = true;
+                        addToExtraMenuItem.ToolTipText = $"Запомнить запрос: {nameQuery}{Environment.NewLine}{bodyQuery}";
+                    }
                 }
             }
         }
@@ -715,9 +726,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
         //выбранный пункт из ДропДаунМеню сделать названием фильтра
         private void FilterMenu_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-            (sender as ToolStripSplitButton).Text = e.ClickedItem.Text;
-        }
+        { (sender as ToolStripSplitButton).Text = e.ClickedItem.Text; }
 
 
 
@@ -725,10 +734,9 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
         private void SelectNewDBMenuItem_Click(object sender, EventArgs e)
         {
-            string filePath = string.Empty;
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
-                filePath = ofd.OpenFileDialogReturnPath();
+              string  filePath = ofd.OpenFileDialogReturnPath();
                 if (filePath?.Length > 0)
                 {
                     CheckUpSelectedSQLiteDB(filePath);
@@ -853,6 +861,10 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
         private async void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            //write Config to File
+            await Task.Run(() => MakeConfig());
+            await WriteCfgInFile();
+
             await Task.Delay(500);
 
             if (OperatingModes == AppModes.Admin)
@@ -875,27 +887,28 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             });
         }
 
-        private void AddQueriesFromRegistryToToolStripMenu(ToolStripMenuItem item, IList<ToolStripMenuItem> menuItems, ToolStripModes toolStripModes)
+        private void AddQueriesFromRegistryToToolStripMenu(ToolStripMenuItem target, IList<ToolStripMenuItem> source, ToolStripMenuType menuType)
         {
-            if (menuItems.Count > 0)
+            if (target != null && source?.Count > 0)
             {
-                foreach (var m in menuItems.ToArray())
+                foreach (var m in source.ToArray())
                 {
-                    switch (toolStripModes) {
-                        case ToolStripModes.QueryExtra:
+                    switch (menuType)
+                    {
+                        case ToolStripMenuType.ExtraQuery:
                             {
                                 m.Click += QueryMenuItem_Click;
                                 break;
                             }
-                        case ToolStripModes.RecentConnection:
+                        case ToolStripMenuType.RecentConnection:
                             {
                                 m.Click += RecentMenuItems_Click;
                                 break;
                             }
                     }
-                    item.DropDownItems.Add(m);
+                    target.DropDownItems.Add(m);
                 }
-                StatusInfoMain.Text = $"В пользовательское меню добавлено {menuItems.Count} запросов";
+                StatusInfoMain.Text = $"В меню '{target.Text}' добавлено - {source.Count} запросов";
 
                 menuStrip.Update();
                 menuStrip.Refresh();
@@ -907,6 +920,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         {
              RemoveCheckedMenuItemFromMenuStrip(queriesExtraMenu);
         }
+       
         private async void RemoveCheckedMenuItemFromMenuStrip(ToolStripMenuItem item,bool allMenuChecked=false)
         {
             IList<ToolStripItem> listRemove = item.ToToolStripItemsList();
@@ -935,14 +949,14 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             await Task.Run(() => UpdateQueryExtraMenuInRegistry());
         }
 
-        private async void AddQueryExtraMenuItem_Click(object sender, EventArgs e)
+        private async void AddExtraQueryMenuItem_Click(object sender, EventArgs e)
         {
             string nameQuery = txtbNameQuery.Text.Trim();
             string bodyQuery = txtBodyQuery.Text.Trim();
 
             MenuItem menuItem = new MenuItem(nameQuery, bodyQuery);
 
-            ToolStripMenuItem item = menuItem.ToExtentendedMenuToolStripMenuItem();
+            ToolStripMenuItem item = menuItem.ToExtraMenuToolStripMenuItem();
             
                 queriesExtraMenu.DropDownItems.Add(item as ToolStripMenuItem);
                 item.Click += QueryMenuItem_Click;
@@ -971,7 +985,6 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 {
                     txtbNameQuery.Text = queryName;
                     AddLineAtTextboxLog($"Выполняется запрос - '{queryName}':");
-                    //   tooltip.SetToolTip(menuStrip, $"Выполняется запрос {queryName}");
                 }
 
                 await GetData(queryBody);
@@ -1496,7 +1509,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
             AbstractConfig parameter = new ConfigParameter();
             parameter.Name = RECENT;
-            foreach (var menuItem in recentConnectionToolStripMenuItem.ToDictionary())
+            foreach (var menuItem in changeBaseToolStripMenuItem.ToDictionary())
             { parameter.Add(menuItem.Key, menuItem.Value); }
             unit.Add(parameter);
 

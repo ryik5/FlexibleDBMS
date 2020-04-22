@@ -69,6 +69,7 @@
       <HintPath>packages\MySql.Data.6.9.12\lib\net45\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
@@ -145,7 +146,7 @@
     <Compile Include="Views\SelectDBForm.Designer.cs">
       <DependentUpon>SelectDBForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Enums\ToolStripModes.cs" />
+    <Compile Include="Enums\ToolStripMenuType.cs" />
     <EmbeddedResource Include="Views\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

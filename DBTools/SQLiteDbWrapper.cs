@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.Linq;
 
 namespace AutoAnalysis
 {
@@ -23,10 +22,10 @@ namespace AutoAnalysis
             ConnectToDB(_dbConnectionString);
         }
 
-        public string GetConnectionString()
-        {
-            return _dbConnectionString;
-        }
+        //public string GetConnectionString()
+        //{
+        //    return _dbConnectionString;
+        //}
 
         public void CheckUpDB(string dbConnectionString, System.IO.FileInfo dbFileInfo)
         {
@@ -104,26 +103,30 @@ namespace AutoAnalysis
         public event Message Status;
 
         //Read Data
-        public SQLiteDataReader GetQueryResultAsDataReader(string query)
-        {
-            CheckFormatQuery(query);
-
-            Status?.Invoke(this, new TextEventArgs("query: " + query));
-            using (var _sqlCommand = new SQLiteCommand(query, sqlConnection))
-            { return _sqlCommand.ExecuteReader(); }
-        }
+        //public SQLiteDataReader GetQueryResultAsDataReader(string query)
+        //{
+        //    SQLiteDataReader _sqlCommand;
+        //    Status?.Invoke(this, new TextEventArgs("query: " + query));
+        //    if (CommonExtesions.IsSqlQuery(query))
+        //    {
+        //        using (_sqlCommand = new SQLiteCommand(query, sqlConnection))
+        //        {  _sqlCommand.ExecuteReader(); }
+        //    }
+        //    return _sqlCommand;
+        //}
 
         public DataTable GetQueryResultAsTable(string query)
         {
-            CheckFormatQuery(query);
-
             DataTable dt = new DataTable();
 
-            using (var sqlAdapter = new SQLiteDataAdapter(query, sqlConnection))
+            if (CommonExtesions.IsSqlQuery(query))
             {
-                Status?.Invoke(this, new TextEventArgs("query: " + query));
-                sqlAdapter.SelectCommand.CommandType = CommandType.Text;
-                sqlAdapter.Fill(dt);
+                using (var sqlAdapter = new SQLiteDataAdapter(query, sqlConnection))
+                {
+                    Status?.Invoke(this, new TextEventArgs("query: " + query));
+                    sqlAdapter.SelectCommand.CommandType = CommandType.Text;
+                    sqlAdapter.Fill(dt);
+                }
             }
             return dt;
         }
@@ -148,80 +151,47 @@ namespace AutoAnalysis
         }
 
         //Write Data or Execute query
-        public void Execute(SQLiteCommand sqlCommand)
-        {
-            if (sqlCommand == null)
-            {
-                Status?.Invoke(this, new TextEventArgs("Error. The SQLCommand can not be empty or null!"));
-                new ArgumentNullException();
-            }
+        //public void Execute(SQLiteCommand sqlCommand)
+        //{
+        //    if (sqlCommand == null)
+        //    {
+        //        Status?.Invoke(this, new TextEventArgs("Error. The SQLCommand can not be empty or null!"));
+        //        new ArgumentNullException();
+        //    }
 
-            using (var sqlCommand1 = new SQLiteCommand("begin", sqlConnection))
-            { sqlCommand1.ExecuteNonQuery(); }
+        //    using (var sqlCommand1 = new SQLiteCommand("begin", sqlConnection))
+        //    { sqlCommand1.ExecuteNonQuery(); }
 
-            try
-            {
-                sqlCommand.ExecuteNonQuery();
-                Status?.Invoke(this, new TextEventArgs("Execute sqlCommand - Ok"));
-            }
-            catch (Exception expt)
-            { Status?.Invoke(this, new TextEventArgs("Error! " + expt.ToString())); }
+        //    try
+        //    {
+        //        sqlCommand.ExecuteNonQuery();
+        //        Status?.Invoke(this, new TextEventArgs("Execute sqlCommand - Ok"));
+        //    }
+        //    catch (Exception expt)
+        //    { Status?.Invoke(this, new TextEventArgs("Error! " + expt.ToString())); }
 
-            using (var sqlCommand1 = new SQLiteCommand("end", sqlConnection))
-            { sqlCommand1.ExecuteNonQuery(); }
-        }
+        //    using (var sqlCommand1 = new SQLiteCommand("end", sqlConnection))
+        //    { sqlCommand1.ExecuteNonQuery(); }
+        //}
 
         public void Execute(string query)
         {
-            CheckFormatQuery(query);
-
-            using (var sqlCommand = new SQLiteCommand(query, sqlConnection))
+            if (CommonExtesions.IsSqlQuery(query))
             {
-                try
+                using (var sqlCommand = new SQLiteCommand(query, sqlConnection))
                 {
-                    sqlCommand.ExecuteNonQuery();
-                    Status?.Invoke(this, new TextEventArgs("Execute query: " + query + " - ok"));
+                    try
+                    {
+                        sqlCommand.ExecuteNonQuery();
+                        Status?.Invoke(this, new TextEventArgs("Execute query: " + query + " - ok"));
+                    }
+                    catch (Exception expt)
+                    { Status?.Invoke(this, new TextEventArgs("query: " + query + " ->Error! " + expt.ToString())); }
                 }
-                catch (Exception expt)
-                { Status?.Invoke(this, new TextEventArgs("query: " + query + " ->Error! " + expt.ToString())); }
             }
         }
 
-        /// <summary>
-        /// Check correctness of query
-        /// </summary>
-        /// <param name="query"> sql statement </param>
-        public void CheckFormatQuery(string query)
-        {
-            if (string.IsNullOrEmpty(query))
-            {
-                Status?.Invoke(this, new TextEventArgs("Error. The query can not be empty or null!"));
-                new ArgumentNullException();
-            }
 
-            string[] word = query.Split(' ');
-            if (
-               !word[0].ToLower().Equals("select") ||
-               !word[0].ToLower().Equals("update") ||
-               !word[0].ToLower().Equals("insert") ||
-               !word[0].ToLower().Equals("create") ||
-               !word[0].ToLower().Equals("delete") ||
-               !word[0].ToLower().Equals("replace"))
-            {
-                Status?.Invoke(this, new TextEventArgs(
-                    "Query is wrong! It does not start with appropriate commands. Query must start with any these commands: " +
-                    $"'SELECT, UPDATE, INSERT, CREATE, DELETE, REPLACE'\r\nYour query:  {query.ToUpper()}"));
-                new ArgumentException();
-            }
-
-            if (word.Where(x => x.ToLower().Equals("from")).Count() == 0)
-            {
-                Status?.Invoke(this, new TextEventArgs(
-                    $"Query is wrong! It does not contain any query to a table. " +
-                    $"Check your expresion near 'FROM'\r\nYour query:  {query.ToUpper()}"));
-                new ArgumentException();
-            }
-        }
 
         /// <summary>
         /// To use with transaction keywords - "begin" and "end"

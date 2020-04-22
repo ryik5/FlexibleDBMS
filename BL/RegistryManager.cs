@@ -26,7 +26,7 @@ namespace AutoAnalysis
     {
         public string Key { get; set; }
         public object Value { get; set; }
-        public RegistryValueKind Type { get; set; }
+        public RegistryValueKind ValueKind { get; set; }
     }
 
     public class RegistryManager : IRegistryWriteable, IRegistryReadable
@@ -50,20 +50,20 @@ namespace AutoAnalysis
                     {
                         entity.Key = key?.Trim();
                         entity.Value = EvUserKey?.GetValue(key);
-                        entity.Type = EvUserKey.GetValueKind(key);
+                        entity.ValueKind = EvUserKey.GetValueKind(key);
                     }
                     catch (Exception err)
                     {
-                        EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't get value of '{key}' from Registry:\r\n{err.ToString()}"));
+                        EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't get value of '{key}' from Registry:{Environment.NewLine}{err.ToString()}"));
                     }
                 }
 
                 if (string.IsNullOrEmpty(errors)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"'{key}' was read in Registry")); }
-                else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading '{key}' in Registry:\r\n{errors}")); }
+                else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading '{key}' in Registry:{Environment.NewLine}{errors}")); }
             }
             catch (Exception err)
             {
-                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't find '{appRegistryKey}' in Registry:\r\n{err.ToString()}"));
+                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't find '{appRegistryKey}' in Registry:{Environment.NewLine}{err.ToString()}"));
             }
             return entity;
         }
@@ -79,34 +79,38 @@ namespace AutoAnalysis
                 using (RegistryKey EvUserKey = Registry.CurrentUser.OpenSubKey(appRegistryKey, RegistryKeyPermissionCheck.ReadSubTree, RegistryRights.ReadKey))
                 {
                     string[] subNames = EvUserKey.GetSubKeyNames();
-                    foreach (string name in subNames)
-                    {
-                        string key = name?.Trim();
-                        if (key.Length > 0)
-                            try
-                            {
-                                RegistryEntity entity = new RegistryEntity
-                                {
-                                    Key = key,
-                                    Value = EvUserKey?.GetValue(name),
-                                    Type = EvUserKey.GetValueKind(name)
-                                };
-                                list.Add(entity);
-                            }
-                            catch (Exception err)
-                            {
-                                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't get value of '{name}' from Registry:\r\n{err.ToString()}"));
-                            }
 
+                    if (subNames?.Length > 0)
+                    {
+                        foreach (string name in subNames)
+                        {
+                            if (!string.IsNullOrWhiteSpace(name))
+                            {
+                                try
+                                {
+                                    RegistryEntity entity = new RegistryEntity
+                                    {
+                                        Key = name.Trim(),
+                                        Value = EvUserKey?.GetValue(name),
+                                        ValueKind = EvUserKey.GetValueKind(name)
+                                    };
+                                    list.Add(entity);
+                                }
+                                catch (Exception err)
+                                {
+                                    EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't get value of '{name}' from Registry:{Environment.NewLine}{err.ToString()}"));
+                                }
+                            }
+                        }
                     }
                 }
 
                 if (string.IsNullOrEmpty(errors)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"'{appRegistryKey}' was found to read keys in Registry")); }
-                else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading '{appRegistryKey}' from Registry:\r\n{errors}")); }
+                else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading '{appRegistryKey}' from Registry:{Environment.NewLine}{errors}")); }
             }
             catch (Exception err)
             {
-                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't find '{appRegistryKey}' in Registry:\r\n{err.ToString()}"));
+                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't find '{appRegistryKey}' in Registry:{Environment.NewLine}{err.ToString()}"));
             }
 
             return list;
@@ -114,6 +118,11 @@ namespace AutoAnalysis
 
         public IList<RegistryEntity> ReadRegistryKeys(string subkey)
         {
+            if (string.IsNullOrWhiteSpace(subkey))
+            {
+                return null;
+            }
+
             IList<RegistryEntity> list = new List<RegistryEntity>();
 
             string errors = string.Empty;
@@ -121,28 +130,31 @@ namespace AutoAnalysis
             {
                 using (RegistryKey EvUserKey = Registry.CurrentUser.OpenSubKey(appRegistryKey + "\\" + subkey, false))
                 {
-                    string[] subNames = EvUserKey.GetValueNames();
+                    string[] subNames = EvUserKey?.GetValueNames();
 
-                    foreach (string name in subNames)
+                    if (subNames?.Length > 0)
                     {
-                        string key = name?.Trim();
-                        if (key?.Length > 0)
+                        foreach (string name in subNames)
                         {
-                            try
+                            string key = name?.Trim();
+                            if (key?.Length > 0)
                             {
-                                RegistryEntity entity = new RegistryEntity
+                                try
                                 {
-                                    Key = key,
-                                    Value = EvUserKey?.GetValue(key),
-                                    Type = EvUserKey.GetValueKind(key)
-                                };
+                                    RegistryEntity entity = new RegistryEntity
+                                    {
+                                        Key = key,
+                                        Value = EvUserKey?.GetValue(key),
+                                        ValueKind = EvUserKey.GetValueKind(key)
+                                    };
 
-                                list.Add(entity);
-                            }
+                                    list.Add(entity);
+                                }
 
-                            catch (Exception err)
-                            {
-                                errors += $"Can't get value of '{name}' from Registry:\r\n{err.ToString()}";
+                                catch (Exception err)
+                                {
+                                    errors += $"Can't get value of '{name}' from Registry:{Environment.NewLine}{err.ToString()}";
+                                }
                             }
                         }
                     }
@@ -151,11 +163,11 @@ namespace AutoAnalysis
                 if (string.IsNullOrEmpty(errors))
                 { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Under Registry subkey '{appRegistryKey}\\{subkey}' was read {list.Count} elements")); }
                 else
-                { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading '{appRegistryKey}' in Registry:\r\n{errors}")); }
+                { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error reading key '{appRegistryKey}' in Registry:{Environment.NewLine}{errors}")); }
             }
             catch (Exception err)
             {
-                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't find '{appRegistryKey}' in Registry:\r\n{err.ToString()}"));
+                EvntStatusInfo?.Invoke(this, new TextEventArgs($"Can't find key '{appRegistryKey}' in Registry:{Environment.NewLine}{err.ToString()}"));
             }
             return list;
         }
@@ -180,13 +192,13 @@ namespace AutoAnalysis
                 using (RegistryKey EvUserKey = Registry.CurrentUser.CreateSubKey(appRegistryKey))
                 {
                     try { EvUserKey.SetValue(key, value, RegistryValueKind.String); }
-                    catch (Exception err) { errMessage += $"Error writting of value{key}: {err.ToString()} + \r\n"; }
+                    catch (Exception err) { errMessage += $"Error writting of value{key}: {err.ToString()}{Environment.NewLine}"; }
                 }
             }
-            catch (Exception err) { errMessage += $"Forbiden access to write in Registry:{appRegistryKey}: {err.ToString()} + \r\n"; }
+            catch (Exception err) { errMessage += $"Forbiden access to write in Registry:{appRegistryKey}: {err.ToString()}{Environment.NewLine}"; }
 
             if (string.IsNullOrEmpty(errMessage)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Data was written in Registry succesful")); }
-            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error to write in Registry:\r\n{errMessage}")); }
+            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error to write in Registry:{Environment.NewLine}{errMessage}")); }
         }
 
         /// <summary>
@@ -220,16 +232,16 @@ namespace AutoAnalysis
                         {
 
                             try { EvUserSubKey.SetValue(key, $"{value}", RegistryValueKind.String); }
-                            catch (Exception err) { errMessage += $"Error writting of value{key}: {err.ToString()} + \r\n"; }
+                            catch (Exception err) { errMessage += $"Error writting of value '{key}':{Environment.NewLine}{err.ToString()}{Environment.NewLine}"; }
                         }
                     }
-                    catch (Exception err) { errMessage += $"Forbiden access to write in Registry:{subkey}: {err.ToString()} + \r\n"; }
+                    catch (Exception err) { errMessage += $"Forbiden access to write in Registry key '{subkey}':{Environment.NewLine}{err.ToString()}{Environment.NewLine}"; }
                 }
             }
-            catch (Exception err) { errMessage += $"Forbiden access to write in Registry:{appRegistryKey}: {err.ToString()} + \r\n"; }
+            catch (Exception err) { errMessage += $"Forbiden access to write in Registry:{appRegistryKey}:{Environment.NewLine}{err.ToString()}{Environment.NewLine}"; }
 
             if (string.IsNullOrEmpty(errMessage)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Data was written in Registry succesful")); }
-            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error to write in Registry:\r\n{errMessage}")); }
+            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error to write in Registry:{Environment.NewLine}{errMessage}")); }
         }
 
         /// <summary>
@@ -258,14 +270,14 @@ namespace AutoAnalysis
                     foreach (var parameter in dic)
                     {
                         try { EvUserKey.SetValue(parameter.Key, $"{parameter.Value}", RegistryValueKind.String); }
-                        catch (Exception err) { errMessage += $"Error writting of value{parameter.Key}: {err.ToString()} + \r\n"; }
+                        catch (Exception err) { errMessage += $"Error writting of value '{parameter.Key}':{Environment.NewLine}{err.ToString()}{Environment.NewLine}"; }
                     }
                 }
             }
-            catch (Exception err) { errMessage += $"Forbiden access to write in Registry:{appRegistryKey}: {err.ToString()} + \r\n"; }
+            catch (Exception err) { errMessage += $"Forbiden access to write in Registry key '{appRegistryKey}':{Environment.NewLine}{err.ToString()}{Environment.NewLine}"; }
 
             if (string.IsNullOrEmpty(errMessage)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Data was written in Registry succesful")); }
-            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error to write in Registry:\r\n{errMessage}")); }
+            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error to write in Registry:{Environment.NewLine}{errMessage}")); }
         }
 
         /// <summary>
@@ -299,17 +311,17 @@ namespace AutoAnalysis
                             foreach (var parameter in dic)
                             {
                                 try { EvUserSubKey.SetValue(parameter.Key, $"{parameter.Value}", RegistryValueKind.String); }
-                                catch (Exception err) { errMessage += $"Error writting of value{parameter.Key}: {err.ToString()} + \r\n"; }
+                                catch (Exception err) { errMessage += $"Error writting of value '{parameter.Key}':{Environment.NewLine}{err.ToString()}{Environment.NewLine}"; }
                             }
                         }
                     }
-                    catch (Exception err) { errMessage += $"Forbiden access to write in Registry:{subkey}: {err.ToString()} + \r\n"; }
+                    catch (Exception err) { errMessage += $"Forbiden access to write in Registry key '{subkey}':{Environment.NewLine}{err.ToString()}{Environment.NewLine}"; }
                 }
             }
-            catch (Exception err) { errMessage += $"Forbiden access to write in Registry:{appRegistryKey}: {err.ToString()} + \r\n"; }
+            catch (Exception err) { errMessage += $"Forbiden access to write Registry key '{appRegistryKey}':{Environment.NewLine}{err.ToString()}{Environment.NewLine}"; }
 
             if (string.IsNullOrEmpty(errMessage)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Data was written in Registry succesful")); }
-            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error to write in Registry:\r\n{errMessage}")); }
+            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error to write in Registry:{Environment.NewLine}{errMessage}")); }
         }
 
         public void DeleteSubKeyTreeQueryExtraItems(string subkey)
@@ -323,13 +335,13 @@ namespace AutoAnalysis
                     {
                         EvUserKey.DeleteSubKeyTree(subkey);
                     }
-                    catch (Exception err) { errMessage += $"Forbiden to delete in Registry:{subkey}: {err.ToString()} + \r\n"; }
+                    catch (Exception err) { errMessage += $"Forbiden to delete Registry key '{subkey}':{Environment.NewLine}{err.ToString()}{Environment.NewLine}"; }
                 }
             }
-            catch (Exception err) { errMessage += $"Forbiden to write in Registry:{appRegistryKey}: {err.ToString()} + \r\n"; }
+            catch (Exception err) { errMessage += $"Forbiden to open Registry key '{appRegistryKey}':{Environment.NewLine}{err.ToString()}{Environment.NewLine}"; }
 
-            if (string.IsNullOrEmpty(errMessage)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Data was written in Registry succesful")); }
-            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Error to write in Registry:\r\n{errMessage}")); }
+            if (string.IsNullOrEmpty(errMessage)) { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Data was succesful deleted from Registry")); }
+            else { EvntStatusInfo?.Invoke(this, new TextEventArgs($"Registry delete errors:{Environment.NewLine}{errMessage}")); }
         }
     }
 }

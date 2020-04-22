@@ -37,7 +37,7 @@ namespace AutoAnalysis
             return list;
         }
 
-        public static IList<ToolStripMenuItem> ToToolStripMenuItemsList(this IList<RegistryEntity> list, ToolStripModes modes)
+        public static IList<ToolStripMenuItem> ToToolStripMenuItemsList(this IList<RegistryEntity> list, ToolStripMenuType modes)
         {
             IList<ToolStripMenuItem> toolMenuList = new List<ToolStripMenuItem>();
 
@@ -50,9 +50,9 @@ namespace AutoAnalysis
                 {
                     switch (modes)
                     {
-                        case ToolStripModes.QueryExtra:
+                        case ToolStripMenuType.ExtraQuery:
                             {
-                                if (r.Type == Microsoft.Win32.RegistryValueKind.String)
+                                if (r.ValueKind == Microsoft.Win32.RegistryValueKind.String)
                                 {
                                     text = r?.Value?.ToString()?.Trim().Split(':')[0]?.Trim();
                                     tag = r?.Value?.ToString()?.Trim().Split(':')[1]?.Trim();
@@ -60,21 +60,21 @@ namespace AutoAnalysis
                                     menuItem = new MenuItem(text, tag);
                                     if (text?.Length > 0 && tag?.Length > 0)
                                     {
-                                        ToolStripMenuItem toolMenu = menuItem.ToExtentendedMenuToolStripMenuItem();
+                                        ToolStripMenuItem toolMenu = menuItem.ToExtraMenuToolStripMenuItem();
                                         toolMenuList.Add(toolMenu);
                                     }
                                 }
                                 break;
                             }
-                        case ToolStripModes.RecentConnection:
+                        case ToolStripMenuType.RecentConnection:
                             {
                                 text = r?.Value?.ToString()?.Trim();
                                 tag = r?.Key?.ToString()?.Trim();
-
+                                
                                 menuItem = new MenuItem(text, tag);
                                 if (text?.Length > 0 && tag?.Length > 0)
                                 {
-                                    ToolStripMenuItem toolMenu = menuItem.ToExtentendedMenuToolStripMenuItem();
+                                    ToolStripMenuItem toolMenu = menuItem.ToFilterToolStripMenuItem();
                                     toolMenuList.Add(toolMenu);
                                 }
 
@@ -118,32 +118,32 @@ namespace AutoAnalysis
         /// </summary>
         /// <param name="item">ToolStripDropDownItem, is used itemName, itemText and itemTag</param>
         /// <returns></returns>
-        public static IDictionary<string, string> ToDictionary(this ToolStripDropDownItem item, int limitElementsMenu = 40)
+        public static IDictionary<string, string> ToDictionary(this ToolStripDropDownItem item, int maxAmountElementsSubMenu = 40)
         {
-            IDictionary<string, string> dic = new Dictionary<string, string>(limitElementsMenu);
-            IList<string> queries = new List<string>();
+            IDictionary<string, string> dic = new Dictionary<string, string>(maxAmountElementsSubMenu);
+            IList<string> lines = new List<string>();
             MenuItem menuItem;
-            string name, query;
+            string text, tag;
 
             foreach (var v in item.DropDownItems)
             {
                 if (v is ToolStripMenuItem)
                 {
                     ToolStripMenuItem m = v as ToolStripMenuItem;
-                    name = m.Text?.Replace(":", "")?.Replace("  ", " ")?.Trim();
-                    query = m.Tag?.ToString()?.Replace(":", "")?.Replace("  ", " ")?.Trim();
-                    if (name?.Length > 0 && query?.Length > 0)
+                    text = m.Text?.Replace(":", "")?.Replace("  ", " ")?.Trim();
+                    tag = m.Tag?.ToString()?.Replace(":", "")?.Replace("  ", " ")?.Trim();
+                    if (text?.Length > 0 && tag?.Length > 0)
                     {
-                        if (queries.Where(x => x.Equals(query)).Count() == 0)
+                        if (lines.Where(x => x.ToLower().Equals(tag)).Count() == 0)
                         {
-                            if (limitElementsMenu < 1)
+                            if (maxAmountElementsSubMenu < 1)
                             {
                                 continue;
                             }
-                            menuItem = new MenuItem(name, query);
-                            queries.Add(query);
-                            dic.Add(menuItem.Name, $"{name}: {query}");
-                            limitElementsMenu--;
+                            menuItem = new MenuItem(text, tag);
+                            lines.Add(tag.ToLower());
+                            dic.Add(menuItem.Name, $"{text}: {tag}");
+                            maxAmountElementsSubMenu--;
                         }
                     }
                 }
@@ -152,9 +152,9 @@ namespace AutoAnalysis
             return dic;
         }
 
-        public static IDictionary<string, string> GetPropertyValues(this object obj, int limitElementsMenu = 1000)
+        public static IDictionary<string, string> GetPropertyValues(this object obj, int maxAmountClassElements = 1000)
         {
-            IDictionary<string, string> dic = new Dictionary<string, string>(limitElementsMenu);
+            IDictionary<string, string> dic = new Dictionary<string, string>(maxAmountClassElements);
 
             if (obj == null) return null;
 
@@ -257,7 +257,7 @@ namespace AutoAnalysis
             return connectionSettings;
         }
 
-        public static ToolStripMenuItem ToExtentendedMenuToolStripMenuItem(this MenuItem menuItem)
+        public static ToolStripMenuItem ToExtraMenuToolStripMenuItem(this MenuItem menuItem)
         {
             ToolStripMenuItem item = new ToolStripMenuItem()
             {

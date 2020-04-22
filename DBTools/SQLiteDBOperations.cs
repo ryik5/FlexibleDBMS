@@ -79,22 +79,22 @@ namespace AutoAnalysis
             return dt;
         }
 
-        public IList<string> GetList(DataTable dt)
-        {
-            IList<string> list = new List<string>();
-            string text = string.Empty;
-            var myData = dt.Select();
-            for (int i = 0; i < myData.Length; i++)
-            {
-                text = string.Empty; 
+        //public IList<string> GetList(DataTable dt)
+        //{
+        //    IList<string> list = new List<string>();
+        //    string text = string.Empty;
+        //    var myData = dt.Select();
+        //    for (int i = 0; i < myData.Length; i++)
+        //    {
+        //        text = string.Empty; 
 
-                for (int j = 0; j < myData[i].ItemArray.Length; j++)
-                    text += myData[i].ItemArray[j] + " ";
-                list.Add(text);
-            }
+        //        for (int j = 0; j < myData[i].ItemArray.Length; j++)
+        //            text += myData[i].ItemArray[j] + " ";
+        //        list.Add(text);
+        //    }
 
-            return list;
-        }
+        //    return list;
+        //}
 
         /// <summary>
         /// get only simple query like 'SELECT DISTINCT name_column FROM name_table'

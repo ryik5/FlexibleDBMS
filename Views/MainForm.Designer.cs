@@ -35,7 +35,6 @@
             this.createLocalDBMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectNewDBMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.connectToSQLServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.recentConnectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.importFromTextFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.writeModelsListMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -54,7 +53,7 @@
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.exportMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.queryMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.addQueryExtraMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addToExtraMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.queriesStandartMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.schemeLocalDBMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -87,6 +86,8 @@
             this.progressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.txtBodyQuery = new System.Windows.Forms.TextBox();
             this.txtbNameQuery = new System.Windows.Forms.TextBox();
+            this.changeBaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addToStandartMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.statusMessenges.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -111,7 +112,8 @@
             this.administratorMenu,
             this.viewMenu,
             this.queryMenu,
-            this.helpMenu});
+            this.helpMenu,
+            this.changeBaseToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(800, 24);
@@ -124,7 +126,6 @@
             this.createLocalDBMenuItem,
             this.selectNewDBMenuItem,
             this.connectToSQLServerToolStripMenuItem,
-            this.recentConnectionToolStripMenuItem,
             this.toolStripSeparator5,
             this.importFromTextFileMenuItem,
             this.writeModelsListMenuItem,
@@ -153,12 +154,6 @@
             this.connectToSQLServerToolStripMenuItem.Name = "connectToSQLServerToolStripMenuItem";
             this.connectToSQLServerToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.connectToSQLServerToolStripMenuItem.Text = "Connect to SQL server";
-            // 
-            // recentConnectionToolStripMenuItem
-            // 
-            this.recentConnectionToolStripMenuItem.Name = "recentConnectionToolStripMenuItem";
-            this.recentConnectionToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
-            this.recentConnectionToolStripMenuItem.Text = "Recent connection";
             // 
             // toolStripSeparator5
             // 
@@ -269,7 +264,8 @@
             // queryMenu
             // 
             this.queryMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addQueryExtraMenuItem,
+            this.addToStandartMenuItem,
+            this.addToExtraMenuItem,
             this.toolStripSeparator1,
             this.queriesStandartMenu,
             this.queriesExtraMenu,
@@ -279,16 +275,16 @@
             this.queryMenu.Size = new System.Drawing.Size(51, 20);
             this.queryMenu.Text = "Query";
             // 
-            // addQueryExtraMenuItem
+            // addToExtraMenuItem
             // 
-            this.addQueryExtraMenuItem.Name = "addQueryExtraMenuItem";
-            this.addQueryExtraMenuItem.Size = new System.Drawing.Size(159, 22);
-            this.addQueryExtraMenuItem.Text = "Add";
+            this.addToExtraMenuItem.Name = "addToExtraMenuItem";
+            this.addToExtraMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addToExtraMenuItem.Text = "Add to Extra";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(156, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // queriesStandartMenu
             // 
@@ -307,7 +303,7 @@
             this.lookForFamiliyNameToolStripMenuItem,
             this.lookForOrganizationToolStripMenuItem});
             this.queriesStandartMenu.Name = "queriesStandartMenu";
-            this.queriesStandartMenu.Size = new System.Drawing.Size(159, 22);
+            this.queriesStandartMenu.Size = new System.Drawing.Size(180, 22);
             this.queriesStandartMenu.Text = "Standart queries";
             // 
             // schemeLocalDBMenuItem
@@ -388,18 +384,18 @@
             // queriesExtraMenu
             // 
             this.queriesExtraMenu.Name = "queriesExtraMenu";
-            this.queriesExtraMenu.Size = new System.Drawing.Size(159, 22);
+            this.queriesExtraMenu.Size = new System.Drawing.Size(180, 22);
             this.queriesExtraMenu.Text = "Extra queries";
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(156, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
             // 
             // removeQueryExtraMenuItem
             // 
             this.removeQueryExtraMenuItem.Name = "removeQueryExtraMenuItem";
-            this.removeQueryExtraMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.removeQueryExtraMenuItem.Size = new System.Drawing.Size(180, 22);
             this.removeQueryExtraMenuItem.Text = "Remove";
             // 
             // helpMenu
@@ -414,13 +410,13 @@
             // aboutMenuItem
             // 
             this.aboutMenuItem.Name = "aboutMenuItem";
-            this.aboutMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.aboutMenuItem.Size = new System.Drawing.Size(180, 22);
             this.aboutMenuItem.Text = "About";
             // 
             // useApplicationMenuItem
             // 
             this.useApplicationMenuItem.Name = "useApplicationMenuItem";
-            this.useApplicationMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.useApplicationMenuItem.Size = new System.Drawing.Size(180, 22);
             this.useApplicationMenuItem.Text = "UseApplication";
             // 
             // statusMessenges
@@ -517,6 +513,18 @@
             this.txtbNameQuery.Size = new System.Drawing.Size(97, 20);
             this.txtbNameQuery.TabIndex = 7;
             // 
+            // changeBaseToolStripMenuItem
+            // 
+            this.changeBaseToolStripMenuItem.Name = "changeBaseToolStripMenuItem";
+            this.changeBaseToolStripMenuItem.Size = new System.Drawing.Size(84, 20);
+            this.changeBaseToolStripMenuItem.Text = "ChangeBase";
+            // 
+            // addToStandartMenuItem
+            // 
+            this.addToStandartMenuItem.Name = "addToStandartMenuItem";
+            this.addToStandartMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addToStandartMenuItem.Text = "Add to Standart";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -561,7 +569,7 @@
         private System.Windows.Forms.ToolStripStatusLabel StatusLabelExtraInfo;
         private System.Windows.Forms.ToolStripDropDownButton SplitImage1;
         private System.Windows.Forms.ToolStripMenuItem queryMenu;
-        private System.Windows.Forms.ToolStripMenuItem addQueryExtraMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addToExtraMenuItem;
         private System.Windows.Forms.ToolStripMenuItem queriesStandartMenu;
         private System.Windows.Forms.ToolStripMenuItem analysisToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem loadData0MenuItem;
@@ -599,11 +607,12 @@
         private System.Windows.Forms.ToolStripMenuItem lookForFamiliyNameToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem lookForOrganizationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem connectToSQLServerToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem recentConnectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
         private System.Windows.Forms.ToolStripMenuItem readFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem writeFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem printConfigToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem changeBaseToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addToStandartMenuItem;
     }
 }
 
