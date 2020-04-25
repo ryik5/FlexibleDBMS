@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     public interface ISQLConnectionSettings
     {
@@ -12,7 +12,6 @@ namespace AutoAnalysis
         string Password { get; set; }
         string Name { get; set; }
         SQLProvider? ProviderName { get; set; }
-        bool IsGlobal { get; }
     }
 
     [Serializable]
@@ -21,16 +20,22 @@ namespace AutoAnalysis
         public string Host { get; set; } = "local";
         public int? Port { get; set; } = 0;
         public string Database { get; set; } = "main.db";
-        public string Table { get; set; } = "CarAndOwner";
+        public string Table { get; set; } = "main";
         public string Username { get; set; } = "";
         public string Password { get; set; } = "";
-        public string Name { get; set; } = $"local - Main.db";
+        public string Name { get; set; } = $"local - main.db";
         public SQLProvider? ProviderName { get; set; } = SQLProvider.SQLite;
-        public bool IsGlobal => false;
 
+        public delegate void ConfigChanged(object sender, BoolEventArgs args);
+        
+        public event ConfigChanged EvntConfigChanged;
+        
         public SQLConnectionSettings() { }
 
         public SQLConnectionSettings(ISQLConnectionSettings settings)
+        {            Set(settings);        }
+
+        public void Set(ISQLConnectionSettings settings)
         {
             Name = settings?.Name;
             ProviderName = settings?.ProviderName;
@@ -40,6 +45,8 @@ namespace AutoAnalysis
             Password = settings?.Password;
             Database = settings?.Database;
             Table = settings?.Table;
+
+            EvntConfigChanged?.Invoke(this, new BoolEventArgs(true));
         }
 
         public SQLConnectionSettings Get()
@@ -57,5 +64,4 @@ namespace AutoAnalysis
             };
         }
     }
-
 }

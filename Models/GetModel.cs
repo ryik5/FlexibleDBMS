@@ -1,4 +1,4 @@
-﻿namespace AutoAnalysis
+﻿namespace FlexibleDBMS
 {
     public static class GetModel<T> where T : IModel
     {

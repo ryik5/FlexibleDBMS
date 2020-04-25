@@ -5,15 +5,15 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
-    public class FileReader: IReadable
+    public class FileReader : IReadable
     {
         int _maxElementsInDictionary = 1000;
         Encoding _encoding = Encoding.GetEncoding(1251);
         public int importedRows = 0;
         public IList<string> Text;
-        public ConfigParameter config;
+        public AbstractConfigList config;
 
         public delegate void CollectionFull(object sender, BoolEventArgs e);
         public event CollectionFull EvntCollectionFull;
@@ -68,7 +68,7 @@ namespace AutoAnalysis
 
         public async Task Read(string filePath)
         {
-            await Task.Run(() => Read(filePath,_maxElementsInDictionary));
+            await Task.Run(() => Read(filePath, _maxElementsInDictionary));
         }
 
         public async Task Read(string filePath, int maxElementsInDictionary)
@@ -78,18 +78,25 @@ namespace AutoAnalysis
 
         public async Task ReadConfigAsync(string filePath)
         {
-            await Task.Run(() => config = ReadConfig(filePath));
+            await Task.Run(() => config = ReadSerilizedConfig(filePath));
         }
 
-        private ConfigParameter ReadConfig(string filePath)
+        public AbstractConfigList ReadConfig(string filePath)
         {
-            ConfigParameter config = null;
+            Task.Run(() => ReadConfigAsync(filePath)).Wait();
+
+            return config;
+        }
+
+        private AbstractConfigList ReadSerilizedConfig(string filePath)
+        {
             BinaryFormatter formatter = new BinaryFormatter();
             try
             {
-                using (FileStream fs = new FileStream(filePath, FileMode.Open))
+                EvntInfoMessage?.Invoke(this, new TextEventArgs($"Try to read '{filePath}'"));
+                using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate))
                 {
-                    config = (ConfigParameter)formatter.Deserialize(fs);
+                    config = (AbstractConfigList)formatter.Deserialize(fs);
                 }
             }
             catch (Exception excpt)

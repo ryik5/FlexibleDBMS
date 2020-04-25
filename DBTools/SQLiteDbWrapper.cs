@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
 
     //SQLite
@@ -119,7 +119,7 @@ namespace AutoAnalysis
         {
             DataTable dt = new DataTable();
 
-            if (CommonExtesions.IsSqlQuery(query))
+            if (CommonExtesions.CheckIsSqlQuery(query))
             {
                 using (var sqlAdapter = new SQLiteDataAdapter(query, sqlConnection))
                 {
@@ -176,7 +176,7 @@ namespace AutoAnalysis
 
         public void Execute(string query)
         {
-            if (CommonExtesions.IsSqlQuery(query))
+            if (CommonExtesions.CheckIsSqlQuery(query))
             {
                 using (var sqlCommand = new SQLiteCommand(query, sqlConnection))
                 {

@@ -1,4 +1,4 @@
-﻿namespace AutoAnalysis
+﻿namespace FlexibleDBMS
 {
     partial class HelpForm
     {
@@ -83,7 +83,7 @@
             // logoPictureBox
             // 
             this.logoPictureBox.BackColor = System.Drawing.SystemColors.Info;
-            this.logoPictureBox.BackgroundImage = global::AutoAnalysis.Properties.Resources.LogoRYIK;
+            this.logoPictureBox.BackgroundImage = global::FlexibleDBMS.Properties.Resources.LogoRYIK;
             this.logoPictureBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.logoPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.logoPictureBox.Dock = System.Windows.Forms.DockStyle.Fill;

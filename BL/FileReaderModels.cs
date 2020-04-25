@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
 
     public class FileReaderModels<T> where T : IModel

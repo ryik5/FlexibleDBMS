@@ -1,4 +1,4 @@
-﻿namespace AutoAnalysis
+﻿namespace FlexibleDBMS
 {
     partial class Form1
     {
@@ -53,6 +53,7 @@
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.exportMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.queryMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.addToStandartMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addToExtraMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.queriesStandartMenu = new System.Windows.Forms.ToolStripMenuItem();
@@ -75,6 +76,7 @@
             this.helpMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.useApplicationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.changeBaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusMessenges = new System.Windows.Forms.StatusStrip();
             this.StatusApp = new System.Windows.Forms.ToolStripStatusLabel();
             this.StatusInfoMain = new System.Windows.Forms.ToolStripStatusLabel();
@@ -86,8 +88,6 @@
             this.progressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.txtBodyQuery = new System.Windows.Forms.TextBox();
             this.txtbNameQuery = new System.Windows.Forms.TextBox();
-            this.changeBaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.addToStandartMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.statusMessenges.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -275,16 +275,22 @@
             this.queryMenu.Size = new System.Drawing.Size(51, 20);
             this.queryMenu.Text = "Query";
             // 
+            // addToStandartMenuItem
+            // 
+            this.addToStandartMenuItem.Name = "addToStandartMenuItem";
+            this.addToStandartMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.addToStandartMenuItem.Text = "Add to Standart";
+            // 
             // addToExtraMenuItem
             // 
             this.addToExtraMenuItem.Name = "addToExtraMenuItem";
-            this.addToExtraMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addToExtraMenuItem.Size = new System.Drawing.Size(159, 22);
             this.addToExtraMenuItem.Text = "Add to Extra";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(156, 6);
             // 
             // queriesStandartMenu
             // 
@@ -303,7 +309,7 @@
             this.lookForFamiliyNameToolStripMenuItem,
             this.lookForOrganizationToolStripMenuItem});
             this.queriesStandartMenu.Name = "queriesStandartMenu";
-            this.queriesStandartMenu.Size = new System.Drawing.Size(180, 22);
+            this.queriesStandartMenu.Size = new System.Drawing.Size(159, 22);
             this.queriesStandartMenu.Text = "Standart queries";
             // 
             // schemeLocalDBMenuItem
@@ -384,18 +390,18 @@
             // queriesExtraMenu
             // 
             this.queriesExtraMenu.Name = "queriesExtraMenu";
-            this.queriesExtraMenu.Size = new System.Drawing.Size(180, 22);
+            this.queriesExtraMenu.Size = new System.Drawing.Size(159, 22);
             this.queriesExtraMenu.Text = "Extra queries";
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(156, 6);
             // 
             // removeQueryExtraMenuItem
             // 
             this.removeQueryExtraMenuItem.Name = "removeQueryExtraMenuItem";
-            this.removeQueryExtraMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeQueryExtraMenuItem.Size = new System.Drawing.Size(159, 22);
             this.removeQueryExtraMenuItem.Text = "Remove";
             // 
             // helpMenu
@@ -410,14 +416,20 @@
             // aboutMenuItem
             // 
             this.aboutMenuItem.Name = "aboutMenuItem";
-            this.aboutMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.aboutMenuItem.Size = new System.Drawing.Size(154, 22);
             this.aboutMenuItem.Text = "About";
             // 
             // useApplicationMenuItem
             // 
             this.useApplicationMenuItem.Name = "useApplicationMenuItem";
-            this.useApplicationMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.useApplicationMenuItem.Size = new System.Drawing.Size(154, 22);
             this.useApplicationMenuItem.Text = "UseApplication";
+            // 
+            // changeBaseToolStripMenuItem
+            // 
+            this.changeBaseToolStripMenuItem.Name = "changeBaseToolStripMenuItem";
+            this.changeBaseToolStripMenuItem.Size = new System.Drawing.Size(84, 20);
+            this.changeBaseToolStripMenuItem.Text = "ChangeBase";
             // 
             // statusMessenges
             // 
@@ -513,18 +525,6 @@
             this.txtbNameQuery.Size = new System.Drawing.Size(97, 20);
             this.txtbNameQuery.TabIndex = 7;
             // 
-            // changeBaseToolStripMenuItem
-            // 
-            this.changeBaseToolStripMenuItem.Name = "changeBaseToolStripMenuItem";
-            this.changeBaseToolStripMenuItem.Size = new System.Drawing.Size(84, 20);
-            this.changeBaseToolStripMenuItem.Text = "ChangeBase";
-            // 
-            // addToStandartMenuItem
-            // 
-            this.addToStandartMenuItem.Name = "addToStandartMenuItem";
-            this.addToStandartMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.addToStandartMenuItem.Text = "Add to Standart";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -539,6 +539,7 @@
             this.MainMenuStrip = this.menuStrip;
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.statusMessenges.ResumeLayout(false);

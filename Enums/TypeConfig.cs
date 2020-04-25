@@ -1,6 +1,9 @@
 ﻿
-namespace AutoAnalysis
+using System;
+
+namespace FlexibleDBMS
 {
+    [Serializable]
     public enum TypeConfig
     {
         None,

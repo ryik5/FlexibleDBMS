@@ -9,8 +9,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
+
     public partial class Form1 : Form
     {
         //Application Modes
@@ -19,7 +20,7 @@ namespace AutoAnalysis
         //Application's Main interface Turn Up
         static readonly System.Diagnostics.FileVersionInfo appFileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(Application.ExecutablePath);
         static readonly string appName = Path.GetFileNameWithoutExtension(Application.ExecutablePath);
-        static readonly string appCfgFilePath = appName + ".cfg";
+        static readonly string appCfgFilePath = Application.StartupPath + "\\" + appName + ".cfg";
         static readonly string appRegistryKey = @"SOFTWARE\YuriRyabchenko\AutoAnalyse";
         Bitmap bmpLogo;
         static NotifyIcon notifyIcon;
@@ -28,7 +29,7 @@ namespace AutoAnalysis
 
         //DB
         SelectDBForm selectDB;
-        ISQLConnectionSettings connectionSettings = null;
+        ISQLConnectionSettings currentSQLConnection = null;
 
         ISqlDbConnector dBOperations;// = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
         IModelDBable<ModelDBTable> db;
@@ -41,13 +42,16 @@ namespace AutoAnalysis
         DataTable dtForShow;
         DataTable dtForStore;
 
-        
+        IModelDBable<ModelDBColumn> filtersTable = null; // меню фильтров в строке статуса
+        IDictionary<string, string> dicTranslator = null; //Перверодчик англ-русс
+
+
         //import a txt file in DB
         FileReaderModels<CarAndOwner> reader;
-        
+
         const int MAX_ELEMENTS_COLLECTION = 100000;
 
-        
+
         //Registry
         static RegistryManager regOperator;
         readonly string regSubKeyMenu = "Menu";
@@ -57,20 +61,62 @@ namespace AutoAnalysis
         //Configuration
         //const of default connection
         const string MAIN = "Main";
-        const string RECENT = "Recent";
-        const string DEFAULT = "Default";
+        const string DB_LIST = "Recent";
+        const string DEFAULT_CONNECTION = "Default";
 
-               
+        AbstractConfigParameter currentParameterConfig = null;
+        AbstractUnitConfigParameterList currentUnitConfig = null;
+        AbstractConfigList currentConfig = null;
+
+        IReadable readerConfig = null;
+        /*
+         Configuration:
+           Unit1: A) Name -> "name of connection1"
+                     ListParameters: AA) Name -> QueryExtra
+                                         ListParameters: AAA) Name -> QueryExtra1
+                                                              ListParameters: Name Value and Value
+                                                         BBB) Name -> QueryExtra2
+                                                              ListParameters: Name Value and Value
+           Unit2: A) Name -> "name of connection2"
+                     ListParameters: AA) Name -> QueryExtra
+                                         ListParameters: AAA) Name -> QueryExtra1
+                                                              ListParameters: Name Value and Value
+                                                         BBB) Name -> QueryExtra2
+                                                              ListParameters: Name Value and Value
+             
+             */
+
         public Form1()
         {
-            
             InitializeComponent();
-            
+        }
+
+
+        private async void Form1_Load(object sender, EventArgs e)
+        {
+            currentSQLConnection = new SQLConnectionSettings();
+
+            currentParameterConfig = new ConfigParameter();
+            currentUnitConfig = new ConfigUnitParameterList();
+            currentUnitConfig.Add(currentParameterConfig);
+            currentConfig = new ConfigList();
+            currentConfig.Add(currentUnitConfig);
+
+            regOperator = new RegistryManager(appRegistryKey);
+
             //Check Up Inputed Environment parameters
             CheckEnvironment();
 
             //Turn Up Application
             TurnUpAplication();
+
+            //registration manager RegestryWork
+
+            if (OperatingModes == AppModes.Admin)
+            { (regOperator as RegistryManager).EvntStatusInfo += AddLineAtTextboxLog; }
+            else if (OperatingModes == AppModes.User)
+            { try { (regOperator as RegistryManager).EvntStatusInfo -= AddLineAtTextboxLog; } catch { } }
+
 
             //Turn Up Menu
             TurnUpToolStripMenuItems();
@@ -83,21 +129,17 @@ namespace AutoAnalysis
             //show TextBox Log as main view 
             ShowLogViewTextbox(MainViewMode.Textbox);
 
-            if (connectionSettings == null)
-            {
-                connectionSettings = new SQLConnectionSettings
-                {
-                    Name = "default",
-                    Host = "local",
-                    ProviderName = SQLProvider.SQLite
-                };
-            }
+
+            // (currentConfig as ConfigParameter).EvntConfigChanged += CurrentConfiguration_EvntConfigChanged;
+
+          //  (currentSQLConnection as SQLConnectionSettings).EvntConfigChanged += CurrentSQLConnection_EvntConfigChanged;
+
+            await ReadCfgAsyncFromFile();
         }
 
-        /////
-        ////Settings
-        ////
-        
+
+
+
         /// <summary>
         /// Read Settings from Registry
         /// </summary>
@@ -115,12 +157,16 @@ namespace AutoAnalysis
                 {
                     case "Recent":
                         {
-                            ReadLastConnectionFromRegistry(entry?.Value?.ToString());
+                         
+                            ISQLConnectionSettings connection = ReadConnectionParametersFromRegistry(entry?.Value?.ToString());
+
+                            WriteConnectionInRegistry(connection);
+                            SetCurrentSQLConfiguration(connection);
                             break;
                         }
                     default:
                         {
-                            AddLineAtTextboxLog($"Найдены неизвестные настройки в реестре: {key} : {entry.Value}");
+                            AddLineAtTextboxLog($"Найдены необработанные настройки в реестре '{key}':{Environment.NewLine}{entry.Value}");
                             break;
                         }
                 }
@@ -132,12 +178,25 @@ namespace AutoAnalysis
             }
             else
             {
-                IList<ToolStripMenuItem> menuItems = 
+                IList<ToolStripMenuItem> menuItems =
                     regOperator.ReadRegistryKeys(regSubKeyRecent)?.ToToolStripMenuItemsList(ToolStripMenuType.RecentConnection);
                 AddQueriesFromRegistryToToolStripMenu(changeBaseToolStripMenuItem, menuItems, ToolStripMenuType.RecentConnection);
-                
-                if (connectionSettings.ProviderName == SQLProvider.SQLite) //Check Up Local DB schema
-                { CheckUpSelectedSQLiteDB(connectionSettings.Database); }
+
+                if (currentSQLConnection == null)
+                {
+                    AddLineAtTextboxLog("SQLConnectionSettings is empty. Will do new SQLConnectionSettings");
+
+                    currentSQLConnection = new SQLConnectionSettings
+                    {
+                        Name = "default",
+                        Host = "local",
+                        ProviderName = SQLProvider.SQLite
+                    };
+                }
+
+                if (currentSQLConnection?.ProviderName == SQLProvider.SQLite) //Check Up Local DB schema
+                { CheckUpSelectedSQLiteDB(currentSQLConnection.Database); }
+
             }
         }
 
@@ -204,14 +263,6 @@ namespace AutoAnalysis
                 ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
             };
             panel1.Controls.Add(dgv);
-
-            //registration manager RegestryWork
-            regOperator = new RegistryManager(appRegistryKey);
-
-            if (OperatingModes == AppModes.Admin)
-            { (regOperator as RegistryManager).EvntStatusInfo += AddLineAtTextboxLog; }
-            else if (OperatingModes == AppModes.User)
-            { try { (regOperator as RegistryManager).EvntStatusInfo -= AddLineAtTextboxLog; } catch { } }
         }
 
         private void TurnUpToolStripMenuItems()
@@ -264,13 +315,13 @@ namespace AutoAnalysis
 
                 queriesStandartMenu.Text = "Стандартные";
                 queriesStandartMenu.ToolTipText = "Предустановленные поисковые запросы";
-                addToStandartMenuItem.Text= "Добавить новый запрос в Стандартное меню";
+                addToStandartMenuItem.Text = "Добавить новый запрос в Стандартное меню";
                 addToStandartMenuItem.ToolTipText = "Формат слова которое будет искаться - {}. Вставить в месте запроса";
 
                 addToExtraMenuItem.Text = "Добавить новый запрос в Пользовательское меню";
                 addToExtraMenuItem.ToolTipText = "Составленный запрос запомнить и добавить его в Пользовательское меню";
                 addToExtraMenuItem.Click += AddExtraQueryMenuItem_Click;
-               
+
                 //query standart menu
                 {
                     //query standart menu items
@@ -354,17 +405,14 @@ namespace AutoAnalysis
             changeBaseToolStripMenuItem.Text = "Сменить";
             changeBaseToolStripMenuItem.ToolTipText = "Сменить банк";
         }
-
-
+        
 
         private void ConnectToSQLServerToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            GetNewConnection();
-        }
+        { GetNewConnection(); }
 
         private void GetNewConnection()
         {
-            SQLConnection.Settings = new SQLConnectionSettings(connectionSettings);
+            SQLConnection.Settings = new SQLConnectionSettings(currentSQLConnection);
             selectDB = new SelectDBForm();
             selectDB.Owner = this;
             selectDB.Icon = Icon.FromHandle(bmpLogo.GetHicon());
@@ -375,104 +423,96 @@ namespace AutoAnalysis
             selectDB.FormClosing += SelectDB_FormClosing;
         }
 
-        private async void SelectDB_FormClosing(object sender, FormClosingEventArgs e)
+        private void SelectDB_FormClosing(object sender, FormClosingEventArgs e)
         {
-            connectionSettings = new SQLConnectionSettings(selectDB.settings);
-            ReNewParametersDB(connectionSettings);
-         
+            SetCurrentSQLConfiguration(selectDB.settings);
             //Write in Registry Last Connection and its parameters
-            await Task.Run(() => WriteConnection(connectionSettings));
+
+
+            //Destroy SelectDB Form
+            selectDB.Dispose();
+            SQLConnection.Settings = null;
 
 
             //Show Main Form
             Show();
-            //Destroy SelectDB Form
-            selectDB.Dispose();
-
-            SQLConnection.Settings = null;
 
 
             //Check Data
-            AddLineAtTextboxLog($"Name: {connectionSettings.Name}");
-            AddLineAtTextboxLog($"ProviderName: {connectionSettings.ProviderName}");
-            AddLineAtTextboxLog($"Host: {connectionSettings.Host}");
-            AddLineAtTextboxLog($"Port: {connectionSettings.Port}");
-            AddLineAtTextboxLog($"Username: {connectionSettings.Username}");
-            AddLineAtTextboxLog($"Password: {connectionSettings.Password}");
-            AddLineAtTextboxLog($"Database: {connectionSettings.Database}");
-            AddLineAtTextboxLog($"Table: {connectionSettings.Table}");
+            AddLineAtTextboxLog($"Name: {currentSQLConnection.Name}");
+            AddLineAtTextboxLog($"ProviderName: {currentSQLConnection.ProviderName}");
+            AddLineAtTextboxLog($"Host: {currentSQLConnection.Host}");
+            AddLineAtTextboxLog($"Port: {currentSQLConnection.Port}");
+            AddLineAtTextboxLog($"Username: {currentSQLConnection.Username}");
+            AddLineAtTextboxLog($"Password: {currentSQLConnection.Password}");
+            AddLineAtTextboxLog($"Database: {currentSQLConnection.Database}");
+            AddLineAtTextboxLog($"Table: {currentSQLConnection.Table}");
+        }
+
+
+        private void BaseChangeMenuItems_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+
+            ISQLConnectionSettings connection = ReadConnectionParametersFromRegistry(item.Text);
+
+            //Write in Registry Last Connection and its parameters
+            WriteConnectionInRegistry(connection);
+            SetCurrentSQLConfiguration(connection);
+            MakeCurrentFullConfig();
+        }
+
+        private void SetCurrentSQLConfiguration(ISQLConnectionSettings settings)
+        {
+            (currentSQLConnection as SQLConnectionSettings).Set(settings);
+
+            //dBOperations renew
+            switch (currentSQLConnection.ProviderName)
+            {
+                case SQLProvider.SQLite:
+                    {
+                        dBOperations = new SQLiteDBOperations(currentSQLConnection);
+                        break;
+                    }
+                case SQLProvider.My_SQL:
+                    {
+                        dBOperations = new MySQLUtils(currentSQLConnection);
+                        break;
+                    }
+                default:
+                    {
+                        dBOperations = null;
+                        break;
+                    }
+            }
+            
+            StatusLabelExtraInfo.Text = $"Данные в таблице(ах) {currentSQLConnection.Table}";
+        }
+
+        private ISQLConnectionSettings ReadConnectionParametersFromRegistry(string text)
+        {
+            ISQLConnectionSettings settings = regOperator?
+                                      .ReadRegistryKeys($"{regSubKeyRecent}\\{text}")?
+                                          .ToSQLConnectionSettings();
+
+            return settings;
         }
 
         /// <summary>
         /// /Write in Registry Last Connection and its parameters
         /// </summary>
         /// <param name="settings"></param>
-        private void WriteConnection(ISQLConnectionSettings settings)
+        private void WriteConnectionInRegistry(ISQLConnectionSettings settings)
         {
-                 IDictionary<string, string> dic = settings.GetPropertyValues(20);
-                //write parameters of connection
-                regOperator.Write(dic, $"{regSubKeyRecent}\\{settings.Name}");
-                //write last connection' name
-                regOperator.Write(regSubKeyRecent, settings.Name);
-                //write connection and name as pair key-value
-                regOperator.Write(settings.Name, settings.Name, regSubKeyRecent);
+            IDictionary<string, string> dic = settings.GetPropertyValues(50);
+            //write parameters of connection
+            regOperator.Write(dic, $"{regSubKeyRecent}\\{settings.Name}");
+            //write last connection' name
+            regOperator.Write(regSubKeyRecent, settings.Name);
+            //write connection and name as pair key-value
+            regOperator.Write(settings.Name, settings.Name, regSubKeyRecent);
         }
 
-        private async void RecentMenuItems_Click(object sender, EventArgs e)
-        {
-            ToolStripMenuItem item = sender as ToolStripMenuItem;
-            
-            ReadLastConnectionFromRegistry(item.Text);
-
-
-            //Write in Registry Last Connection and its parameters
-            await Task.Run(() => WriteConnection(connectionSettings));
-        }
-
-        private void ReadLastConnectionFromRegistry(string text)
-        {
-            connectionSettings = regOperator?
-                                    .ReadRegistryKeys($"{regSubKeyRecent}\\{text}")?
-                                        .ToSQLConnectionSettings();
-                       
-            ReNewParametersDB(connectionSettings);
-            
-
-            //Check correctness
-            IDictionary<string, string> dic = connectionSettings.GetPropertyValues(50);
-
-            AddLineAtTextboxLog(dic.AsString());
-
-            //foreach (var ent in dic)
-            //{
-            //    AddLineAtTextboxLog(ent.Key + ": \t" + ent.Value);
-            //}
-        }
-
-        private void ReNewParametersDB(ISQLConnectionSettings settings)
-        {
-            //DB
-            if (settings.ProviderName == SQLProvider.SQLite)
-            {
-                dBOperations = new SQLiteDBOperations(settings);
-            }
-            else if (settings.ProviderName == SQLProvider.My_SQL)
-            {
-                dBOperations = new MySQLUtils(settings);
-            }
-
-            StatusLabelExtraInfo.Text = $"Данные в таблице(ах) {settings.Table}";
-
-            //Registry
-            RemoveCheckedMenuItemFromMenuStrip(queriesExtraMenu, true);
-
-            //ReNew QueryExtra with this connection
-            IList<ToolStripMenuItem> menuItems = regOperator
-                .ReadRegistryKeys($"{regSubKeyMenu}\\{connectionSettings.Name}")
-                .ToToolStripMenuItemsList(ToolStripMenuType.ExtraQuery);
-
-            AddQueriesFromRegistryToToolStripMenu(queriesExtraMenu, menuItems, ToolStripMenuType.ExtraQuery);
-        }
 
 
         private void EnableAddQueryMenuItem_queryMenu_DropDownOpened(object sender, EventArgs e)
@@ -485,7 +525,7 @@ namespace AutoAnalysis
             lookForNumberToolStripMenuItem.Enabled = false;
             lookForOrganizationToolStripMenuItem.Enabled = false;
 
-            if (!string.IsNullOrWhiteSpace( bodyQuery))
+            if (!string.IsNullOrWhiteSpace(bodyQuery))
             {
                 lookForNumberToolStripMenuItem.Enabled = true;
                 lookForFamiliyNameToolStripMenuItem.Enabled = true;
@@ -660,9 +700,6 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         }
 
 
-        IModelDBable<ModelDBColumn> filtersTable = null; // меню фильтров в строке статуса
-        IDictionary<string, string> dicTranslator = null; //Перверодчик англ-русс
-
         private async Task BuildFilters()
         {
             AddLineAtTextboxLog("Выполняется чтение базы и формирование библиотеки уникальных слов.");
@@ -692,8 +729,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             MenuFiltersMaker menuMaker;
             ToolStripSplitButton filterSplitButton;
             ToolStripMenuItem subFilterMenu;
-            // await Task.Run(() =>
-            //              {
+
             foreach (var column in filtersTable.Collection.Take(5))
             {
                 menuMaker = new MenuFiltersMaker(dicTranslator);
@@ -720,8 +756,6 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     filterSplitButton.DropDownItems.Add(subFilterMenu);
                 }
             }
-
-            //        });
         }
 
         //выбранный пункт из ДропДаунМеню сделать названием фильтра
@@ -736,7 +770,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         {
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
-              string  filePath = ofd.OpenFileDialogReturnPath();
+                string filePath = ofd.OpenFileDialogReturnPath();
                 if (filePath?.Length > 0)
                 {
                     CheckUpSelectedSQLiteDB(filePath);
@@ -814,13 +848,12 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     tableName += $" '{tbl.Value.TableName}'";
                     tablesDB.Add(tbl.Value.TableName);
                 }
-                
+
                 StatusLabelExtraInfo.Text = $"Данные в таблице(ах) {tableName}";
 
                 try { (dBOperations as SQLiteDBOperations).EvntInfoMessage -= AddLineAtTextboxLog; } catch { }
 
-                connectionSettings.Database = filePath;
-                ReNewParametersDB(connectionSettings);
+                currentSQLConnection.Database = filePath;
 
                 if (OperatingModes == AppModes.Admin)
                 { (dBOperations as SQLiteDBOperations).EvntInfoMessage += AddLineAtTextboxLog; }
@@ -844,8 +877,8 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     txtbNameQuery.Enabled = false;
                     txtBodyQuery.Enabled = false;
                     txtbResultShow.Enabled = false;
-                    
-                    connectionSettings = new SQLConnectionSettings();
+
+                    //   connectionSettings = new SQLConnectionSettings();
                     (dBOperations as SQLiteDBOperations).TryMakeLocalDB();
                 }
                 schemaDB = null;
@@ -856,15 +889,16 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         private void AddLineAtTextboxLog(object sender, TextEventArgs text)
         { AddLineAtTextboxLog(text?.Message); }
 
-        private void AddLineAtTextboxLog(string text=null)
+        private void AddLineAtTextboxLog(string text = null)
         { txtbResultShow.AppendLine($"{text}"); }
 
         private async void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             //write Config to File
-            await Task.Run(() => MakeConfig());
-            await WriteCfgInFile();
+               await Task.Run(() => MakeCurrentFullConfig());
+            await Task.Delay(100);
 
+               await Task.Run(() => WriteCfgInFile());
             await Task.Delay(500);
 
             if (OperatingModes == AppModes.Admin)
@@ -872,18 +906,18 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         }
 
 
-        
+
         private async Task UpdateQueryExtraMenuInRegistry()
         {
             //clear registry from menu entries
-            await Task.Run(() => regOperator.DeleteSubKeyTreeQueryExtraItems($"{regSubKeyMenu}\\{connectionSettings.Name}"));
-            
+            await Task.Run(() => regOperator.DeleteSubKeyTreeQueryExtraItems($"{regSubKeyMenu}\\{currentSQLConnection.Name}"));
+
             await Task.Delay(500);
 
             await Task.Run(() =>
             {
                 IDictionary<string, string> menuItems = queriesExtraMenu.ToDictionary(30);
-                regOperator.Write(menuItems, $"{regSubKeyMenu}\\{connectionSettings.Name}");
+                regOperator.Write(menuItems, $"{regSubKeyMenu}\\{currentSQLConnection.Name}");
             });
         }
 
@@ -902,7 +936,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                             }
                         case ToolStripMenuType.RecentConnection:
                             {
-                                m.Click += RecentMenuItems_Click;
+                                m.Click += BaseChangeMenuItems_Click;
                                 break;
                             }
                     }
@@ -914,14 +948,38 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 menuStrip.Refresh();
             }
         }
-        
 
-        private  void RemoveCheckedInQueryExtraMenuItem_Click(object sender, EventArgs e)
+
+
+        private async void QueryMenuItem_Click(object sender, EventArgs e)
         {
-             RemoveCheckedMenuItemFromMenuStrip(queriesExtraMenu);
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+
+            string queryName = item?.Text?.ToString();
+            string queryBody = item?.Tag?.ToString();
+
+            menuStrip.Update();
+            menuStrip.Refresh();
+
+            if (queryBody?.Length > 0)
+            {
+                if (queryName?.Length > 0)
+                {
+                    txtbNameQuery.Text = queryName;
+                    AddLineAtTextboxLog($"Выполняется запрос - '{queryName}':");
+                }
+
+                await GetData(queryBody);
+            }
         }
-       
-        private async void RemoveCheckedMenuItemFromMenuStrip(ToolStripMenuItem item,bool allMenuChecked=false)
+
+
+        private void RemoveCheckedInQueryExtraMenuItem_Click(object sender, EventArgs e)
+        {
+            RemoveCheckedMenuItemFromMenuStrip(queriesExtraMenu);
+        }
+
+        private async void RemoveCheckedMenuItemFromMenuStrip(ToolStripMenuItem item, bool allMenuChecked = false)
         {
             IList<ToolStripItem> listRemove = item.ToToolStripItemsList();
 
@@ -931,7 +989,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
                 foreach (ToolStripMenuItem m in listRemove)
                 {
-                    if (m.Checked|| allMenuChecked)
+                    if (m.Checked || allMenuChecked)
                     {
                         result += $" '{m.Text}'";
                         item.DropDownItems.Remove(m);
@@ -957,38 +1015,16 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             MenuItem menuItem = new MenuItem(nameQuery, bodyQuery);
 
             ToolStripMenuItem item = menuItem.ToExtraMenuToolStripMenuItem();
-            
-                queriesExtraMenu.DropDownItems.Add(item as ToolStripMenuItem);
-                item.Click += QueryMenuItem_Click;
-                menuStrip.Update();
-                menuStrip.Refresh();
 
-                await Task.Run(() => UpdateQueryExtraMenuInRegistry());
-            
-
-            StatusInfoMain.Text = $"Запрос '{nameQuery}' в меню добавлен сохранен";
-        }
-
-        private async void QueryMenuItem_Click(object sender, EventArgs e)
-        {
-            ToolStripMenuItem item = sender as ToolStripMenuItem;
-
-            string queryName = item?.Text?.ToString();
-            string queryBody = item?.Tag?.ToString();
-
+            queriesExtraMenu.DropDownItems.Add(item as ToolStripMenuItem);
+            item.Click += QueryMenuItem_Click;
             menuStrip.Update();
             menuStrip.Refresh();
 
-            if (queryBody?.Length > 0)
-            {
-                if (queryName?.Length > 0)
-                {
-                    txtbNameQuery.Text = queryName;
-                    AddLineAtTextboxLog($"Выполняется запрос - '{queryName}':");
-                }
+            await Task.Run(() => UpdateQueryExtraMenuInRegistry());
 
-                await GetData(queryBody);
-            }
+
+            StatusInfoMain.Text = $"Запрос '{nameQuery}' в меню добавлен сохранен";
         }
 
 
@@ -1017,7 +1053,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             notifyIcon?.Dispose();
             contextMenu?.Dispose();
 
-            System.Threading.Thread.Sleep(500);
+            Thread.Sleep(500);
 
             Application.Exit();
         }
@@ -1135,13 +1171,13 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         private void GetSchemaLocalDBMenuItem_Click(object sender, EventArgs e)
         {
             ShowLogViewTextbox(MainViewMode.Textbox);
-            if (connectionSettings.ProviderName == SQLProvider.SQLite)
+            if (currentSQLConnection.ProviderName == SQLProvider.SQLite)
             {
-                schemaDB = DbSchema.LoadDB(connectionSettings.Database);
+                schemaDB = DbSchema.LoadDB(currentSQLConnection.Database);
                 tablesDB = new List<string>();
 
                 AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
-                AddLineAtTextboxLog($"-  Scheme of local DB: '{connectionSettings.Database}':");
+                AddLineAtTextboxLog($"-  Scheme of local DB: '{currentSQLConnection.Database}':");
                 AddLineAtTextboxLog();
                 AddLineAtTextboxLog();
                 AddLineAtTextboxLog($"-=  tables: {schemaDB.Tables.Count}  =-");
@@ -1160,7 +1196,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
                 schemaDB = null;
                 AddLineAtTextboxLog();
-                AddLineAtTextboxLog($"-  End of Scheme of local DB: '{connectionSettings.Database}':");
+                AddLineAtTextboxLog($"-  End of Scheme of local DB: '{currentSQLConnection.Database}':");
                 AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
             }
             else
@@ -1172,12 +1208,13 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         private void allColumnsInTableQueryMenuItem_Click(object sender, EventArgs e)
         {
             ShowLogViewTextbox(MainViewMode.Textbox);
-            if (connectionSettings.ProviderName == SQLProvider.SQLite)
-            { schemaDB = DbSchema.LoadDB(connectionSettings.Database);
+            if (currentSQLConnection.ProviderName == SQLProvider.SQLite)
+            {
+                schemaDB = DbSchema.LoadDB(currentSQLConnection.Database);
                 tablesDB = new List<string>();
 
                 AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
-                AddLineAtTextboxLog($"- Selected DB: '{connectionSettings.Database}'");
+                AddLineAtTextboxLog($"- Selected DB: '{currentSQLConnection.Database}'");
 
                 foreach (var table in schemaDB.Tables)
                 {
@@ -1240,7 +1277,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     arrQuery[0].ToLower() == "select" && arrQuery.Length > 3
                     && arrQuery.Where(w => w.ToLower().Contains("select")).Count() > 0
                     && arrQuery.Where(w => w.ToLower().Contains("from")).Count() > 0
-                    )|| OperatingModes== AppModes.Admin)
+                    ) || OperatingModes == AppModes.Admin)
                 {
                     DialogResult doQuery =
                         MessageBox.Show($"Выполнить ваш запрос?\r\n{query}", "Проверьте свой запрос", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
@@ -1299,9 +1336,9 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         {
             reader = new FileReaderModels<CarAndOwner>();
             txtbResultShow.Clear();
-           
+
             reader.EvntCollectionFull += Reader_collectionFull;
-           await reader.GetContent(filePath, MAX_ELEMENTS_COLLECTION);
+            await reader.GetContent(filePath, MAX_ELEMENTS_COLLECTION);
             reader.EvntCollectionFull -= Reader_collectionFull;
 
             AddLineAtTextboxLog("");
@@ -1318,7 +1355,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             {
                 IList<CarAndOwner> list = reader.listModels.ToList();
                 int readRows = reader.importedRows;
-                
+
                 (dBOperations as SQLiteDBOperations).WriteListInLocalDB(list);
 
                 StatusInfoMain.Text = $"Количество записей: {readRows}";
@@ -1357,7 +1394,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     OperatingModes = AppModes.Admin;
                     administratorMenu.Enabled = true;
                 }
-             }
+            }
             else
             {
                 OperatingModes = AppModes.User;
@@ -1370,91 +1407,98 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
 
 
-
-        AbstractConfig config = null;
-        IReadable readerConfig = null;
-        /*
-         Configuration:
-           Unit1: A) Name -> "name of connection1"
-                     ListParameters: AA) Name -> QueryExtra
-                                         ListParameters: AAA) Name -> QueryExtra1
-                                                              ListParameters: Name Value and Value
-                                                         BBB) Name -> QueryExtra2
-                                                              ListParameters: Name Value and Value
-           Unit2: A) Name -> "name of connection2"
-                     ListParameters: AA) Name -> QueryExtra
-                                         ListParameters: AAA) Name -> QueryExtra1
-                                                              ListParameters: Name Value and Value
-                                                         BBB) Name -> QueryExtra2
-                                                              ListParameters: Name Value and Value
-             
-             */
         private void PrintConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AddLineAtTextboxLog("connectionSettings:");
-            AddLineAtTextboxLog(connectionSettings?.GetPropertyValues()?.AsString());
-            AddLineAtTextboxLog("(SQLConnection.Settings:");
-            AddLineAtTextboxLog(SQLConnection.Settings?.GetPropertyValues()?.AsString());
+            PrintFullConfig();
         }
 
         private async void ReadCfgFromFileMenuItem_Click(object sender, EventArgs e)
         {
-            await ReadCfgFromFile();            
+            await ReadCfgAsyncFromFile();
         }
 
-        public void PrintConfig()
+        public void PrintFullConfig()
+        {
+            AddLineAtTextboxLog("  -= static SQLConnection.Settings =-  ");
+            AddLineAtTextboxLog(SQLConnection.Settings?.GetPropertyValues()?.AsString());
+            AddLineAtTextboxLog();
+
+            AddLineAtTextboxLog("-= current SQL connectionSettings =-");
+            AddLineAtTextboxLog(currentSQLConnection?.GetPropertyValues()?.AsString());
+            AddLineAtTextboxLog();
+
+            AddLineAtTextboxLog("-= currentConfig =-");
+            PrintConfig(currentConfig);
+            AddLineAtTextboxLog();
+        }
+
+        public void PrintConfig(AbstractConfigList config)
         {
             AddLineAtTextboxLog($"-=   =-");
             AddLineAtTextboxLog($"Config:");
-            AddLineAtTextboxLog($"{config?.Get()?.Count}");
+            AddLineAtTextboxLog($"{config?.Get?.Count}");
             string defaultConnection = null;
-            ISQLConnectionSettings connectionDefault=null;
+            ISQLConnectionSettings connectionDefault = new SQLConnectionSettings(null);
 
-            if (config?.Get()?.Count > 0)
+            if (config?.Get?.Count > 0)
             {
-                foreach (var confUnit in config.Get())
+                foreach (var confUnit in config.Get)
                 {
-                    AbstractConfig unit = confUnit.Value as ConfigParameter;
+                    AbstractUnitConfigParameterList unit = confUnit.Value;
                     AddLineAtTextboxLog($"--   --");
                     AddLineAtTextboxLog($"unit.Name - {unit?.Name} : {unit?.Desciption} : {unit?.LastModification} : {unit?.Version} ");
-
-
-                    if (unit.Get()?.Count > 0)
+                    
+                    if (unit.Get?.Count > 0)
                     {
-                        foreach (var confParameter in unit.Get())
+                        foreach (var confParameter in unit.Get)
                         {
-                            AddLineAtTextboxLog($"confParameter.Key - {confParameter.Key}:");
+                            AddLineAtTextboxLog($"{unit?.Name}  confParameter.Key - {confParameter.Key}:");
 
-                            if (confParameter.Key == nameof(ISQLConnectionSettings))
+                            if (confParameter.Key == nameof(ISQLConnectionSettings) && unit?.Name == MAIN)
                             {
-                                ISQLConnectionSettings connection = confParameter.Value as ISQLConnectionSettings;
 
-                                AddLineAtTextboxLog($"{connection?.Name} {connection?.Host}  {connection?.Port}" +
-                                    $" {connection?.Database} {connection?.Username} {connection?.Password} ");
+                                AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
+                                AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
+                                AddLineAtTextboxLog($"{nameof(ISQLConnectionSettings)}:");
 
-                                if(defaultConnection== connection?.Name)
+                                if (confParameter.Value?.Get?.Count > 0)
                                 {
-                                    connectionDefault = connection;
+                                    foreach (var p in confParameter.Value?.Get)
+                                    {
+                                        AddLineAtTextboxLog($"{p.Key} - =- {p.Value}");
+                                    }
+
+                                    connectionDefault.Name = confParameter.Value.Get[nameof(connectionDefault.Name)];
+                                    connectionDefault.Database = confParameter.Value.Get[nameof(connectionDefault.Database)];
+                                    connectionDefault.Table = confParameter.Value.Get[nameof(connectionDefault.Table)];
+                                    connectionDefault.ProviderName = confParameter.Value.Get[nameof(connectionDefault.ProviderName)].GetSQLProvider();
+                                    connectionDefault.Host = confParameter.Value.Get[nameof(connectionDefault.Host)];
+                                    connectionDefault.Port = int.TryParse(confParameter.Value.Get[nameof(connectionDefault.Port)], out int port) ? port : 0;
+                                    connectionDefault.Username = confParameter.Value.Get[nameof(connectionDefault.Username)];
+                                    connectionDefault.Password = confParameter.Value.Get[nameof(connectionDefault.Password)];
+
+                                    AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
+                                    AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
                                 }
                             }
                             else
                             {
-                                AbstractConfig parameters = confParameter.Value as ConfigParameter;
+                                AbstractConfigParameter parameters = confParameter.Value as ConfigParameter;
                                 AddLineAtTextboxLog($"parameters.Name - {parameters?.Name}");
 
-                                if (parameters.Get()?.Count > 0)
+                                if (parameters?.Get?.Count > 0)
                                 {
-                                    foreach (var parameter in parameters?.Get())
+                                    foreach (var parameter in parameters?.Get)
                                     {
-                                        AddLineAtTextboxLog($"unit.Name - {unit.Name} :parameters.Name - {parameters.Name}:   parameter.Value.ToString - {  parameter.Value.ToString()}");
+                                        AddLineAtTextboxLog($"unit.Name '{unit.Name}', parameters.Name '{parameters.Name}',  parameter.Value - {  parameter.Value}");
 
-                                        if (unit.Name.Equals(MAIN) && parameters.Name.Equals(DEFAULT))
+                                        if (unit.Name.Equals(MAIN) && parameters.Name.Equals(DEFAULT_CONNECTION))
                                         {
-                                            AddLineAtTextboxLog($"Default connection is {parameter.Value}");                                            
-                                            defaultConnection = parameter.Value.ToString();                                            
+                                            AddLineAtTextboxLog($"Default connection is {parameter.Value}");
+                                            defaultConnection = parameter.Value.ToString();
                                         }
 
-                                        AddLineAtTextboxLog($"parameter.Key - {parameter.Key} :parameter.Value - {parameter.Value}");
+                                        AddLineAtTextboxLog($"parameter.Key '{parameter.Key}', Value '{parameter.Value}'");
                                     }
                                 }
                             }
@@ -1463,90 +1507,111 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 }
             }
 
-            AddLineAtTextboxLog($"-=   =-");
-
-            AddLineAtTextboxLog();
-
-            AddLineAtTextboxLog("connectionDefault:");
-            AddLineAtTextboxLog(connectionDefault?.GetPropertyValues()?.AsString());
-
-            connectionSettings = new SQLConnectionSettings(connectionDefault);
+            AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
+            AddLineAtTextboxLog("connectionDefault - " + connectionDefault?.GetPropertyValues()?.AsString());
+            AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
         }
 
-        public async Task ReadCfgFromFile()
+
+        public async Task ReadCfgAsyncFromFile()
         {
             readerConfig = new FileReader();
             (readerConfig as FileReader).EvntInfoMessage += AddLineAtTextboxLog;
-            await readerConfig.ReadConfigAsync(appCfgFilePath);
-            config = (readerConfig as FileReader).config;
+
+            await (readerConfig as FileReader).ReadConfigAsync(appCfgFilePath);
+
+            if ((readerConfig as FileReader)?.config != null && (readerConfig as FileReader)?.config?.Count > 0)
+            {
+                currentConfig = new ConfigList((readerConfig as FileReader)?.config);
+            }
             (readerConfig as FileReader).EvntInfoMessage -= AddLineAtTextboxLog;
         }
 
 
+
         private async void WriteFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await Task.Run(() => MakeConfig());
-            await WriteCfgInFile();
+            AddLineAtTextboxLog();
+            AddLineAtTextboxLog("  -= Prepare MakeCurrentFullConfig =-  ");
+            await Task.Run(() => MakeCurrentFullConfig());
+
+            AddLineAtTextboxLog("-= PrintConfig currentConfig =-");
+            PrintConfig(currentConfig);
+            AddLineAtTextboxLog();
+
+            AddLineAtTextboxLog();
+            AddLineAtTextboxLog("  -= Prepare WriteCfgInFile =-  ");
+            AddLineAtTextboxLog("  -= Fake =-  ");
+            await Task.Run(() => WriteCfgInFile());
         }
+
+
 
         public async Task WriteCfgInFile()
         {
             IWriterable writer = new FileWriter();
             (writer as FileWriter).EvntInfoMessage += AddLineAtTextboxLog;
-            await writer.Write(appCfgFilePath, config as ConfigParameter);
+            await writer.Write(appCfgFilePath, currentConfig);
             (writer as FileWriter).EvntInfoMessage -= AddLineAtTextboxLog;
+            writer = null;
         }
 
-        public void MakeConfig()
+        public void MakeCurrentFullConfig()
         {
-            config = new ConfigParameter();
-
-
             //Unit1
             //Main Config
-            AbstractConfig unit = new ConfigParameter();
-            unit.Name = MAIN;
+            AbstractUnitConfigParameterList parametersList = new ConfigUnitParameterList();
 
-            AbstractConfig parameter = new ConfigParameter();
-            parameter.Name = RECENT;
+            AbstractConfigParameter parameters = new ConfigParameter();
+            parameters.Name = DB_LIST;
             foreach (var menuItem in changeBaseToolStripMenuItem.ToDictionary())
-            { parameter.Add(menuItem.Key, menuItem.Value); }
-            unit.Add(parameter);
+            { parameters.Add(menuItem.Key, menuItem.Value); }
+            parametersList.Add(parameters);//add the whole parameter in unit
 
-            parameter = new ConfigParameter();
-            parameter.Name = DEFAULT;
-            parameter.Add(DEFAULT, connectionSettings.Name);
-            unit.Add(parameter);
-            config.Add(unit);
+            parameters = new ConfigParameter();
+            parameters.Name = nameof(ISQLConnectionSettings);
+            foreach (var item in currentSQLConnection.GetPropertyValues())
+            { parameters.Add(item.Key, item.Value); }
 
+            parametersList.Name = MAIN;
+            parametersList.Add(parameters);//add the whole parameter in unit
+
+            currentConfig.Name = "CurrentFullConfig";
+            currentConfig.Desciption = "Current Full Configuration";
+            currentConfig.Add(parametersList); //add the whole unit in Config
+
+            
             //Unit2
-            //connection
-            unit = new ConfigParameter();
-            unit.Name = connectionSettings.Name;
-
-            //ISQLConnectionSettings
-            unit.Add(nameof(ISQLConnectionSettings), connectionSettings);
+            //connections
+            parametersList = new ConfigUnitParameterList();
 
 
             //queriesExtraMenu
-            parameter = new ConfigParameter();
-            parameter.Name = $"{nameof(queriesExtraMenu)}";
+            parameters = new ConfigParameter();
+            parameters.Name = $"{nameof(queriesExtraMenu)}";
             foreach (var menuItem in queriesExtraMenu.ToDictionary())
-            { parameter.Add(menuItem.Key, menuItem.Value); }
-            unit.Add(parameter);
+            {
+                parameters.Add(menuItem.Key, menuItem.Value);
+            }
+            parametersList.Name = currentSQLConnection.Name;
+            parametersList.Add(parameters);//add the whole parameter in unit
 
 
             //queriesStandartMenu
-            parameter = new ConfigParameter();
-            parameter.Name = $"{nameof(queriesStandartMenu)}";
+            parameters = new ConfigParameter();
             foreach (var menuItem in queriesStandartMenu.ToDictionary())
-            { parameter.Add(menuItem.Key, menuItem.Value); }
-            unit.Add(parameter);
+            {
+                parameters.Add(menuItem.Key, menuItem.Value);
+            }
+            parameters.Name = $"{nameof(queriesStandartMenu)}";
+            parametersList.Add(parameters);//add the whole parameter in unit
 
-            config.Add(unit);
-
+            //newConfig
+            currentConfig.Add(parametersList); //add the whole unit in Config
 
             //Unit3 .....
+
+            //(currentConfig as ConfigParameter).Set(newConfig);
         }
 
 
@@ -1564,7 +1629,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             else
             { ShowLogViewTextbox(MainViewMode.Textbox); logView = true; }
         }
-        
+
         private void ShowLogViewTextbox(MainViewMode mode)
         {
             switch (mode)
@@ -1605,5 +1670,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     }
             }
         }
+
+
     }
 }

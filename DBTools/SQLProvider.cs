@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
+    [Serializable]
     public enum SQLProvider
     {
         None,
@@ -10,6 +12,7 @@ namespace AutoAnalysis
         SQLite
     }
 
+    [Serializable]
     public static class SQLProviderManager
     {
         public static IList<string> GetSQLProvider()

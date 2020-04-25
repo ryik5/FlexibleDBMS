@@ -1,4 +1,4 @@
-﻿namespace AutoAnalysis
+﻿namespace FlexibleDBMS
 {
     partial class SelectDBForm
     {

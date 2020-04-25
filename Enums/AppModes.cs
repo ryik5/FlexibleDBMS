@@ -1,5 +1,5 @@
 ﻿
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
 
 public enum AppModes

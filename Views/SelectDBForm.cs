@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     public partial class SelectDBForm : Form
     {
@@ -21,6 +21,7 @@ namespace AutoAnalysis
         {
             InitializeComponent();
             settings = new SQLConnectionSettings(SQLConnection.Settings);
+            SQLConnection.Settings = null;
 
             selectedDB = "mysql";
 

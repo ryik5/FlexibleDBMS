@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     public static class CommonExtesions
     {
@@ -13,6 +13,16 @@ namespace AutoAnalysis
             string result = dic.TryGetValue(key, out string name) == false ? key : name;
 
             return result;
+        }
+
+        public static IDictionary<string, string> Update(this IDictionary<string, string> oldDic, IDictionary<string, string> newDic)
+        {
+            foreach(var d in newDic)
+            {
+                 oldDic[d.Key] = d.Value;                
+            }
+            
+            return oldDic;
         }
 
         public static SQLProvider GetSQLProvider(this string provider)
@@ -42,7 +52,7 @@ namespace AutoAnalysis
         /// Check correctness of query
         /// </summary>
         /// <param name="query"> sql statement </param>
-        public static bool IsSqlQuery(string query)
+        public static bool CheckIsSqlQuery(string query)
         {
             bool isQuery = true;
             if (string.IsNullOrEmpty(query))

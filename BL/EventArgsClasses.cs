@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     public class BoolEventArgs : EventArgs
     {

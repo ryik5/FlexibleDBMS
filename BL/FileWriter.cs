@@ -5,10 +5,10 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
 
-    public class FileWriter: IWriterable
+    public class FileWriter : IWriterable
     {
 
         public int importedRows = 0;
@@ -37,7 +37,7 @@ namespace AutoAnalysis
 
                     await writer.FlushAsync();
                 }
-                await stream.FlushAsync();
+                //   await stream.FlushAsync();
             }
 
             EvntWriteFinished?.Invoke(this, new BoolEventArgs(true));//last part of the collection
@@ -56,7 +56,7 @@ namespace AutoAnalysis
 
                     await writer.FlushAsync();
                 }
-                await stream.FlushAsync();
+                //  await stream.FlushAsync();
             }
 
             EvntWriteFinished?.Invoke(this, new BoolEventArgs(true));//last part of the collection
@@ -75,26 +75,38 @@ namespace AutoAnalysis
 
             await Write(filePath, content, _encoding);
         }
- 
-        public async Task Write(string filePath, ConfigParameter config)
-        {
-            BinaryFormatter formatter = new BinaryFormatter();
-            EvntInfoMessage?.Invoke(this, new TextEventArgs($"Try to write {nameof(ConfigParameter)}"));
 
-            using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate))
+        public async Task Write(string filePath, object config)
+        {
+            EvntInfoMessage?.Invoke(this, new TextEventArgs($"Try to write {nameof(ConfigParameter)}"));
+            if (File.Exists(filePath))
             {
-                try
-                {
-                    await Task.Run(() => formatter.Serialize(fs, config));
-                    EvntInfoMessage?.Invoke(this, new TextEventArgs("ConfigApplication was written."));
-                }
+                try { File.Delete(filePath); }
                 catch (Exception excpt)
                 {
                     EvntInfoMessage?.Invoke(this, new TextEventArgs($"{excpt.Message}"));
                 }
-                EvntWriteFinished?.Invoke(this, new BoolEventArgs(true));//last part of the collection
+                using (FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate))
+                {
+                    try
+                    {
+                        EvntInfoMessage?.Invoke(this, new TextEventArgs($"0 {config.GetPropertyValues().AsString()}"));
 
-               await fs.FlushAsync();
+                        BinaryFormatter formatter = new BinaryFormatter();
+                        await Task.Run(() =>
+                        formatter.Serialize(fileStream, config)
+                        );
+
+                        EvntInfoMessage?.Invoke(this, new TextEventArgs("ConfigApplication was written."));
+                    }
+                    catch (Exception excpt)
+                    {
+                        EvntInfoMessage?.Invoke(this, new TextEventArgs($"1 {excpt.ToString()}"));
+                    }
+                    EvntWriteFinished?.Invoke(this, new BoolEventArgs(true));//last part of the collection
+
+                    // await fs.FlushAsync();
+                }
             }
         }
     }

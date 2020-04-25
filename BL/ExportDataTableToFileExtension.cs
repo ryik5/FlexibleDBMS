@@ -3,7 +3,7 @@ using OfficeOpenXml.Table;
 using OfficeOpenXml.Table.PivotTable;
 using System.Data;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
    public static class ExportDataTableToFileExtension
     {

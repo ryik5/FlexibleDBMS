@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.SQLite;
 using System.IO;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
 
     public class SQLiteDBOperations: ISqlDbConnector

@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     public interface ISqlDbConnector
     {

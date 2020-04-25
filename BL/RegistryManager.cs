@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.AccessControl;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
 
     public interface IRegistryWriteable

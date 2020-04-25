@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Windows.Forms;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     public partial class HelpForm : Form
     {

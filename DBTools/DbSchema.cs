@@ -5,7 +5,7 @@ using System.Data.SQLite;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     /// <summary>
     /// Represents a complete SQLite DB schema

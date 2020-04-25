@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     public interface IModelDBable<T>
     {

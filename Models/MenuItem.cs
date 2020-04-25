@@ -1,4 +1,4 @@
-﻿namespace AutoAnalysis
+﻿namespace FlexibleDBMS
 {
     public class MenuItem
     {

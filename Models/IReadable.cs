@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     public interface IReadable
     {
@@ -11,6 +11,7 @@ namespace AutoAnalysis
         Task Read(string filePath, Encoding encoding, int maxElementsInDictionary);
 
         Task ReadConfigAsync(string filePath);
+        
 
         delegate void WorkFinished(object sender, BoolEventArgs e);
         delegate void InfoMessage(object sender, TextEventArgs e);

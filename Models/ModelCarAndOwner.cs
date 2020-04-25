@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Text;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
-
     public enum TypeOwner
     {
         Person = 0,

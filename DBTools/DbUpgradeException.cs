@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     /// <summary>
     /// Used to notify about upgrader errors.

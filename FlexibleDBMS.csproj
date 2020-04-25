@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{FBE9AF98-3B3C-4745-AEC4-E3A14A3F20A3}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>AutoAnalysis</RootNamespace>
-    <AssemblyName>AutoAnalysis</AssemblyName>
+    <RootNamespace>FlexibleDBMS</RootNamespace>
+    <AssemblyName>FlexibleDBMS</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -55,7 +55,7 @@
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
-    <StartupObject>AutoAnalysis.Program</StartupObject>
+    <StartupObject>FlexibleDBMS.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>RYIK40.ico</ApplicationIcon>
@@ -89,9 +89,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BL\IReadable.cs" />
-    <Compile Include="BL\IWriterable.cs" />
-    <Compile Include="Models\ConfigParameter.cs" />
+    <Compile Include="BL\ConfigBuilder.cs" />
+    <Compile Include="Models\IReadable.cs" />
+    <Compile Include="Models\IWriterable.cs" />
+    <Compile Include="Models\AbstractConfigList.cs" />
+    <Compile Include="Models\AbstractUnitConfigParameterList.cs" />
+    <Compile Include="BL\ConfigList.cs" />
+    <Compile Include="BL\ConfigUnitParameterList.cs" />
+    <Compile Include="BL\ConfigParameters.cs" />
     <Compile Include="BL\FileReader.cs" />
     <Compile Include="BL\FileWriter.cs" />
     <Compile Include="DBTools\ISqlDbConnector.cs" />
@@ -115,7 +120,7 @@
     <Compile Include="DBTools\SQLiteDBOperations.cs" />
     <Compile Include="BL\FileReaderModels.cs" />
     <Compile Include="Extentions\CommonExtentions.cs" />
-    <Compile Include="Models\AbstractConfig.cs" />
+    <Compile Include="Models\AbstractConfigParameter.cs" />
     <Compile Include="Views\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

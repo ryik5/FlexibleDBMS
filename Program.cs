@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     static class Program
     {

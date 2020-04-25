@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     // <summary>
     /// Represents a single SQLite table.

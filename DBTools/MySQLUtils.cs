@@ -1,7 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
 using System.Data;
 
-namespace AutoAnalysis
+namespace FlexibleDBMS
 {
     public class MySQLUtils:ISqlDbConnector
     {
