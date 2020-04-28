@@ -122,13 +122,40 @@ namespace FlexibleDBMS
                 AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
                 AddLineAtTextboxLog($"Config '{appCfgFilePath}' was read succesful.");
                 AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
-
+                        
+                IList<ToolStripMenuItem> menuItems = ReturnNameConnectionsInConfig().ToToolStripMenuItemsList(ToolStripMenuType.RecentConnection);
+                AddToDropDownToolStripMenu(changeBaseToolStripMenuItem, menuItems, ToolStripMenuType.RecentConnection);
             }
             else
             {
-              //  GetNewConnection();
+                GetNewConnection();
             }
             currentSQLConnectionStore.EvntConfigChanged += CurrentSQLConnectionStore_EvntConfigChanged;
+        }
+
+        private IList<string> ReturnNameConnectionsInConfig()
+        {
+            IList<string> connections = new List<string>();
+
+            if (configFull?.Count() > 0)
+            {
+                foreach (var confUnit in configFull?.Config)
+                {
+                    string name = confUnit.Value?.Name;
+
+                    if (!string.IsNullOrWhiteSpace(name) && name != MAIN && name != DB_LIST)
+                    { connections.Add(confUnit.Value?.Name); }
+                }
+            }
+
+            AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
+            foreach (var c in connections)
+            {
+                AddLineAtTextboxLog("connection:" + c);
+            }
+
+            AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
+            return connections;
         }
 
 
@@ -310,7 +337,6 @@ namespace FlexibleDBMS
             config = new Config();
             config.Name = nameof(ISQLConnectionSettings);
             config.ConfigDictionary = currentSQLConnectionStore.Get().GetObjectPropertiesValuesToObject();
-
             configUnit.ConfigDictionary[config.Name] = config;
             configFull.Add(configUnit);
 
@@ -318,6 +344,12 @@ namespace FlexibleDBMS
             configUnit = new Config();
             configUnit.Name = currentSQLConnectionStore?.Get()?.Name;
             configUnit.ConfigDictionary = new Dictionary<string, object>();
+
+            config = new Config();
+            config.Name = nameof(ISQLConnectionSettings);
+            config.ConfigDictionary = currentSQLConnectionStore.Get().GetObjectPropertiesValuesToObject();
+            configUnit.ConfigDictionary[config.Name] = config;
+            configFull.Add(configUnit);
 
             config = new Config();
             config.Name = nameof(queriesExtraMenu);
@@ -347,27 +379,47 @@ namespace FlexibleDBMS
 
         private void CurrentSQLConnectionStore_EvntConfigChanged(object sender, BoolEventArgs args)
         {
-            SQLConnectionData data = currentSQLConnectionStore.Get().ToSQLConnectionData();
-           
             //todo => add the whole data in config
-            AddConnectionInFullConfig(data);
+            AddConnectionInFullConfig(currentSQLConnectionStore.Get());
         }
 
-        public void AddConnectionInFullConfig(SQLConnectionData newConnection)
+
+        public void AddConnectionInFullConfig(ISQLConnectionSettings newConnection)
         {
             configUnit = new Config();
             configUnit.Name = MAIN;
             configUnit.ConfigDictionary = new Dictionary<string, object>();
-            
+
             config = new Config();
             config.Name = nameof(ISQLConnectionSettings);
-            config.ConfigDictionary = newConnection.GetObjectPropertiesValuesToObject();
+            config.ConfigDictionary = newConnection?.GetObjectPropertiesValuesToObject();
+            configUnit.ConfigDictionary[config.Name] = config;            
+            configFull.Add(configUnit);
+
+            ////
+            configUnit = new Config();
+            configUnit.Name = newConnection?.Name;
+            configUnit.ConfigDictionary = new Dictionary<string, object>();
+
+            config = new Config();
+            config.Name = nameof(ISQLConnectionSettings);
+            config.ConfigDictionary = newConnection?.GetObjectPropertiesValuesToObject();
+            configUnit.ConfigDictionary[config.Name] = config;
+            configFull.Add(configUnit);
+
+
+            config = new Config();
+            config.Name = nameof(queriesExtraMenu);
+            config.ConfigDictionary = queriesExtraMenu.AsObjectDictionary();
             configUnit.ConfigDictionary[config.Name] = config;
 
-            configFull.Add(configUnit);
+            config = new Config();
+            config.Name = nameof(queriesStandartMenu);
+            config.ConfigDictionary = queriesStandartMenu.AsObjectDictionary();
+            configUnit.ConfigDictionary[config.Name] = config;
+            if (!string.IsNullOrWhiteSpace(configUnit.Name))
+            { configFull.Add(configUnit); }
         }
-
-        
 
 
 
@@ -658,31 +710,7 @@ namespace FlexibleDBMS
         }
 
 
-
-        /// <summary>
-        /// Set DropDownToolStripMenu, FullConfig, CurrentDBOperation, currentSQLConnectionStore
-        /// </summary>
-        /// <param name="currentSet"></param>
-        private void SetCurrentSettings(ISQLConnectionSettings currentSet)
-        {
-            if (currentSet?.ToSQLConnectionData() != null && (!(string.IsNullOrWhiteSpace(currentSet?.Name)) || !(string.IsNullOrWhiteSpace(currentSet?.Database)) || !(string.IsNullOrWhiteSpace(currentSet?.Host))))
-            {
-                SQLConnectionData sd = currentSet?.ToSQLConnectionData();
-                AddConnectionInFullCodnfig(sd);
-
-                ToolStripMenuItem item = (new MenuItem(currentSet.Name, currentSet.Database)).ToToolStripMenuItem(ToolStripMenuType.RecentConnection);
-
-                AddToDropDownToolStripMenu(changeBaseToolStripMenuItem, item, ToolStripMenuType.RecentConnection);
-
-                SetCurrentDBOperations(currentSet);
-                AddLineAtTextboxLog("SelectDB_FormClosing,selectDB.settings: " + currentSet?.Database + " " + currentSet?.ProviderName);
-                currentSQLConnectionStore?.Set(currentSet);
-
-                AddLineAtTextboxLog("SelectDB_FormClosing,dBOperations.GetSettings: " + dBOperations?.GetSettings()?.Database + " " + dBOperations?.GetSettings()?.ProviderName);            
-            }
-        }
-
-            
+    
 
         private void SelectDB_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -708,40 +736,88 @@ namespace FlexibleDBMS
             AddLineAtTextboxLog($"Database: {currentSQLConnectionStore?.Get()?.Database}");
             AddLineAtTextboxLog($"Table: {currentSQLConnectionStore?.Get()?.Table}");
         }
-        
-        public void AddConnectionInFullCodnfig(SQLConnectionData newConnection)
+
+
+
+        /// <summary>
+        /// Set DropDownToolStripMenu, FullConfig, CurrentDBOperation, currentSQLConnectionStore
+        /// </summary>
+        /// <param name="currentSet"></param>
+        private void SetCurrentSettings(ISQLConnectionSettings currentSet)
         {
-            configUnit = new Config();
-            configUnit.Name = MAIN;
-            configUnit.ConfigDictionary = new Dictionary<string, object>();
+            if (currentSet?.ToSQLConnectionData() != null && (!(string.IsNullOrWhiteSpace(currentSet?.Name)) || !(string.IsNullOrWhiteSpace(currentSet?.Database)) || !(string.IsNullOrWhiteSpace(currentSet?.Host))))
+            {
+                AddConnectionInFullConfig(currentSet);
 
-            config = new Config();
-            config.Name = nameof(ISQLConnectionSettings);
-            config.ConfigDictionary = newConnection.GetObjectPropertiesValuesToObject();
-            configUnit.ConfigDictionary[config.Name] = config;
+                ToolStripMenuItem item = (new MenuItem(currentSet.Name, currentSet.Database)).ToToolStripMenuItem(ToolStripMenuType.RecentConnection);
 
-            configFull.Add(configUnit);
+                AddToDropDownToolStripMenu(changeBaseToolStripMenuItem, item, ToolStripMenuType.RecentConnection);
+
+                SetCurrentDBOperations(currentSet);
+                AddLineAtTextboxLog("SelectDB_FormClosing,selectDB.settings: " + currentSet?.Database + " " + currentSet?.ProviderName);
+                currentSQLConnectionStore?.Set(currentSet);
+
+                AddLineAtTextboxLog("SelectDB_FormClosing,dBOperations.GetSettings: " + dBOperations?.GetSettings()?.Database + " " + dBOperations?.GetSettings()?.ProviderName);
+            }
         }
+
+
 
 
         private void BaseChangeMenuItems_Click(object sender, EventArgs e)
         {
             string text = (sender as ToolStripMenuItem).Text;
-
             AddLineAtTextboxLog("text: " + text);
             AddLineAtTextboxLog("tag: " + (sender as ToolStripMenuItem).Tag.ToString());
 
-            ConfigDictionaryTo convertor = new ConfigDictionaryTo();
+            ISQLConnectionSettings connectionDefault;
+            connectionDefault = new SQLConnectionSettings(SearchConnectionByTextInConfig(text));
 
-            if (configFull?.Get(text)?.ConfigDictionary?.Values?.GetObjectPropertiesValuesToObject().Count > 0)
-                foreach (var t in configFull?.Get(text)?.ConfigDictionary?.Values?.GetObjectPropertiesValuesToObject())
-                    AddLineAtTextboxLog("count dic1: " + t.Key + " - " + t.Value);
-
-            ISQLConnectionSettings connectionDefault = convertor.ToISQLConnectionSettings(configFull?.Get(text)?.ConfigDictionary?.Values?.GetObjectPropertiesValuesToObject());
 
             SetCurrentDBOperations(connectionDefault);
             currentSQLConnectionStore.Set(connectionDefault);
         }
+
+        private ISQLConnectionSettings SearchConnectionByTextInConfig(string text)
+        {
+            ISQLConnectionSettings connectionDefault = new SQLConnectionSettings(null);
+            ConfigDictionaryTo convertor;
+
+            if (configFull?.Count() > 0)
+            {
+                foreach (var confUnit in configFull?.Config)
+                {
+                    AbstractConfig unit = confUnit.Value;
+
+                    if (unit.ConfigDictionary?.Count() > 0)
+                    {
+                        foreach (var confParameter in unit.ConfigDictionary)
+                        {
+                            if (unit.ConfigDictionary?.Count() > 0 && unit?.Name == text && confParameter.Key == nameof(ISQLConnectionSettings))
+                            {
+                                configUnit = confParameter.Value as Config;
+                                if (configUnit?.ConfigDictionary?.Count > 0)
+                                {
+                                    convertor = new ConfigDictionaryTo();
+                                    SQLConnectionData data = convertor?.ToSQLConnectionData(configUnit?.ConfigDictionary);
+                                    connectionDefault = convertor?.ToISQLConnectionSettings(configUnit?.ConfigDictionary);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
+            AddLineAtTextboxLog("connectionDefault:");
+            AddLineAtTextboxLog(connectionDefault?.GetObjectPropertiesValuesToString()?.AsString());
+
+            return connectionDefault;
+        }
+      
+        
+ 
+
 
         /// <summary>
         /// dBOperations renew
@@ -1156,6 +1232,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 regOperator.Write(menuItems, $"{regSubKeyMenu}\\{currentSQLConnectionStore.Get().Name}");
             });
         }
+
 
         private void AddToDropDownToolStripMenu(ToolStripMenuItem target, IList<ToolStripMenuItem> source, ToolStripMenuType menuType)
         {

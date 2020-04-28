@@ -70,7 +70,7 @@ namespace FlexibleDBMS
                             {
                                 text = r?.Value?.ToString()?.Trim();
                                 tag = r?.Key?.ToString()?.Trim();
-                                
+
                                 menuItem = new MenuItem(text, tag);
                                 if (text?.Length > 0 && tag?.Length > 0)
                                 {
@@ -86,7 +86,42 @@ namespace FlexibleDBMS
 
             return toolMenuList;
         }
-        
+
+        public static IList<ToolStripMenuItem> ToToolStripMenuItemsList(this IList<string> list, ToolStripMenuType modes)
+        {
+            IList<ToolStripMenuItem> toolMenuList = new List<ToolStripMenuItem>();
+            ToolStripMenuItem toolMenu = null;
+            MenuItem menuItem;
+
+            if (list?.Count > 0)
+            {
+                foreach (var text in list)
+                {
+                    if (text?.Length > 0)
+                    {
+                        menuItem = new MenuItem(text, text);
+                        switch (modes)
+                        {
+                            case ToolStripMenuType.ExtraQuery:
+                                {
+                                    toolMenu = menuItem.ToExtraMenuToolStripMenuItem();
+                                    break;
+                                }
+                            case ToolStripMenuType.RecentConnection:
+                                {
+                                    toolMenu = menuItem.ToFilterToolStripMenuItem();
+                                    break;
+                                }
+                        }
+
+                        toolMenuList.Add(toolMenu);
+                    }
+                }
+            }
+
+            return toolMenuList;
+        }
+
 
         public static ToolStripMenuItem ToToolStripMenuItem(this MenuItem item, ToolStripMenuType modes)
         {
