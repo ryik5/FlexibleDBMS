@@ -15,30 +15,10 @@ namespace FlexibleDBMS
         public SQLiteCommand sqlCommand;
         private string _dbConnectionString;
 
-        protected SQLiteDbAbstract(string dbConnectionString, System.IO.FileInfo dbFileInfo)
+        protected SQLiteDbAbstract(string dbConnectionString,string filePath)
         {
             _dbConnectionString = dbConnectionString;
-            CheckUpDB(_dbConnectionString, dbFileInfo);
             ConnectToDB(_dbConnectionString);
-        }
-
-        //public string GetConnectionString()
-        //{
-        //    return _dbConnectionString;
-        //}
-
-        public void CheckUpDB(string dbConnectionString, System.IO.FileInfo dbFileInfo)
-        {
-            if (!(dbFileInfo?.Name?.Length > 0))
-            { throw new ArgumentNullException("dbFileInfo can not be null!"); }
-
-            if (!dbFileInfo.Exists)
-            {
-                SQLiteConnection.CreateFile(dbFileInfo.Name);
-            }
-
-            if (!(dbConnectionString?.Trim()?.Length > 0))
-            { throw new ArgumentNullException("dbConnectionString string can not be Empty or short"); }
         }
 
         private void ConnectToDB(string dbConnectionString)
@@ -96,24 +76,11 @@ namespace FlexibleDBMS
 
     public class SqLiteDbWrapper : SQLiteDbAbstract, IDisposable
     {
-        public SqLiteDbWrapper(string dbConnectionString, System.IO.FileInfo dbFileInfo) :
-            base(dbConnectionString, dbFileInfo)
+        public SqLiteDbWrapper(string dbConnectionString, string filePath) :
+            base(dbConnectionString, filePath)
         {        }
 
         public event Message Status;
-
-        //Read Data
-        //public SQLiteDataReader GetQueryResultAsDataReader(string query)
-        //{
-        //    SQLiteDataReader _sqlCommand;
-        //    Status?.Invoke(this, new TextEventArgs("query: " + query));
-        //    if (CommonExtesions.IsSqlQuery(query))
-        //    {
-        //        using (_sqlCommand = new SQLiteCommand(query, sqlConnection))
-        //        {  _sqlCommand.ExecuteReader(); }
-        //    }
-        //    return _sqlCommand;
-        //}
 
         public DataTable GetQueryResultAsTable(string query)
         {
@@ -131,13 +98,13 @@ namespace FlexibleDBMS
             return dt;
         }
 
-        public IModelDBable<ModelDBFilter> GetColumnUniqueValuesList(string table, string column, string alias)
+        public IModelEntityDB<DBFilterModel> MakeFilterCollection(string table, string column, string alias)
         {
-            IModelDBable<ModelDBFilter> modelDBColumn = new ModelDBColumn();
+            IModelEntityDB<DBFilterModel> modelDBColumn = new DBColumnModel();
             modelDBColumn.Name = column;
             modelDBColumn.Alias = alias;
-            modelDBColumn.Collection = new List<ModelDBFilter>();
-            modelDBColumn.Collection.Add(new ModelDBFilter() { Name = "Нет" });
+            modelDBColumn.Collection = new List<DBFilterModel>();
+            modelDBColumn.Collection.Add(new DBFilterModel() { Name = "Нет" });
 
             string q = $"SELECT distinct {column}, COUNT(*) as amount FROM {table} WHERE LENGTH(TRIM({column}))>1 GROUP BY {column} ORDER BY amount DESC";
 
@@ -145,34 +112,10 @@ namespace FlexibleDBMS
 
             foreach (DataRow r in dt.Rows)
             {
-                modelDBColumn.Collection.Add(new ModelDBFilter() { Name = r[column].ToString() });
+                modelDBColumn.Collection.Add(new DBFilterModel() { Name = r[column].ToString() });
             }
             return modelDBColumn;
         }
-
-        //Write Data or Execute query
-        //public void Execute(SQLiteCommand sqlCommand)
-        //{
-        //    if (sqlCommand == null)
-        //    {
-        //        Status?.Invoke(this, new TextEventArgs("Error. The SQLCommand can not be empty or null!"));
-        //        new ArgumentNullException();
-        //    }
-
-        //    using (var sqlCommand1 = new SQLiteCommand("begin", sqlConnection))
-        //    { sqlCommand1.ExecuteNonQuery(); }
-
-        //    try
-        //    {
-        //        sqlCommand.ExecuteNonQuery();
-        //        Status?.Invoke(this, new TextEventArgs("Execute sqlCommand - Ok"));
-        //    }
-        //    catch (Exception expt)
-        //    { Status?.Invoke(this, new TextEventArgs("Error! " + expt.ToString())); }
-
-        //    using (var sqlCommand1 = new SQLiteCommand("end", sqlConnection))
-        //    { sqlCommand1.ExecuteNonQuery(); }
-        //}
 
         public void Execute(string query)
         {
@@ -190,8 +133,7 @@ namespace FlexibleDBMS
                 }
             }
         }
-
-
+        
 
         /// <summary>
         /// To use with transaction keywords - "begin" and "end"

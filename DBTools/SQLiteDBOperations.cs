@@ -13,12 +13,17 @@ namespace FlexibleDBMS
         public event Message EvntInfoMessage;
 
         string sqLiteConnectionString;
-        FileInfo dbFileInfo;
+        ISQLConnectionSettings settings;
 
         public SQLiteDBOperations(ISQLConnectionSettings settings)
         {
-            dbFileInfo = new FileInfo(settings.Database); 
+            this.settings = settings;
             sqLiteConnectionString = $"Data Source = {settings.Database}; Version=3;";
+        }
+
+        public ISQLConnectionSettings GetSettings()
+        {
+            return settings;
         }
 
         private bool CheckUpDBStructure()
@@ -30,19 +35,19 @@ namespace FlexibleDBMS
 
             try
             {
-                schemaDB = DbSchema.LoadDB(dbFileInfo.FullName);
+                schemaDB = DbSchema.LoadDB(settings.Database);
 
                 foreach (var table in schemaDB.Tables)
                 {
                     if (table.Value.Columns.Count == 0)
                     {
-                        EvntInfoMessage?.Invoke(this, new TextEventArgs($"Ошибка в таблице: {table.Value.TableName} - отсутствуют колонки и структура данных в таблице.\r\n"));
+                        EvntInfoMessage?.Invoke(this, new TextEventArgs($"Ошибка в таблице: {table.Value.TableName} - отсутствуют колонки и структура данных в таблице."));
                     }
                 }
             }
             catch (Exception e)
             {
-                EvntInfoMessage?.Invoke(this, new TextEventArgs($"Ошибка в БД: {e.Message}:\r\n{e.ToString()}\r\n"));
+                EvntInfoMessage?.Invoke(this, new TextEventArgs($"Ошибка в БД: {e.Message}:\r\n{e.ToString()}"));
                 isGood = false;
             }
             finally
@@ -58,7 +63,7 @@ namespace FlexibleDBMS
 
             if (isGood)
             {
-                EvntInfoMessage?.Invoke(this, new TextEventArgs($"В базе данных {dbFileInfo.FullName} со структурой все в порядке"));
+                EvntInfoMessage?.Invoke(this, new TextEventArgs($"В базе данных {settings.Database} со структурой все в порядке"));
             }
 
             return isGood;
@@ -70,7 +75,7 @@ namespace FlexibleDBMS
 
             if (CheckUpDBStructure())
             {
-                using (SqLiteDbWrapper readData = new SqLiteDbWrapper(sqLiteConnectionString, dbFileInfo))
+                using (SqLiteDbWrapper readData = new SqLiteDbWrapper(sqLiteConnectionString, settings.Database))
                 {
                     dt = readData.GetQueryResultAsTable(query);
                 }
@@ -79,50 +84,32 @@ namespace FlexibleDBMS
             return dt;
         }
 
-        //public IList<string> GetList(DataTable dt)
-        //{
-        //    IList<string> list = new List<string>();
-        //    string text = string.Empty;
-        //    var myData = dt.Select();
-        //    for (int i = 0; i < myData.Length; i++)
-        //    {
-        //        text = string.Empty; 
-
-        //        for (int j = 0; j < myData[i].ItemArray.Length; j++)
-        //            text += myData[i].ItemArray[j] + " ";
-        //        list.Add(text);
-        //    }
-
-        //    return list;
-        //}
-
         /// <summary>
         /// get only simple query like 'SELECT DISTINCT name_column FROM name_table'
         /// </summary>
         /// <param name="table"></param>
         /// <param name="columns"></param>
         /// <returns></returns>
-        public IModelDBable<ModelDBColumn> GetFilterList(IDictionary<string, string> columns, string table)
+        public IModelEntityDB<DBColumnModel> GetFilterList(IDictionary<string, string> columns, string table)
         {
             EvntInfoMessage?.Invoke(this, new TextEventArgs("В таблице: " + table + " " + columns?.Keys?.Count + " колонок "));
 
-            IModelDBable<ModelDBColumn> _table = new ModelDBTable();
-            IModelDBable<ModelDBFilter> result;
-            _table.Collection = new List<ModelDBColumn>();
+            IModelEntityDB<DBColumnModel> _table = new DBTableModel();
+            IModelEntityDB<DBFilterModel> result;
+            _table.Collection = new List<DBColumnModel>();
             if (CheckUpDBStructure())
             {
-                //    EvntInfoMessage?.Invoke(this, new TextEventArgs("В таблице: " + table + " " + columns?.Length + " колонок "));
                 foreach (var column in columns)
                 {
                     //SQLiteDBOperations dBOperations
-                    using (SqLiteDbWrapper readData = new SqLiteDbWrapper(sqLiteConnectionString, dbFileInfo))
+                    using (SqLiteDbWrapper readData = new SqLiteDbWrapper(sqLiteConnectionString, settings.Database))
                     {
-                        result = readData.GetColumnUniqueValuesList(table, column.Key, column.Value);
+                        result = readData.MakeFilterCollection(table, column.Key, column.Value);
                     }
 
                     EvntInfoMessage?.Invoke(this, new TextEventArgs($"Для фильтра отобрано {result.Collection.Count} строк"));
 
-                    _table.Collection.Add((ModelDBColumn)result);
+                    _table.Collection.Add((DBColumnModel)result);
                 }
             }
             return _table;
@@ -135,12 +122,12 @@ namespace FlexibleDBMS
                 "Type TEXT, DRFO INTEGER, F TEXT, I TEXT, O TEXT, Birthday TEXT, " +
                 "EDRPOU INTEGER, Name TEXT, City TEXT, District TEXT, Street TEXT, Building TEXT, BuildingBody TEXT, Apartment TEXT, " +
                 "CodeOperation TEXT, CodeDate TEXT);";
-            if (!File.Exists(dbFileInfo.Name))
+            if (!File.Exists(settings.Database))
             {
-                SQLiteConnection.CreateFile(dbFileInfo.Name);
+                SQLiteConnection.CreateFile(settings.Database);
             }
 
-            using (SqLiteDbWrapper dbWriter = new SqLiteDbWrapper(sqLiteConnectionString, dbFileInfo))
+            using (SqLiteDbWrapper dbWriter = new SqLiteDbWrapper(sqLiteConnectionString, settings.Database))
             {
                 dbWriter.Execute("begin");
                 dbWriter.Execute(strQueryCreateObjectInDb);
@@ -165,7 +152,7 @@ namespace FlexibleDBMS
 
             if (CheckUpDBStructure())
             {
-                using (SqLiteDbWrapper dbWriter = new SqLiteDbWrapper(sqLiteConnectionString, dbFileInfo))
+                using (SqLiteDbWrapper dbWriter = new SqLiteDbWrapper(sqLiteConnectionString, settings.Database))
                 {
                     EvntInfoMessage?.Invoke(this, new TextEventArgs($"Запись список в {list.Count} записей в базу список"));
 
@@ -213,5 +200,4 @@ namespace FlexibleDBMS
             }
         }
     }
-
 }

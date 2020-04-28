@@ -5,10 +5,10 @@ namespace FlexibleDBMS
 {
     public interface IReadable
     {
-        Task Read(string filePath);
-        Task Read(string filePath, Encoding encoding);
-        Task Read(string filePath, int maxElementsInDictionary);
-        Task Read(string filePath, Encoding encoding, int maxElementsInDictionary);
+        Task ReadAsync(string filePath);
+        Task ReadAsync(string filePath, Encoding encoding);
+        Task ReadAsync(string filePath, int maxElementsInDictionary);
+        Task ReadAsync(string filePath, Encoding encoding, int maxElementsInDictionary);
 
         Task ReadConfigAsync(string filePath);
         

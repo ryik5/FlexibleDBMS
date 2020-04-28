@@ -33,8 +33,7 @@
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.administratorMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.createLocalDBMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.selectNewDBMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.connectToSQLServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.selectNewSqlConnectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.importFromTextFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.writeModelsListMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,6 +41,7 @@
             this.printConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.writeFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.changeBaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.changeViewPanelviewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
@@ -76,7 +76,7 @@
             this.helpMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.useApplicationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.changeBaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusMessenges = new System.Windows.Forms.StatusStrip();
             this.StatusApp = new System.Windows.Forms.ToolStripStatusLabel();
             this.StatusInfoMain = new System.Windows.Forms.ToolStripStatusLabel();
@@ -110,10 +110,10 @@
             // 
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.administratorMenu,
+            this.changeBaseToolStripMenuItem,
             this.viewMenu,
             this.queryMenu,
-            this.helpMenu,
-            this.changeBaseToolStripMenuItem});
+            this.helpMenu});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(800, 24);
@@ -124,8 +124,7 @@
             // 
             this.administratorMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.createLocalDBMenuItem,
-            this.selectNewDBMenuItem,
-            this.connectToSQLServerToolStripMenuItem,
+            this.selectNewSqlConnectionToolStripMenuItem,
             this.toolStripSeparator5,
             this.importFromTextFileMenuItem,
             this.writeModelsListMenuItem,
@@ -140,60 +139,60 @@
             // createLocalDBMenuItem
             // 
             this.createLocalDBMenuItem.Name = "createLocalDBMenuItem";
-            this.createLocalDBMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.createLocalDBMenuItem.Size = new System.Drawing.Size(219, 22);
             this.createLocalDBMenuItem.Text = "Create local DB";
             // 
-            // selectNewDBMenuItem
+            // selectNewSqlDbToolStripMenuItem
             // 
-            this.selectNewDBMenuItem.Name = "selectNewDBMenuItem";
-            this.selectNewDBMenuItem.Size = new System.Drawing.Size(191, 22);
-            this.selectNewDBMenuItem.Text = "Select new DB";
-            // 
-            // connectToSQLServerToolStripMenuItem
-            // 
-            this.connectToSQLServerToolStripMenuItem.Name = "connectToSQLServerToolStripMenuItem";
-            this.connectToSQLServerToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
-            this.connectToSQLServerToolStripMenuItem.Text = "Connect to SQL server";
+            this.selectNewSqlConnectionToolStripMenuItem.Name = "selectNewSqlDbToolStripMenuItem";
+            this.selectNewSqlConnectionToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
+            this.selectNewSqlConnectionToolStripMenuItem.Text = "Select new SQL Connection";
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(188, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(216, 6);
             // 
             // importFromTextFileMenuItem
             // 
             this.importFromTextFileMenuItem.Name = "importFromTextFileMenuItem";
-            this.importFromTextFileMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.importFromTextFileMenuItem.Size = new System.Drawing.Size(219, 22);
             this.importFromTextFileMenuItem.Text = "Import from text file";
             // 
             // writeModelsListMenuItem
             // 
             this.writeModelsListMenuItem.Name = "writeModelsListMenuItem";
-            this.writeModelsListMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.writeModelsListMenuItem.Size = new System.Drawing.Size(219, 22);
             this.writeModelsListMenuItem.Text = "Write models List";
             // 
             // toolStripSeparator11
             // 
             this.toolStripSeparator11.Name = "toolStripSeparator11";
-            this.toolStripSeparator11.Size = new System.Drawing.Size(188, 6);
+            this.toolStripSeparator11.Size = new System.Drawing.Size(216, 6);
             // 
             // printConfigToolStripMenuItem
             // 
             this.printConfigToolStripMenuItem.Name = "printConfigToolStripMenuItem";
-            this.printConfigToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.printConfigToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
             this.printConfigToolStripMenuItem.Text = "PrintCurrentConfig";
             // 
             // readFileToolStripMenuItem
             // 
             this.readFileToolStripMenuItem.Name = "readFileToolStripMenuItem";
-            this.readFileToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.readFileToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
             this.readFileToolStripMenuItem.Text = "ReadConfig";
             // 
             // writeFileToolStripMenuItem
             // 
             this.writeFileToolStripMenuItem.Name = "writeFileToolStripMenuItem";
-            this.writeFileToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.writeFileToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
             this.writeFileToolStripMenuItem.Text = "WriteConfig";
+            // 
+            // changeBaseToolStripMenuItem
+            // 
+            this.changeBaseToolStripMenuItem.Name = "changeBaseToolStripMenuItem";
+            this.changeBaseToolStripMenuItem.Size = new System.Drawing.Size(84, 20);
+            this.changeBaseToolStripMenuItem.Text = "ChangeBase";
             // 
             // viewMenu
             // 
@@ -408,7 +407,8 @@
             // 
             this.helpMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.aboutMenuItem,
-            this.useApplicationMenuItem});
+            this.useApplicationMenuItem,
+            this.quitToolStripMenuItem});
             this.helpMenu.Name = "helpMenu";
             this.helpMenu.Size = new System.Drawing.Size(44, 20);
             this.helpMenu.Text = "Help";
@@ -425,11 +425,11 @@
             this.useApplicationMenuItem.Size = new System.Drawing.Size(154, 22);
             this.useApplicationMenuItem.Text = "UseApplication";
             // 
-            // changeBaseToolStripMenuItem
+            // quitToolStripMenuItem
             // 
-            this.changeBaseToolStripMenuItem.Name = "changeBaseToolStripMenuItem";
-            this.changeBaseToolStripMenuItem.Size = new System.Drawing.Size(84, 20);
-            this.changeBaseToolStripMenuItem.Text = "ChangeBase";
+            this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.quitToolStripMenuItem.Text = "Quit";
             // 
             // statusMessenges
             // 
@@ -591,7 +591,6 @@
         private System.Windows.Forms.ToolStripStatusLabel StatusInfoFilter;
         private System.Windows.Forms.ToolStripMenuItem updateFiltersMenuItem;
         private System.Windows.Forms.ToolStripMenuItem allColumnsInTableQueryMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem selectNewDBMenuItem;
         private System.Windows.Forms.ToolStripStatusLabel StatusApp;
         private System.Windows.Forms.ToolStripMenuItem exportMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recoverDataTableAfterQueryMenuItem;
@@ -607,13 +606,14 @@
         private System.Windows.Forms.ToolStripMenuItem lookForNumberToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem lookForFamiliyNameToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem lookForOrganizationToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem connectToSQLServerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem selectNewSqlConnectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
         private System.Windows.Forms.ToolStripMenuItem readFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem writeFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem printConfigToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem changeBaseToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addToStandartMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;
     }
 }
 

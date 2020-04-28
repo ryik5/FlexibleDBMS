@@ -16,15 +16,16 @@ namespace FlexibleDBMS
         public MySQLUtils(ISQLConnectionSettings settings)
         { SetSQLConnectionString(settings); }
 
-        //public void SetSQLConnectionSettings(ISQLConnectionSettings settings)
-        //{ SetSQLConnectionString(settings); }
-
+        public ISQLConnectionSettings GetSettings()
+        {
+            return settings;
+        }
         private void SetSQLConnectionString(ISQLConnectionSettings settings)
         {
             this.settings = settings;
             connString = SetConnectionString(settings);
         }
-
+               
         public DataTable GetTable(string query)
         {
             DataTable dt = null;
@@ -46,65 +47,7 @@ namespace FlexibleDBMS
             }
             return dt;
         }
-
-        //public DataTable GetData(string query, ISQLConnectionSettings _settings)
-        //{
-        //    SetSQLConnectionString(_settings);
-
-        //    using (var connection = new MySqlConnection(connString))
-        //    {
-        //        connection.Open();
-
-        //        DataTable dt = null;
-        //        // Insert some data
-        //        //using (var cmd = new MySqlCommand())
-        //        //{
-        //        //    cmd.Connection = conn;
-        //        //    cmd.CommandText = "INSERT INTO data (some_field) VALUES (@p)";
-        //        //    cmd.Parameters.AddWithValue("p", "Hello world");
-        //        //    await cmd.ExecuteNonQueryAsync();
-        //        //}
-
-        //        // Retrieve all rows
-        //        if (CommonExtesions.IsSqlQuery(query))
-        //        {
-        //            using (MySqlDataAdapter dataAdapter = new MySqlDataAdapter(query, connection))
-        //            {
-        //                dataAdapter.SelectCommand.CommandType = CommandType.Text;
-
-        //                dataAdapter.Fill(dt);
-        //            }
-        //        }
-        //        return dt;
-        //    }
-        //}
-
-        //public void TestMySql()
-        //{
-        //    string query = "show databases";
-
-        //    try
-        //    {
-        //        using (MySqlConnection dbCon = new MySqlConnection(connString))
-        //        {
-        //            dbCon.Open();
-        //            using (MySqlCommand cmd = new MySqlCommand(query, dbCon))
-        //            {
-        //                using (MySqlDataReader reader = cmd.ExecuteReader())
-        //                {
-        //                    while (reader.Read())
-        //                    {
-        //                        if (reader.GetString(0) != null && reader.GetString(0).Length > 0)
-        //                            reader.GetString(0);
-        //                    }
-        //                }
-        //            }
-        //            dbCon.Close();
-        //        }
-        //    }
-        //    catch (Exception excpt) { MessageBox.Show(excpt.ToString()); }
-        //}
-
+      
         public static string SetConnectionString(ISQLConnectionSettings settings)
         {
             string connString = string.Empty;
@@ -132,6 +75,7 @@ namespace FlexibleDBMS
 
             return connString;
         }
+        
     }
 }
 

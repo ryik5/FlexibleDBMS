@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace FlexibleDBMS
 {
-    public static class ModelsExtensions
+    public static class ToolStripExtensions
     {
         public static IList<MenuItem> ToMenuItemsList(this IList<ToolStripItem> items)
         {
@@ -86,6 +86,33 @@ namespace FlexibleDBMS
 
             return toolMenuList;
         }
+        
+
+        public static ToolStripMenuItem ToToolStripMenuItem(this MenuItem item, ToolStripMenuType modes)
+        {
+            ToolStripMenuItem toolMenu = null;
+
+            switch (modes)
+            {
+                case ToolStripMenuType.ExtraQuery:
+                    {
+                        toolMenu = item.ToExtraMenuToolStripMenuItem();
+                        break;
+                    }
+                case ToolStripMenuType.RecentConnection:
+                    {
+
+                        toolMenu = item.ToFilterToolStripMenuItem();
+
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            return toolMenu;
+        }
+        
 
         /// <summary>
         /// Filter Menu Items
@@ -118,7 +145,7 @@ namespace FlexibleDBMS
         /// </summary>
         /// <param name="item">ToolStripDropDownItem, is used itemName, itemText and itemTag</param>
         /// <returns></returns>
-        public static IDictionary<string, string> ToDictionary(this ToolStripDropDownItem item, int maxAmountElementsSubMenu = 40)
+        public static IDictionary<string, string> AsDictionary(this ToolStripDropDownItem item, int maxAmountElementsSubMenu = 1000)
         {
             IDictionary<string, string> dic = new Dictionary<string, string>(maxAmountElementsSubMenu);
             IList<string> lines = new List<string>();
@@ -151,113 +178,49 @@ namespace FlexibleDBMS
 
             return dic;
         }
-
-        public static IDictionary<string, string> GetPropertyValues(this object obj, int maxAmountClassElements = 1000)
+      
+        /// <summary>
+        /// Convert ToolStripDropDownItem to IDictionary<itemName,itemText: itemTag>
+        /// </summary>
+        /// <param name="item">ToolStripDropDownItem, is used itemName, itemText and itemTag</param>
+        /// <returns></returns>
+        public static IDictionary<string, object> AsObjectDictionary(this ToolStripDropDownItem item, int maxAmountElementsSubMenu = 1000)
         {
-            IDictionary<string, string> dic = new Dictionary<string, string>(maxAmountClassElements);
+            IDictionary<string, object> dic = new Dictionary<string, object>(maxAmountElementsSubMenu);
+            IList<string> lines = new List<string>();
+            MenuItem menuItem;
+            string text, tag;
 
-            if (obj == null) return null;
-
-            Type t = obj.GetType();
-
-            PropertyInfo[] props = t.GetProperties();
-
-            if (props?.Length > 0)
+            foreach (var v in item.DropDownItems)
             {
-                foreach (var prop in props)
+                if (v is ToolStripMenuItem)
                 {
-                    if (prop.GetIndexParameters().Length == 0)
-                    { dic.Add(prop?.Name, prop?.GetValue(obj)?.ToString()); }
-                    else
-                    { dic.Add(prop?.Name, prop?.PropertyType?.Name); }
+                    ToolStripMenuItem m = v as ToolStripMenuItem;
+                    text = m.Text?.Replace(":", "")?.Replace("  ", " ")?.Trim();
+                    tag = m.Tag?.ToString()?.Replace(":", "")?.Replace("  ", " ")?.Trim();
+                    if (text?.Length > 0 && tag?.Length > 0)
+                    {
+                        if (lines.Where(x => x.ToLower().Equals(tag)).Count() == 0)
+                        {
+                            if (maxAmountElementsSubMenu < 1)
+                            {
+                                continue;
+                            }
+                            menuItem = new MenuItem(text, tag);
+                            lines.Add(tag.ToLower());
+                            dic[menuItem.Name] = $"{text}: {tag}";
+
+                            maxAmountElementsSubMenu--;
+                        }
+                    }
                 }
             }
 
             return dic;
         }
 
-
-        public static string AsString(this IDictionary<string, string> dic)
-        {
-            string text = string.Empty;
-            if (dic?.Count > 0)
-            {
-                foreach (var s in dic)
-                {
-                    text += $"{s.Key}:\t{s.Value}\r\n";
-                }
-            }
-
-            return text;
-        }
-
-
-        public static ISQLConnectionSettings ToSQLConnectionSettings(this IList<RegistryEntity> entities)
-        {
-            ISQLConnectionSettings connectionSettings = new SQLConnectionSettings();
-
-            //if entities is empty or null
-            if (entities==null|| entities?.Count == 0)
-            {
-                return connectionSettings;
-            }
-
-            foreach (var entity in entities)
-            {
-                string key = entity?.Key;
-                switch (key)
-                {
-                    case "Name":
-                        {
-                            connectionSettings.Name = entity?.Value.ToString();
-                            break;
-                        }
-                    case "ProviderName":
-                        {
-                            connectionSettings.ProviderName = entity?.Value.ToString().GetSQLProvider();
-                            break;
-                        }
-                    case "Host":
-                        {
-                            connectionSettings.Host = entity?.Value.ToString();
-                            break;
-                        }
-                    case "Port":
-                        {
-                            connectionSettings.Port = int.TryParse(entity?.Value.ToString(), out int port) ? port : 0;
-                            break;
-                        }
-                    case "Username":
-                        {
-                            connectionSettings.Username = entity?.Value.ToString();
-                            break;
-                        }
-                    case "Password":
-                        {
-                            connectionSettings.Password = entity?.Value.ToString();
-                            break;
-                        }
-                    case "Database":
-                        {
-                            connectionSettings.Database = entity?.Value.ToString();
-                            break;
-                        }
-                    case "Table":
-                        {
-                            connectionSettings.Table = entity?.Value.ToString();
-                            break;
-                        }
-                    default:
-                        {
-                            break;
-                        }
-                }
-            }
-            
-            return connectionSettings;
-        }
-
-        public static ToolStripMenuItem ToExtraMenuToolStripMenuItem(this MenuItem menuItem)
+     
+          public static ToolStripMenuItem ToExtraMenuToolStripMenuItem(this MenuItem menuItem)
         {
             ToolStripMenuItem item = new ToolStripMenuItem()
             {
@@ -282,8 +245,8 @@ namespace FlexibleDBMS
         {
             ToolStripMenuItem item = new ToolStripMenuItem()
             {
-                Name = menuItem.Name,
-                Text = menuItem.Text,
+               Text  = menuItem.Text,
+                Tag = menuItem.Tag,
                 Size = new System.Drawing.Size(180, 22),
             };
             return item;

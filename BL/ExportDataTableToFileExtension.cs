@@ -218,8 +218,6 @@ namespace FlexibleDBMS
             pivotTable.MultipleFieldFilters = true;
             pivotTable.ColumnGrandTotals = true;
             pivotTable.GridDropZones = false;
-
-
             pivotTable.ShowError = true;
             pivotTable.ErrorCaption = "[error]";
             pivotTable.ShowHeaders = true;
@@ -330,8 +328,6 @@ namespace FlexibleDBMS
 
             return pivotTable;
         }
-
-
     }
 
     /// <summary>
@@ -345,5 +341,4 @@ namespace FlexibleDBMS
         Market = 8,
         MarketWithChart = 9,
     }
-
 }

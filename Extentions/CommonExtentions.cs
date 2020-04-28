@@ -1,16 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace FlexibleDBMS
 {
     public static class CommonExtesions
     {
-
-        public static string Translate(this string key, IDictionary<string, string> dic)
+        /// <summary>
+        /// to look for a translation of the word 'key' from Dictionary 
+        /// </summary>
+        /// <param name="key">the foreign word for which to find a translation</param>
+        /// <param name="translationDictionary">the dictionary with translation words</param>
+        /// <returns></returns>
+        public static string Translate(this string key, IDictionary<string, string> translationDictionary)
         {
-            string result = dic.TryGetValue(key, out string name) == false ? key : name;
+            string result = translationDictionary.TryGetValue(key, out string name) == false ? key : name;
 
             return result;
         }
@@ -25,28 +31,55 @@ namespace FlexibleDBMS
             return oldDic;
         }
 
-        public static SQLProvider GetSQLProvider(this string provider)
+        public static IDictionary<string, string> GetObjectPropertiesValuesToString(this object obj, int maxAmountClassElements = 1000)
         {
-            SQLProvider deffinedSQLProvider = SQLProvider.MS_SQL;
-            switch (provider)
+            IDictionary<string, string> dic = new Dictionary<string, string>(maxAmountClassElements);
+
+            if (obj == null) return null;
+
+            Type t = obj.GetType();
+
+            PropertyInfo[] props = t.GetProperties();
+
+            if (props?.Length > 0)
             {
-                case "MS_SQL":
-                    deffinedSQLProvider = SQLProvider.MS_SQL;
-                    break;
-                case "My_SQL":
-                    deffinedSQLProvider = SQLProvider.My_SQL;
-                    break;
-                case "SQLite":
-                    deffinedSQLProvider = SQLProvider.SQLite;
-                    break;
-                case "None":
-                default:
-                    deffinedSQLProvider = SQLProvider.None;
-                    break;
+                foreach (var prop in props)
+                {
+                    if (prop.GetIndexParameters().Length == 0)
+                    { dic.Add(prop?.Name, prop?.GetValue(obj)?.ToString()); }
+                    else
+                    { dic.Add(prop?.Name, prop?.PropertyType?.Name); }
+                }
             }
 
-            return deffinedSQLProvider;
+            return dic;
         }
+        
+
+        public static IDictionary<string, object> GetObjectPropertiesValuesToObject(this object obj, int maxAmountClassElements = 1000)
+        {
+            IDictionary<string, object> dic = new Dictionary<string, object>(maxAmountClassElements);
+
+            if (obj == null) return null;
+
+            Type t = obj.GetType();
+
+            PropertyInfo[] props = t.GetProperties();
+
+            if (props?.Length > 0)
+            {
+                foreach (var prop in props)
+                {
+                    if (prop.GetIndexParameters().Length == 0)
+                    { dic.Add(prop?.Name, prop?.GetValue(obj)); }
+                    else
+                    { dic.Add(prop?.Name, prop?.PropertyType?.Name); }
+                }
+            }
+
+            return dic;
+        }
+
 
         /// <summary>
         /// Check correctness of query
@@ -112,6 +145,22 @@ namespace FlexibleDBMS
             else
                 source.AppendText($"{Environment.NewLine} {value}");
         }
-       
+
+
+        public static string AsString(this IDictionary<string, string> dic)
+        {
+            string text = string.Empty;
+            if (dic?.Count > 0)
+            {
+                foreach (var s in dic)
+                {
+                    text += $"{s.Key}:\t{s.Value}\r\n";
+                }
+            }
+
+            return text;
+        }
+
+
     }
 }

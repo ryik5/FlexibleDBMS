@@ -61,7 +61,7 @@ namespace FlexibleDBMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to --------------------------------------------.
+        ///   Looks up a localized string similar to ----------------------------------------------------------------------------------------.
         /// </summary>
         internal static string DashedSymbols {
             get {

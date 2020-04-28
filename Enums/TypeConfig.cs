@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 
 namespace FlexibleDBMS
 {
@@ -14,5 +13,4 @@ namespace FlexibleDBMS
         ToolStripMenuStandartQuery,
         ToolStripMenuRecent
     }
-
 }

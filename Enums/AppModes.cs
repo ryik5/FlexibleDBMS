@@ -1,10 +1,8 @@
-﻿
-namespace FlexibleDBMS
+﻿namespace FlexibleDBMS
 {
-
-public enum AppModes
+    public enum AppModes
     {
-        Admin=0,
-        User=2
+        Admin = 0,
+        User = 2
     }
 }

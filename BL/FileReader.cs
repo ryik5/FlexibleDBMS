@@ -13,7 +13,7 @@ namespace FlexibleDBMS
         Encoding _encoding = Encoding.GetEncoding(1251);
         public int importedRows = 0;
         public IList<string> Text;
-        public AbstractConfigList config;
+        public ConfigFullNew<AbstractConfig> config;
 
         public delegate void CollectionFull(object sender, BoolEventArgs e);
         public event CollectionFull EvntCollectionFull;
@@ -22,7 +22,7 @@ namespace FlexibleDBMS
         public event InfoMessage EvntInfoMessage;
 
 
-        public async Task Read(string filePath, Encoding encoding, int maxElementsInDictionary)
+        public async Task ReadAsync(string filePath, Encoding encoding, int maxElementsInDictionary)
         {
             Text = new List<string>(maxElementsInDictionary);
 
@@ -61,48 +61,51 @@ namespace FlexibleDBMS
             }
         }
 
-        public async Task Read(string filePath, Encoding encoding)
+        public async Task ReadAsync(string filePath, Encoding encoding)
         {
-            await Task.Run(() => Read(filePath, encoding, _maxElementsInDictionary));
+            await Task.Run(() => ReadAsync(filePath, encoding, _maxElementsInDictionary));
         }
 
-        public async Task Read(string filePath)
+        public async Task ReadAsync(string filePath)
         {
-            await Task.Run(() => Read(filePath, _maxElementsInDictionary));
+            await Task.Run(() => ReadAsync(filePath, _maxElementsInDictionary));
         }
 
-        public async Task Read(string filePath, int maxElementsInDictionary)
+        public async Task ReadAsync(string filePath, int maxElementsInDictionary)
         {
-            await Read(filePath, _encoding, maxElementsInDictionary);
+            await ReadAsync(filePath, _encoding, maxElementsInDictionary);
+        }
+
+        public void ReadConfig(string filePath)
+        {
+            config = ReadSerilizedConfig(filePath);
         }
 
         public async Task ReadConfigAsync(string filePath)
         {
-            await Task.Run(() => config = ReadSerilizedConfig(filePath));
+            await Task.Run(()=> ReadConfig(filePath));
         }
 
-        public AbstractConfigList ReadConfig(string filePath)
+        private ConfigFullNew<AbstractConfig> ReadSerilizedConfig(string filePath)
         {
-            Task.Run(() => ReadConfigAsync(filePath)).Wait();
-
-            return config;
-        }
-
-        private AbstractConfigList ReadSerilizedConfig(string filePath)
-        {
+            ConfigFullNew<AbstractConfig> config=null;
             BinaryFormatter formatter = new BinaryFormatter();
+            string message = string.Empty;
             try
             {
-                EvntInfoMessage?.Invoke(this, new TextEventArgs($"Try to read '{filePath}'"));
+                message+=$"Try to read '{filePath}':{Environment.NewLine}";
                 using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate))
                 {
-                    config = (AbstractConfigList)formatter.Deserialize(fs);
+                    config = (ConfigFullNew<AbstractConfig>)formatter.Deserialize(fs);
+                    message += "Success!";
                 }
             }
             catch (Exception excpt)
             {
-                EvntInfoMessage?.Invoke(this, new TextEventArgs($"{excpt.Message}"));
+                message += $"{excpt.Message}:{Environment.NewLine}{excpt.ToString()}";
             }
+
+            EvntInfoMessage?.Invoke(this, new TextEventArgs(message));
             EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//collection is full
 
             return config;

@@ -1,5 +1,4 @@
-﻿
-namespace FlexibleDBMS
+﻿namespace FlexibleDBMS
 {
     public enum MainViewMode
     {

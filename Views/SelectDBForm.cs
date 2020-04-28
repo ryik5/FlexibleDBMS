@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FlexibleDBMS
@@ -20,8 +19,8 @@ namespace FlexibleDBMS
         public SelectDBForm()
         {
             InitializeComponent();
+           
             settings = new SQLConnectionSettings(SQLConnection.Settings);
-            SQLConnection.Settings = null;
 
             selectedDB = "mysql";
 
@@ -98,57 +97,62 @@ namespace FlexibleDBMS
         private void ChangeDB()
         {
             cmbTables.Enabled = false;
-
-            if (!string.IsNullOrWhiteSpace(tbHost?.Text))
+            if (settings.ProviderName == SQLProvider.My_SQL)
             {
-                settings.Host = tbHost?.Text;
-                settings.Port = int.TryParse(tbPort?.Text, out int port) ? port : 0;
-                settings.Database = cmbDataBases?.Items?.Count > 0 ? cmbDataBases?.SelectedItem?.ToString() : selectedDB;
-                settings.Username = tbUserName?.Text;
-                settings.Password = tbPassword?.Text;
-            }
-            else
-            {
-                tbResultShow.AppendLine("Check the correctness of the entered data:");
-                tbResultShow.AppendLine("Host: " + tbHost?.Text);
-                return;
-            }
-
-            try
-            {
-                MySQLUtils mySQL = new MySQLUtils(settings);
-                DataTable dt = mySQL.GetTable("SHOW TABLES");
-                IList<string> list = new List<string>();
-                foreach (DataRow r in dt.Rows)
+                if (!string.IsNullOrWhiteSpace(tbHost?.Text))
                 {
-                    list.Add(r[0].ToString());
+                    settings.Host = tbHost?.Text;
+                    settings.Port = int.TryParse(tbPort?.Text, out int port) ? port : 0;
+                    settings.Database = cmbDataBases?.Items?.Count > 0 ? cmbDataBases?.SelectedItem?.ToString() : selectedDB;
+                    settings.Username = tbUserName?.Text;
+                    settings.Password = tbPassword?.Text;
+                }
+                else
+                {
+                    tbResultShow.AppendLine("Check the correctness of the entered data:");
+                    tbResultShow.AppendLine("Host: " + tbHost?.Text);
+                    return;
                 }
 
-                if (list?.Count > 0)
+                try
                 {
-                    cmbTables.DataSource = list;
-                    cmbTables.Enabled = true;
+                    MySQLUtils mySQL = new MySQLUtils(settings);
+                    DataTable dt = mySQL.GetTable("SHOW TABLES");
+                    IList<string> list = new List<string>();
+                    foreach (DataRow r in dt.Rows)
+                    {
+                        list.Add(r[0].ToString());
+                    }
 
-                    settings.Table = cmbTables?.Items?.Count > 0 ? cmbTables?.SelectedItem?.ToString() : null;
+                    if (list?.Count > 0)
+                    {
+                        cmbTables.DataSource = list;
+                        cmbTables.Enabled = true;
 
-                    tbResultShow.AppendLine($"DB exists and table {settings.Table} are selected.");
-                    tbResultShow.AppendLine("Please will select needed DataBase!");
+                        settings.Table = cmbTables?.Items?.Count > 0 ? cmbTables?.SelectedItem?.ToString() : null;
+
+                        tbResultShow.AppendLine($"DB exists and table {settings.Table} are selected.");
+                        tbResultShow.AppendLine("Please will select needed DataBase!");
+                    }
+                }
+                catch (MySqlException excpt)
+                {
+                    tbResultShow.AppendLine(excpt.Message + ":");
+                    tbResultShow.AppendLine(excpt.ToString());
+                }
+                catch (Exception excpt)
+                {
+                    tbResultShow.AppendLine(excpt.Message + ":");
+                    tbResultShow.AppendLine(excpt.ToString());
                 }
             }
-            catch (MySqlException excpt)
+            else if ( settings.ProviderName == SQLProvider.MS_SQL)
             {
-                tbResultShow.AppendLine(excpt.Message + ":");
-                tbResultShow.AppendLine(excpt.ToString());
-            }
-            catch (Exception excpt)
-            {
-                tbResultShow.AppendLine(excpt.Message + ":");
-                tbResultShow.AppendLine(excpt.ToString());
+                throw new NotImplementedException(); 
             }
 
             tbName.Text = SetNameConnection();
         }
-
 
         private void CheckDB()
         {
@@ -159,15 +163,14 @@ namespace FlexibleDBMS
 
             switch (selectedProvider)
             {
-                case (SQLProvider.My_SQL):
+                case SQLProvider.My_SQL:
                     {
                         if (!string.IsNullOrWhiteSpace(tbHost?.Text))
                         {
-                            settings.Host = tbHost?.Text;
-                            settings.Port = int.TryParse(tbPort?.Text, out int port) ? port : 0;
-                            settings.Database = cmbDataBases?.Items?.Count > 1 ? cmbDataBases?.SelectedItem?.ToString() : selectedDB;
-                            settings.Username = tbUserName?.Text;
-                            settings.Password = tbPassword?.Text;
+                            settings = CheckMySQLDB(settings);
+
+                            if (cmbDataBases?.Items?.Count > 0)
+                            { existDB = true; }
                         }
                         else
                         {
@@ -175,31 +178,13 @@ namespace FlexibleDBMS
                             return;
                         }
 
-                        existDB = CheckMySQLDB(settings);
                         break;
                     }
                 case SQLProvider.SQLite:
                     {
-                        settings.Database = CheckSQLiteDB();
+                        settings = CheckSQLiteDB(settings);
 
-                        if (string.IsNullOrWhiteSpace(settings?.Database))
-                        {
-                            DialogResult dialog = MessageBox.Show("Create new DB?", "DB is empty!", MessageBoxButtons.YesNo);
-
-                            if (dialog == DialogResult.Yes)
-                            {
-                                SQLiteDBOperations connector = new SQLiteDBOperations(settings);
-                                connector.TryMakeLocalDB();
-                                Task.Delay(100);
-                                settings.Database = CheckSQLiteDB();
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
                         existDB = !string.IsNullOrWhiteSpace(settings?.Database);
-
                         break;
                     }
                 default:
@@ -209,10 +194,7 @@ namespace FlexibleDBMS
             if (existDB)
             {
                 if (cmbTables?.Items?.Count > 0)
-                {
-                    settings.Table = cmbTables?.Items?.Count > 0 ? cmbTables?.SelectedItem?.ToString() : null;
-                    cmbTables.Enabled = cmbTables?.Items?.Count > 1;
-                }
+                { cmbTables.Enabled = cmbTables?.Items?.Count > 1; }
 
                 btnSave.Enabled = true;
             }
@@ -220,10 +202,15 @@ namespace FlexibleDBMS
             tbName.Text = SetNameConnection();
         }
 
-        private bool CheckMySQLDB(ISQLConnectionSettings connectionSettings)
+        private ISQLConnectionSettings CheckMySQLDB(ISQLConnectionSettings tmpSettings)
         {
-            bool existDB = false;
-            MySQLUtils mySQL = new MySQLUtils(connectionSettings);
+            ISQLConnectionSettings newSettings = new SQLConnectionSettings(tmpSettings);
+            newSettings.Host = tbHost?.Text;
+            newSettings.Port = int.TryParse(tbPort?.Text, out int port) ? port : 0;
+            newSettings.Database = cmbDataBases?.SelectedItem?.ToString() ?? selectedDB;
+            newSettings.Username = tbUserName?.Text;
+            newSettings.Password = tbPassword?.Text;
+            MySQLUtils mySQL = new MySQLUtils(newSettings);
 
             try
             {
@@ -239,10 +226,9 @@ namespace FlexibleDBMS
                     {
                         cmbDataBases.DataSource = list;
                         cmbDataBases.Enabled = true;
+                        newSettings.Database = list[0];
 
                         tbResultShow.AppendLine("The inputed data are correct.");
-
-                        existDB = true;
                     }
                 }
             }
@@ -257,42 +243,48 @@ namespace FlexibleDBMS
                 tbResultShow.AppendLine(excpt.ToString());
             }
 
-            return existDB;
+            return newSettings;
         }
 
-        private string CheckSQLiteDB()
+        private ISQLConnectionSettings CheckSQLiteDB(ISQLConnectionSettings tmpSettings)
         {
-            string filePath = string.Empty;
-            bool isDB = false;
+            ISQLConnectionSettings newSettings = new SQLConnectionSettings(tmpSettings);
+
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
-                filePath = ofd.OpenFileDialogReturnPath();
-                if (!string.IsNullOrWhiteSpace(filePath))
+                newSettings.Database = ofd.OpenFileDialogReturnPath();
+                    newSettings.Name = "currentDB";
+                if (!string.IsNullOrWhiteSpace(newSettings.Database))
                 {
-                    isDB = CheckUpSelectedSQLiteDB(filePath);
+                    newSettings = CheckSchemaSQLite(newSettings);
+                }
+                else
+                {
+                    DialogResult dialog = MessageBox.Show("Create new DB?", "DB is empty!", MessageBoxButtons.YesNo);
+
+                    if (dialog == DialogResult.Yes)
+                    {
+                        newSettings.Database = "MainDB.db";
+                        SQLiteDBOperations connector = new SQLiteDBOperations(newSettings);
+                        connector.TryMakeLocalDB();
+                        newSettings = CheckSchemaSQLite(newSettings);
+                    }
                 }
             }
-            if (isDB == false)
-            {
-                filePath = null;
-            }
-            return filePath;
+            return newSettings;
         }
 
-        private bool CheckUpSelectedSQLiteDB(string filePath)
+        private ISQLConnectionSettings CheckSchemaSQLite(ISQLConnectionSettings tmpSettings)
         {
-            bool isDB = false;
+            ISQLConnectionSettings newSettings = new SQLConnectionSettings(tmpSettings);
+
             DbSchema schemaDB = null;
             IList<string> tablesDB;
-            ModelDB db = new ModelDB();
-            db.Name = "currentDB";
-            db.Collection = new List<ModelDBTable>();
-            db.FilePath = filePath;
-            db.SqlConnectionString = $"Data Source = {filePath}; Version=3;";
+            DBModel db = new DBModel();
 
             try
             {
-                schemaDB = DbSchema.LoadDB(filePath);
+                schemaDB = DbSchema.LoadDB(tmpSettings.Database);
                 tablesDB = new List<string>();
 
                 foreach (var tbl in schemaDB.Tables)
@@ -300,16 +292,19 @@ namespace FlexibleDBMS
                     tablesDB.Add(tbl.Value.TableName);
                 }
 
-                cmbDataBases.DataSource = new List<string>() { filePath };
-                cmbTables.DataSource = tablesDB;
+                if (tablesDB?.Count > 0)
+                {
+                    newSettings.Table = tablesDB[0];
+                    newSettings.ProviderName = SQLProvider.SQLite;
 
-                isDB = true;
+                    cmbDataBases.DataSource = new List<string>() { tmpSettings.Database };
+                    cmbTables.DataSource = tablesDB;
 
-                tbResultShow.AppendLine("The inputed data are correct.");
+                    tbResultShow.AppendLine("The inputed data are correct.");
+                }
             }
             catch (Exception e)
             {
-                tbResultShow.AppendLine($"Ошибка в БД: {e.Message}");
                 tbResultShow.AppendLine($"Ошибка в БД: {e.Message}");
                 tbResultShow.AppendLine($"{e.ToString()}");
             }
@@ -322,18 +317,13 @@ namespace FlexibleDBMS
                     tbResultShow.AppendLine("Заблокирован функционал по получению данных из таблиц...");
                 }
             }
-
-            return isDB;
+            return newSettings;
         }
-
-
 
 
         private void ShowMessage(string message)
         { MessageBox.Show(message); }
-
-
-
+        
         private void BtnCancel_Click(object sender, EventArgs e)
         { ActiveForm.Close(); }
 
@@ -396,7 +386,7 @@ namespace FlexibleDBMS
 
             cmbSQLProvider.DataSource = SQLProviderManager.GetSQLProvider();
 
-            tbResultShow.AppendLine(settings.GetPropertyValues().AsString());
+            tbResultShow.AppendLine(settings.GetObjectPropertiesValuesToString().AsString());
 
             if (settings != null)
             {

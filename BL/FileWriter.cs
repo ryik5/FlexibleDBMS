@@ -76,9 +76,9 @@ namespace FlexibleDBMS
             await Write(filePath, content, _encoding);
         }
 
-        public async Task Write(string filePath, object config)
+        public async Task Write(string filePath, ConfigFullNew<AbstractConfig> config)
         {
-            EvntInfoMessage?.Invoke(this, new TextEventArgs($"Try to write {nameof(ConfigParameter)}"));
+            EvntInfoMessage?.Invoke(this, new TextEventArgs($"Try to write {nameof(ConfigFullNew<AbstractConfig>)}"));
             if (File.Exists(filePath))
             {
                 try { File.Delete(filePath); }
@@ -90,7 +90,7 @@ namespace FlexibleDBMS
                 {
                     try
                     {
-                        EvntInfoMessage?.Invoke(this, new TextEventArgs($"0 {config.GetPropertyValues().AsString()}"));
+                        EvntInfoMessage?.Invoke(this, new TextEventArgs($"0 {config.GetObjectPropertiesValuesToString().AsString()}"));
 
                         BinaryFormatter formatter = new BinaryFormatter();
                         await Task.Run(() =>
@@ -109,5 +109,6 @@ namespace FlexibleDBMS
                 }
             }
         }
+
     }
 }

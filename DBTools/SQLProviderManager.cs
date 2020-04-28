@@ -3,14 +3,6 @@ using System.Collections.Generic;
 
 namespace FlexibleDBMS
 {
-    [Serializable]
-    public enum SQLProvider
-    {
-        None,
-        MS_SQL,
-        My_SQL,
-        SQLite
-    }
 
     [Serializable]
     public static class SQLProviderManager
