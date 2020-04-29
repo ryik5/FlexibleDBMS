@@ -2,7 +2,7 @@
 {
     public enum ToolStripMenuType
     {
-        QueryStandart,
+        StandartQuery,
         ExtraQuery,
         RecentConnection
     }

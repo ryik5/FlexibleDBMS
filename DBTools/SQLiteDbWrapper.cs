@@ -86,7 +86,7 @@ namespace FlexibleDBMS
         {
             DataTable dt = new DataTable();
 
-            if (CommonExtesions.CheckIsSqlQuery(query))
+        //    if (CommonExtesions.CheckIsSqlQuery(query))
             {
                 using (var sqlAdapter = new SQLiteDataAdapter(query, sqlConnection))
                 {

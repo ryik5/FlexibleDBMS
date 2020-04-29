@@ -5,7 +5,7 @@ namespace FlexibleDBMS
 {
 
     [Serializable]
-    public static class SQLProviderManager
+    public static class SQLProviderExtensions
     {
         public static IList<string> GetSQLProvider()
         {

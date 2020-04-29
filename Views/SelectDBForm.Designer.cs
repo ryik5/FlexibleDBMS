@@ -42,11 +42,11 @@
             this.cmbTables = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
-            // textBox1
+            // tbResultShow
             // 
             this.tbResultShow.Location = new System.Drawing.Point(12, 184);
             this.tbResultShow.Multiline = true;
-            this.tbResultShow.Name = "textBox1";
+            this.tbResultShow.Name = "tbResultShow";
             this.tbResultShow.ReadOnly = true;
             this.tbResultShow.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.tbResultShow.Size = new System.Drawing.Size(783, 254);
@@ -162,6 +162,7 @@
             this.Controls.Add(this.tbResultShow);
             this.Name = "SelectDBForm";
             this.Text = "SelectDB";
+            this.Shown += new System.EventHandler(this.SelectDBForm_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 

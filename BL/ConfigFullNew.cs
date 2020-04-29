@@ -83,6 +83,13 @@ namespace FlexibleDBMS
         {
             return this;
         }
+    
+        //Get whole keys in Dictionary
+        public IList<string> GetAllNameConfigs()
+        {
+            IList<string> result = new List<string>(config.Keys);
+            return result;
+        }
     }
 
     public class ConfigDictionaryTo
@@ -106,7 +113,7 @@ namespace FlexibleDBMS
         public ISQLConnectionSettings ToISQLConnectionSettings(IDictionary<string, object> config)
         {
             ISQLConnectionSettings data = new SQLConnectionSettings();
-            if (!(config?.Count >0))
+            if (!(config?.Count > 0))
                 return data;
 
             data.Name = config[nameof(ISQLConnectionSettings.Name)]?.ToString();
@@ -119,6 +126,25 @@ namespace FlexibleDBMS
             data.Password = config[nameof(ISQLConnectionSettings.Password)]?.ToString();
             return data;
         }
-    }
+        public IList<MenuItem> ToMenuItems(IDictionary<string, object> config)
+        {
+            IList<MenuItem> data = new List<MenuItem>();
+            if (!(config?.Count > 0))
+                return null;
+            MenuItem menu;
+            foreach (var row in config)
+            {
+                string codedMenu = row.Value?.ToString();
+                if (!(string.IsNullOrWhiteSpace(codedMenu)))
+                {
+                    string text = codedMenu.Split(':')[0];
+                    string tag = codedMenu.Split(':')[1];
+                    menu = new MenuItem(text, tag);
+                    data.Add(menu);
+                }
+            }
 
+            return data;
+        }
+    }
 }

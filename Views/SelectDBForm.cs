@@ -12,7 +12,7 @@ namespace FlexibleDBMS
     {
 
         public ISQLConnectionSettings settings { get; set; }
-        string selectedDB;
+        string selectedDB= "mysql";
 
         ToolTip tp = new ToolTip();
 
@@ -20,9 +20,6 @@ namespace FlexibleDBMS
         {
             InitializeComponent();
            
-            settings = new SQLConnectionSettings(SQLConnection.Settings);
-
-            selectedDB = "mysql";
 
             btnCheck.Click += btnCheck_Click;
             btnSave.Click += BtnSave_Click;
@@ -34,6 +31,10 @@ namespace FlexibleDBMS
             SetStartedControls();
         }
 
+        private void SelectDBForm_Shown(object sender, EventArgs e)
+        {
+            settings = new SQLConnectionSettings(SQLConnection.Settings);
+        }
         private void CmbTables_SelectedIndexChanged(object sender, EventArgs e)
         {
             tbName.Text = SetNameConnection();
@@ -384,7 +385,7 @@ namespace FlexibleDBMS
                 tb.Refresh();
             }
 
-            cmbSQLProvider.DataSource = SQLProviderManager.GetSQLProvider();
+            cmbSQLProvider.DataSource = SQLProviderExtensions.GetSQLProvider();
 
             tbResultShow.AppendLine(settings.GetObjectPropertiesValuesToString().AsString());
 
@@ -482,5 +483,7 @@ namespace FlexibleDBMS
                 e.Handled = true;
             }
         }
+
+
     }
 }

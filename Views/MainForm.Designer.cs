@@ -56,7 +56,7 @@
             this.addToStandartMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addToExtraMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.queriesStandartMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.queryStandartMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.schemeLocalDBMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.analysisToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -70,7 +70,7 @@
             this.lookForNumberToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lookForFamiliyNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lookForOrganizationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.queriesExtraMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.queryExtraMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.removeQueryExtraMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpMenu = new System.Windows.Forms.ToolStripMenuItem();
@@ -142,9 +142,9 @@
             this.createLocalDBMenuItem.Size = new System.Drawing.Size(219, 22);
             this.createLocalDBMenuItem.Text = "Create local DB";
             // 
-            // selectNewSqlDbToolStripMenuItem
+            // selectNewSqlConnectionToolStripMenuItem
             // 
-            this.selectNewSqlConnectionToolStripMenuItem.Name = "selectNewSqlDbToolStripMenuItem";
+            this.selectNewSqlConnectionToolStripMenuItem.Name = "selectNewSqlConnectionToolStripMenuItem";
             this.selectNewSqlConnectionToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
             this.selectNewSqlConnectionToolStripMenuItem.Text = "Select new SQL Connection";
             // 
@@ -266,8 +266,8 @@
             this.addToStandartMenuItem,
             this.addToExtraMenuItem,
             this.toolStripSeparator1,
-            this.queriesStandartMenu,
-            this.queriesExtraMenu,
+            this.queryStandartMenu,
+            this.queryExtraMenu,
             this.toolStripSeparator4,
             this.removeQueryExtraMenuItem});
             this.queryMenu.Name = "queryMenu";
@@ -293,7 +293,7 @@
             // 
             // queriesStandartMenu
             // 
-            this.queriesStandartMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.queryStandartMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.schemeLocalDBMenuItem,
             this.toolStripSeparator2,
             this.analysisToolStripMenuItem1,
@@ -307,9 +307,9 @@
             this.lookForNumberToolStripMenuItem,
             this.lookForFamiliyNameToolStripMenuItem,
             this.lookForOrganizationToolStripMenuItem});
-            this.queriesStandartMenu.Name = "queriesStandartMenu";
-            this.queriesStandartMenu.Size = new System.Drawing.Size(159, 22);
-            this.queriesStandartMenu.Text = "Standart queries";
+            this.queryStandartMenu.Name = "queriesStandartMenu";
+            this.queryStandartMenu.Size = new System.Drawing.Size(159, 22);
+            this.queryStandartMenu.Text = "Standart queries";
             // 
             // schemeLocalDBMenuItem
             // 
@@ -388,9 +388,9 @@
             // 
             // queriesExtraMenu
             // 
-            this.queriesExtraMenu.Name = "queriesExtraMenu";
-            this.queriesExtraMenu.Size = new System.Drawing.Size(159, 22);
-            this.queriesExtraMenu.Text = "Extra queries";
+            this.queryExtraMenu.Name = "queriesExtraMenu";
+            this.queryExtraMenu.Size = new System.Drawing.Size(159, 22);
+            this.queryExtraMenu.Text = "Extra queries";
             // 
             // toolStripSeparator4
             // 
@@ -539,6 +539,7 @@
             this.MainMenuStrip = this.menuStrip;
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
@@ -571,12 +572,12 @@
         private System.Windows.Forms.ToolStripDropDownButton SplitImage1;
         private System.Windows.Forms.ToolStripMenuItem queryMenu;
         private System.Windows.Forms.ToolStripMenuItem addToExtraMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem queriesStandartMenu;
+        private System.Windows.Forms.ToolStripMenuItem queryStandartMenu;
         private System.Windows.Forms.ToolStripMenuItem analysisToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem loadData0MenuItem;
         private System.Windows.Forms.ToolStripMenuItem getFIOMenuItem;
         private System.Windows.Forms.ToolStripMenuItem getEnterpriseMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem queriesExtraMenu;
+        private System.Windows.Forms.ToolStripMenuItem queryExtraMenu;
         private System.Windows.Forms.ToolStripMenuItem schemeLocalDBMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;

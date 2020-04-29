@@ -101,7 +101,7 @@
     <Compile Include="BL\FileReader.cs" />
     <Compile Include="BL\FileWriter.cs" />
     <Compile Include="DBTools\ISqlDbConnector.cs" />
-    <Compile Include="DBTools\SQLProviderManager.cs" />
+    <Compile Include="Extentions\SQLProviderExtensions.cs" />
     <Compile Include="DBTools\MySQLUtils.cs" />
     <Compile Include="Models\SQLConnectionSettings.cs" />
     <Compile Include="Enums\TypeConfig.cs" />
@@ -120,6 +120,7 @@
     <Compile Include="DBTools\SQLiteDBOperations.cs" />
     <Compile Include="BL\FileReaderModels.cs" />
     <Compile Include="Extentions\CommonExtentions.cs" />
+    <Compile Include="Models\MenuItemStore.cs" />
     <Compile Include="Views\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

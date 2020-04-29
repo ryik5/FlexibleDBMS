@@ -65,6 +65,10 @@ namespace FlexibleDBMS
         ConfigFullNew<AbstractConfig> configFull ;
         AbstractConfig configUnit ;
         AbstractConfig config;
+        IMenuStore recentStore;
+        IMenuStore queryExtraStore;
+        IMenuStore queryStandartStore;
+
 
         /// <summary>
         /// DB Collection connected to the system
@@ -78,13 +82,19 @@ namespace FlexibleDBMS
         }
 
 
-        private async void Form1_Load(object sender, EventArgs e)
+        private void Form1_Load(object sender, EventArgs e)
         {
             currentSQLConnectionStore = new SQLConnectionStore();
-             configFull = new ConfigFullNew<AbstractConfig>();
+
+            regOperator = new RegistryManager(appRegistryKey);
+
+            configFull = new ConfigFullNew<AbstractConfig>();
             configUnit = new Config();
             config = new Config();
-            regOperator = new RegistryManager(appRegistryKey);
+
+            recentStore = new MenuItemStore();
+            queryExtraStore = new MenuItemStore();
+            queryStandartStore = new MenuItemStore();
 
             //Check Up Inputed Environment parameters
             CheckEnvironment();
@@ -102,7 +112,7 @@ namespace FlexibleDBMS
             //Turn Up Menu
             TurnUpToolStripMenuItems();
 
-         //   ReadLastSettingsFromRegistry();
+            //   ReadLastSettingsFromRegistry();
 
             //Turn Up StatusStrip
             TurnUpStatusStripMenuItems();
@@ -111,26 +121,40 @@ namespace FlexibleDBMS
             ShowLogViewTextbox(MainViewMode.Textbox);
 
 
-            ConfigFullNew<AbstractConfig> tmpConfig= ReadCfgFromFile();
+            ConfigFullNew<AbstractConfig> tmpConfig = ReadCfgFromFile();
             ISQLConnectionSettings tmpConnection = GetDefaultConnectionFromConfig(tmpConfig);
             AddLineAtTextboxLog("tmpConnection: " + tmpConnection.GetObjectPropertiesValuesToString().AsString());
-            if(!(string.IsNullOrWhiteSpace(tmpConnection?.Name))&& !(string.IsNullOrWhiteSpace(tmpConnection?.Database)))
+            if (!(string.IsNullOrWhiteSpace(tmpConnection?.Name)) && !(string.IsNullOrWhiteSpace(tmpConnection?.Database)))
             {
                 configFull = tmpConfig;
                 SetCurrentSettings(tmpConnection);
 
+                IList<string> items = ReturnNameConnectionsInConfig();
+                foreach (var item in items)
+                {
+                    recentStore.Add(new MenuItem(item, item));
+                    IList<ToolStripMenuItem> menuItems = (recentStore as MenuItemStore).GetAllMenuItems().ToToolStripMenuItemList(ToolStripMenuType.RecentConnection);
+                    AddToDropDownToolStripMenu(changeBaseToolStripMenuItem, menuItems, ToolStripMenuType.RecentConnection);
+                }
+
                 AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
                 AddLineAtTextboxLog($"Config '{appCfgFilePath}' was read succesful.");
                 AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
-                        
-                IList<ToolStripMenuItem> menuItems = ReturnNameConnectionsInConfig().ToToolStripMenuItemsList(ToolStripMenuType.RecentConnection);
-                AddToDropDownToolStripMenu(changeBaseToolStripMenuItem, menuItems, ToolStripMenuType.RecentConnection);
             }
             else
             {
                 GetNewConnection();
             }
+            
+            (recentStore as MenuItemStore).EvntCollectionChanged += recentStore_EvntCollectionChanged;
             currentSQLConnectionStore.EvntConfigChanged += CurrentSQLConnectionStore_EvntConfigChanged;
+        }
+
+        private void recentStore_EvntCollectionChanged(object sender, BoolEventArgs e)
+        {
+            changeBaseToolStripMenuItem.DropDownItems.Clear();
+            IList<ToolStripMenuItem> menuItems = (recentStore as MenuItemStore).GetAllMenuItems().ToToolStripMenuItemList(ToolStripMenuType.RecentConnection);
+            AddToDropDownToolStripMenu(changeBaseToolStripMenuItem, menuItems, ToolStripMenuType.RecentConnection);
         }
 
         private IList<string> ReturnNameConnectionsInConfig()
@@ -139,22 +163,10 @@ namespace FlexibleDBMS
 
             if (configFull?.Count() > 0)
             {
-                foreach (var confUnit in configFull?.Config)
-                {
-                    string name = confUnit.Value?.Name;
-
-                    if (!string.IsNullOrWhiteSpace(name) && name != MAIN && name != DB_LIST)
-                    { connections.Add(confUnit.Value?.Name); }
-                }
+                connections = configFull.GetAllNameConfigs();
+                connections.Remove(MAIN);
+                connections.Remove(DB_LIST);
             }
-
-            AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
-            foreach (var c in connections)
-            {
-                AddLineAtTextboxLog("connection:" + c);
-            }
-
-            AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
             return connections;
         }
 
@@ -352,13 +364,13 @@ namespace FlexibleDBMS
             configFull.Add(configUnit);
 
             config = new Config();
-            config.Name = nameof(queriesExtraMenu);
-            config.ConfigDictionary = queriesExtraMenu.AsObjectDictionary();
+            config.Name = nameof(queryExtraMenu);
+            config.ConfigDictionary = queryExtraMenu.AsObjectDictionary();
             configUnit.ConfigDictionary[config.Name] = config;
 
             config = new Config();
-            config.Name = nameof(queriesStandartMenu);
-            config.ConfigDictionary = queriesStandartMenu.AsObjectDictionary();
+            config.Name = nameof(queryStandartMenu);
+            config.ConfigDictionary = queryStandartMenu.AsObjectDictionary();
             configUnit.ConfigDictionary[config.Name] = config;
             if (!string.IsNullOrWhiteSpace(configUnit.Name))
             { configFull.Add(configUnit); }
@@ -409,13 +421,13 @@ namespace FlexibleDBMS
 
 
             config = new Config();
-            config.Name = nameof(queriesExtraMenu);
-            config.ConfigDictionary = queriesExtraMenu.AsObjectDictionary();
+            config.Name = nameof(queryExtraMenu);
+            config.ConfigDictionary = queryExtraMenu.AsObjectDictionary();
             configUnit.ConfigDictionary[config.Name] = config;
 
             config = new Config();
-            config.Name = nameof(queriesStandartMenu);
-            config.ConfigDictionary = queriesStandartMenu.AsObjectDictionary();
+            config.Name = nameof(queryStandartMenu);
+            config.ConfigDictionary = queryStandartMenu.AsObjectDictionary();
             configUnit.ConfigDictionary[config.Name] = config;
             if (!string.IsNullOrWhiteSpace(configUnit.Name))
             { configFull.Add(configUnit); }
@@ -510,7 +522,7 @@ namespace FlexibleDBMS
             bmpLogo = Properties.Resources.LogoRYIK;
             Text = appFileVersionInfo.Comments + " " + appFileVersionInfo.LegalCopyright;
             Icon = Icon.FromHandle(bmpLogo.GetHicon());
-            FormClosing += Form1_FormClosing;
+            this.FormClosing += new FormClosingEventHandler(Form1_FormClosing);
 
             //Context Menu for notification
             contextMenu = new ContextMenu();  //Context Menu on notify Icon
@@ -591,13 +603,13 @@ namespace FlexibleDBMS
             {
                 queryMenu.Text = "Найти";
                 queryMenu.ToolTipText = "Сохраненные запросы";
-                queryMenu.Click += EnableAddQueryMenuItem_queryMenu_DropDownOpened;
-
-                queriesStandartMenu.Text = "Стандартные";
-                queriesStandartMenu.ToolTipText = "Предустановленные поисковые запросы";
+                queryMenu.DropDownOpening+= EnableAddQueryMenuItem_queryMenu_DropDownOpened;
+                
+                queryStandartMenu.Text = "Стандартные";
+                queryStandartMenu.ToolTipText = "Предустановленные поисковые запросы";
                 addToStandartMenuItem.Text = "Добавить новый запрос в Стандартное меню";
                 addToStandartMenuItem.ToolTipText = "Формат слова которое будет искаться - {}. Вставить в месте запроса";
-
+                addToStandartMenuItem.Click += AddToStandartMenuItem_Click;
                 addToExtraMenuItem.Text = "Добавить новый запрос в Пользовательское меню";
                 addToExtraMenuItem.ToolTipText = "Составленный запрос запомнить и добавить его в Пользовательское меню";
                 addToExtraMenuItem.Click += AddExtraQueryMenuItem_Click;
@@ -614,7 +626,7 @@ namespace FlexibleDBMS
                         "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou > 1 group by edrpou order by amount desc) " +
                         "where amount > 50) b on a.edrpou=b.edrpou " +
                         "order by b.amount, a.edrpou, a.factory, a.model limit 100";
-                    loadData0MenuItem.Click += QueryMenuItem_Click;
+                    loadData0MenuItem.Click += ExtraQueryMenuItem_Click;
 
                     loadData1MenuItem.Text = "Данные по крупным владельцам автопарков, limit 400";
 
@@ -625,7 +637,7 @@ namespace FlexibleDBMS
                         "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou > 1 group by edrpou order by amount desc) " +
                         "where amount > 50) b on a.edrpou=b.edrpou " +
                         "order by b.amount, a.edrpou, a.factory, a.model limit 400";
-                    loadData1MenuItem.Click += QueryMenuItem_Click;
+                    loadData1MenuItem.Click += ExtraQueryMenuItem_Click;
 
                     loadData2MenuItem.Text = "Данные по крупным владельцам автопарков, limit 1000";
                     loadData2MenuItem.Tag = "select distinct a.City,a.District,a.ManufactureYear,a.name, a.edrpou, a.model, a.plate from CarAndOwner a " +
@@ -634,38 +646,38 @@ namespace FlexibleDBMS
                         "(select distinct District,City,ManufactureYear,name,edrpou,count(edrpou) as amount from CarAndOwner where edrpou is not '0' group by edrpou order by amount desc) " +
                         "where amount > 50) b on a.edrpou=b.edrpou " +
                         "order by b.amount, a.edrpou, a.factory, a.model limit 1000";
-                    loadData2MenuItem.Click += QueryMenuItem_Click;
+                    loadData2MenuItem.Click += ExtraQueryMenuItem_Click;
 
                     getFIOMenuItem.Text = "Физлица в БД";
                     getFIOMenuItem.Tag = "select distinct City,District,ManufactureYear,f,i,o,drfo,count(f) as amount " +
                         "from CarAndOwner " +
                         "group by f,i,o order by amount desc " +
                         "limit 200";
-                    getFIOMenuItem.Click += QueryMenuItem_Click;
+                    getFIOMenuItem.Click += ExtraQueryMenuItem_Click;
 
                     getEnterpriseMenuItem.Text = "Предприятия в БД, limit 100";
                     getEnterpriseMenuItem.Tag = "select distinct City,District,ManufactureYear,name,edrpou,count(edrpou) as amount " +
                         "from CarAndOwner where edrpou > 0 " +
                         "group by edrpou order by amount desc " +
                         "limit 100";
-                    getEnterpriseMenuItem.Click += QueryMenuItem_Click;
+                    getEnterpriseMenuItem.Click += ExtraQueryMenuItem_Click;
 
                     //look for
                     {
                         lookForFamiliyNameToolStripMenuItem.Text = "Искать машины зарегистрированные за введенными фамилией/именем"; ;
-                        lookForFamiliyNameToolStripMenuItem.Click += QueryMenuItem_Click;
+                        lookForFamiliyNameToolStripMenuItem.Click += ExtraQueryMenuItem_Click;
 
                         lookForOrganizationToolStripMenuItem.Text = "Искать машины зарегистрированные за введенными названием организации";
-                        lookForOrganizationToolStripMenuItem.Click += QueryMenuItem_Click;
+                        lookForOrganizationToolStripMenuItem.Click += ExtraQueryMenuItem_Click;
 
                         lookForNumberToolStripMenuItem.Text = "Искать машины по совпадению с введенным номером";
-                        lookForNumberToolStripMenuItem.Click += QueryMenuItem_Click;
+                        lookForNumberToolStripMenuItem.Click += ExtraQueryMenuItem_Click;
                     }
                 }
 
                 //query extra menu 
-                queriesExtraMenu.Text = "Пользовательские запросы";
-                queriesExtraMenu.ToolTipText = "Запросы созданные на данном ПК";
+                queryExtraMenu.Text = "Пользовательские запросы";
+                queryExtraMenu.ToolTipText = "Запросы созданные на данном ПК";
                 // queriesExtraMenu.DropDown.Closing += (o, e) => { e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked; };//не закрывать меню при отметке
 
                 removeQueryExtraMenuItem.Text = "Удалить отмеченные пользовательские запросы";
@@ -688,9 +700,26 @@ namespace FlexibleDBMS
             changeBaseToolStripMenuItem.ToolTipText = "Сменить банк";
         }
 
-        private async void QuitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void AddToStandartMenuItem_Click(object sender, EventArgs e)
         {
-           await ApplicationQuitAsync();
+            string nameQuery = txtbNameQuery.Text.Trim();
+            string bodyQuery = txtBodyQuery.Text.Trim();
+
+            MenuItem menuItem = new MenuItem(nameQuery, bodyQuery);
+
+            ToolStripMenuItem item = menuItem.ToQueryMenuToolStripMenuItem();
+            queryStandartStore.Add(new MenuItem(nameQuery, bodyQuery));
+            queryStandartMenu.DropDownItems.Add(item as ToolStripMenuItem);
+            item.Click += StandartQueryMenuItem_Click;
+            menuStrip.Update();
+            menuStrip.Refresh();
+
+            StatusInfoMain.Text = $"Запрос '{nameQuery}' в меню добавлен сохранен";
+        }
+
+        private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ApplicationQuit();
         }
 
         private void ConnectToSQLServerToolStripMenuItem_Click(object sender, EventArgs e)
@@ -748,10 +777,7 @@ namespace FlexibleDBMS
             if (currentSet?.ToSQLConnectionData() != null && (!(string.IsNullOrWhiteSpace(currentSet?.Name)) || !(string.IsNullOrWhiteSpace(currentSet?.Database)) || !(string.IsNullOrWhiteSpace(currentSet?.Host))))
             {
                 AddConnectionInFullConfig(currentSet);
-
-                ToolStripMenuItem item = (new MenuItem(currentSet.Name, currentSet.Database)).ToToolStripMenuItem(ToolStripMenuType.RecentConnection);
-
-                AddToDropDownToolStripMenu(changeBaseToolStripMenuItem, item, ToolStripMenuType.RecentConnection);
+                recentStore.Add(new MenuItem(currentSet.Name, currentSet.Database));
 
                 SetCurrentDBOperations(currentSet);
                 AddLineAtTextboxLog("SelectDB_FormClosing,selectDB.settings: " + currentSet?.Database + " " + currentSet?.ProviderName);
@@ -770,15 +796,17 @@ namespace FlexibleDBMS
             AddLineAtTextboxLog("text: " + text);
             AddLineAtTextboxLog("tag: " + (sender as ToolStripMenuItem).Tag.ToString());
 
-            ISQLConnectionSettings connectionDefault;
-            connectionDefault = new SQLConnectionSettings(SearchConnectionByTextInConfig(text));
+            queryExtraMenu.DropDownItems.Clear();
+            queryStandartMenu.DropDownItems.Clear();
 
+
+            ISQLConnectionSettings connectionDefault = new SQLConnectionSettings(SearchConfigUnitByName(text));
 
             SetCurrentDBOperations(connectionDefault);
             currentSQLConnectionStore.Set(connectionDefault);
         }
 
-        private ISQLConnectionSettings SearchConnectionByTextInConfig(string text)
+        private ISQLConnectionSettings SearchConfigUnitByName(string text)
         {
             ISQLConnectionSettings connectionDefault = new SQLConnectionSettings(null);
             ConfigDictionaryTo convertor;
@@ -793,14 +821,33 @@ namespace FlexibleDBMS
                     {
                         foreach (var confParameter in unit.ConfigDictionary)
                         {
-                            if (unit.ConfigDictionary?.Count() > 0 && unit?.Name == text && confParameter.Key == nameof(ISQLConnectionSettings))
+                            configUnit = confParameter.Value as Config;
+                            if (unit.ConfigDictionary?.Count() > 0 && unit?.Name == text && configUnit?.ConfigDictionary?.Count > 0)
                             {
-                                configUnit = confParameter.Value as Config;
-                                if (configUnit?.ConfigDictionary?.Count > 0)
-                                {
                                     convertor = new ConfigDictionaryTo();
+
+                                if (confParameter.Key == nameof(ISQLConnectionSettings))
+                                {
                                     SQLConnectionData data = convertor?.ToSQLConnectionData(configUnit?.ConfigDictionary);
                                     connectionDefault = convertor?.ToISQLConnectionSettings(configUnit?.ConfigDictionary);
+                                }
+                                else if (confParameter.Key == nameof(queryStandartMenu))
+                                {
+                                    IList<MenuItem> data = convertor?.ToMenuItems(configUnit?.ConfigDictionary);
+                                    foreach (var menu in data)
+                                    { queryStandartStore.Add(menu); }
+
+                                    IList<ToolStripMenuItem> menuItems = (queryStandartStore as MenuItemStore).GetAllMenuItems().ToToolStripMenuItemList(ToolStripMenuType.StandartQuery);
+                                    AddToDropDownToolStripMenu(queryStandartMenu, menuItems, ToolStripMenuType.StandartQuery);
+                                }
+                                else if (confParameter.Key == nameof(queryExtraMenu))
+                                {
+                                    IList<MenuItem> data = convertor?.ToMenuItems(configUnit?.ConfigDictionary);
+                                    foreach (var menu in data)
+                                    { queryExtraStore.Add(menu); }
+
+                                    IList<ToolStripMenuItem> menuItems = (queryExtraStore as MenuItemStore).GetAllMenuItems().ToToolStripMenuItemList(ToolStripMenuType.ExtraQuery);
+                                    AddToDropDownToolStripMenu(queryExtraMenu, menuItems, ToolStripMenuType.ExtraQuery);                                    
                                 }
                             }
                         }
@@ -881,6 +928,7 @@ namespace FlexibleDBMS
             string bodyQuery = txtBodyQuery.Text.Trim();
             addToStandartMenuItem.Enabled = false;
             addToExtraMenuItem.Enabled = false;
+            
             lookForFamiliyNameToolStripMenuItem.Enabled = false;
             lookForNumberToolStripMenuItem.Enabled = false;
             lookForOrganizationToolStripMenuItem.Enabled = false;
@@ -925,10 +973,11 @@ namespace FlexibleDBMS
                     addToExtraMenuItem.Enabled = true;
                     addToExtraMenuItem.ToolTipText = $"Запомнить запрос: {nameQuery}{Environment.NewLine}{bodyQuery}";
 
-                    if (nameQuery.Contains("{}"))
+                    if (bodyQuery.Contains("{}"))
                     {
+                        addToExtraMenuItem.Enabled = false;
                         addToStandartMenuItem.Enabled = true;
-                        addToExtraMenuItem.ToolTipText = $"Запомнить запрос: {nameQuery}{Environment.NewLine}{bodyQuery}";
+                        addToStandartMenuItem.ToolTipText = $"Запомнить запрос: {nameQuery}{Environment.NewLine}{bodyQuery}";
                     }
                 }
             }
@@ -1187,9 +1236,6 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     txtbNameQuery.Enabled = false;
                     txtBodyQuery.Enabled = false;
                     txtbResultShow.Enabled = false;
-
-                    //   connectionSettings = new SQLConnectionSettings();
-                   // (dBOperations as SQLiteDBOperations).TryMakeLocalDB();
                 }
                 schemaDB = null;
             }
@@ -1206,17 +1252,17 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
         private async void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            //write Config to File
-            //     await Task.Run(() => MakeCurrentFullConfig());
-            await Task.Delay(100);
+             MakeCurrentFullConfig();
 
-            //     await Task.Run(() => WriteCfgInFile());
-            await Task.Delay(500);
+            WriteCfgInFile(configFull);
+
+
+            await Task.Delay(200);
 
             if (OperatingModes == AppModes.Admin)
             { (regOperator as RegistryManager).EvntStatusInfo -= AddLineAtTextboxLog; }
         }
-
+        
 
 
         private async Task UpdateQueryExtraMenuInRegistry()
@@ -1228,7 +1274,7 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
             await Task.Run(() =>
             {
-                IDictionary<string, string> menuItems = queriesExtraMenu.AsDictionary(30);
+                IDictionary<string, string> menuItems = queryExtraMenu.AsDictionary(30);
                 regOperator.Write(menuItems, $"{regSubKeyMenu}\\{currentSQLConnectionStore.Get().Name}");
             });
         }
@@ -1244,7 +1290,12 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     {
                         case ToolStripMenuType.ExtraQuery:
                             {
-                                m.Click += QueryMenuItem_Click;
+                                m.Click += ExtraQueryMenuItem_Click;
+                                break;
+                            }
+                        case ToolStripMenuType.StandartQuery:
+                            {
+                                m.Click += StandartQueryMenuItem_Click;
                                 break;
                             }
                         case ToolStripMenuType.RecentConnection:
@@ -1262,34 +1313,8 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             }
         }
 
-        private void AddToDropDownToolStripMenu(ToolStripMenuItem target, ToolStripMenuItem source, ToolStripMenuType menuType)
-        {
-            if (target != null && source!=null)
-            {
-                switch (menuType)
-                {
-                    case ToolStripMenuType.ExtraQuery:
-                        {
-                            source.Click += QueryMenuItem_Click;
-                            break;
-                        }
-                    case ToolStripMenuType.RecentConnection:
-                        {
-                            source.Click += BaseChangeMenuItems_Click;
-                            break;
-                        }
-                }
-                target.DropDownItems.Add(source);
-                StatusInfoMain.Text = $"В меню '{target.Text}' добавлен 1 запрос";
 
-                menuStrip.Update();
-                menuStrip.Refresh();
-            }
-        }
-
-
-
-        private async void QueryMenuItem_Click(object sender, EventArgs e)
+        private async void ExtraQueryMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem item = sender as ToolStripMenuItem;
 
@@ -1310,11 +1335,33 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 await GetData(queryBody);
             }
         }
+       
+        private async void StandartQueryMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+
+            string queryName = item?.Text?.ToString();
+            string queryBody = item?.Tag?.ToString();
+
+            menuStrip.Update();
+            menuStrip.Refresh();
+
+            if (queryBody?.Length > 0)
+            {
+                if (queryName?.Length > 0)
+                {
+                    txtbNameQuery.Text = queryName;
+                    AddLineAtTextboxLog($"Выполняется запрос - '{queryName}':");
+                }
+                queryBody.Replace("{}", $"'%{txtBodyQuery.Text}%'");
+                await GetData(queryBody);
+            }
+        }
 
 
         private void RemoveCheckedInQueryExtraMenuItem_Click(object sender, EventArgs e)
         {
-            RemoveCheckedMenuItemFromMenuStrip(queriesExtraMenu);
+            RemoveCheckedMenuItemFromMenuStrip(queryExtraMenu);
         }
 
         private async void RemoveCheckedMenuItemFromMenuStrip(ToolStripMenuItem item, bool allMenuChecked = false)
@@ -1352,10 +1399,10 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
 
             MenuItem menuItem = new MenuItem(nameQuery, bodyQuery);
 
-            ToolStripMenuItem item = menuItem.ToExtraMenuToolStripMenuItem();
-
-            queriesExtraMenu.DropDownItems.Add(item as ToolStripMenuItem);
-            item.Click += QueryMenuItem_Click;
+            ToolStripMenuItem item = menuItem.ToQueryMenuToolStripMenuItem();
+            queryExtraStore.Add(new MenuItem(nameQuery,bodyQuery));
+            queryExtraMenu.DropDownItems.Add(item as ToolStripMenuItem);
+            item.Click += ExtraQueryMenuItem_Click;
             menuStrip.Update();
             menuStrip.Refresh();
 
@@ -1377,15 +1424,14 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             help.Show();
         }
 
-        private async void ApplicationExit(object sender, EventArgs e)
+        private  void ApplicationExit(object sender, EventArgs e)
         {
-          await ApplicationQuitAsync();
+           ApplicationQuit();
         }
-        private async Task ApplicationQuitAsync()
+        private void ApplicationQuit()
         {
-            //write Config to File
-            await Task.Run(() => MakeCurrentFullConfig());
-            await Task.Run(() => WriteCfgInFile(configFull));
+            MakeCurrentFullConfig();
+            WriteCfgInFile(configFull);
 
             if (OperatingModes == AppModes.Admin)
             { (regOperator as RegistryManager).EvntStatusInfo -= AddLineAtTextboxLog; }
@@ -1466,9 +1512,10 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
             AddLineAtTextboxLog($"Запрос:{Environment.NewLine}{query}");
             StatusInfoMain.Text = "Выполняется отбор данных...";
 
-            queriesStandartMenu.Enabled = false;
-            queriesExtraMenu.Enabled = false;
+            queryMenu.Enabled = false;
             viewMenu.Enabled = false;
+            txtBodyQuery.Enabled = false;
+            txtbNameQuery.Enabled = false;
             txtbResultShow.Enabled = false;
             dgv.Enabled = false;
 
@@ -1512,9 +1559,10 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                 ShowLogViewTextbox(MainViewMode.Textbox);
             }
 
-            queriesStandartMenu.Enabled = true;
-            queriesExtraMenu.Enabled = true;
+            queryMenu.Enabled = true;
             viewMenu.Enabled = true;
+            txtBodyQuery.Enabled = true;
+            txtbNameQuery.Enabled = true;
             txtbResultShow.Enabled = true;
             dgv.Enabled = true;
         }
@@ -1660,8 +1708,8 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
         private async void ImportFromTextFileMenuItem_Click(object sender, EventArgs e)
         {
             administratorMenu.Enabled = false;
-            queriesStandartMenu.Enabled = false;
-            queriesExtraMenu.Enabled = false;
+            queryStandartMenu.Enabled = false;
+            queryExtraMenu.Enabled = false;
             txtbResultShow.Enabled = false;
 
             ShowLogViewTextbox(MainViewMode.Textbox);
@@ -1677,8 +1725,8 @@ Select distinct a.city,a.name, a.edrpou, a.factory, a.manufactureyear,a.plate  f
                     StatusInfoMain.Text = "Finished!!!";
 
                     administratorMenu.Enabled = true;
-                    queriesStandartMenu.Enabled = true;
-                    queriesExtraMenu.Enabled = true;
+                    queryStandartMenu.Enabled = true;
+                    queryExtraMenu.Enabled = true;
                     txtbResultShow.Enabled = true;
                 }
                 else { AddLineAtTextboxLog($"Файл '{filePath}' пустой или не выбран"); }

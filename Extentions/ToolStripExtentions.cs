@@ -60,7 +60,7 @@ namespace FlexibleDBMS
                                     menuItem = new MenuItem(text, tag);
                                     if (text?.Length > 0 && tag?.Length > 0)
                                     {
-                                        ToolStripMenuItem toolMenu = menuItem.ToExtraMenuToolStripMenuItem();
+                                        ToolStripMenuItem toolMenu = menuItem.ToQueryMenuToolStripMenuItem();
                                         toolMenuList.Add(toolMenu);
                                     }
                                 }
@@ -100,19 +100,7 @@ namespace FlexibleDBMS
                     if (text?.Length > 0)
                     {
                         menuItem = new MenuItem(text, text);
-                        switch (modes)
-                        {
-                            case ToolStripMenuType.ExtraQuery:
-                                {
-                                    toolMenu = menuItem.ToExtraMenuToolStripMenuItem();
-                                    break;
-                                }
-                            case ToolStripMenuType.RecentConnection:
-                                {
-                                    toolMenu = menuItem.ToFilterToolStripMenuItem();
-                                    break;
-                                }
-                        }
+                        toolMenu = menuItem.ToToolStripMenuItem(modes);
 
                         toolMenuList.Add(toolMenu);
                     }
@@ -120,6 +108,34 @@ namespace FlexibleDBMS
             }
 
             return toolMenuList;
+        }
+
+        public static IList<ToolStripMenuItem> ToToolStripMenuItemList(this IDictionary<string, MenuItem> items, ToolStripMenuType modes)
+        {
+            IList<ToolStripMenuItem> list = new List<ToolStripMenuItem>();
+            ToolStripMenuItem toolMenu = null;
+            foreach (var item in items)
+            {
+                toolMenu = item.Value.ToToolStripMenuItem(modes);
+
+                list.Add(toolMenu);
+            }
+
+            return list;
+        }
+
+        public static IList<ToolStripMenuItem> ToToolStripMenuItemList(this IList< MenuItem> items, ToolStripMenuType modes)
+        {
+            IList<ToolStripMenuItem> list = new List<ToolStripMenuItem>();
+            ToolStripMenuItem toolMenu = null;
+            foreach (var item in items)
+            {
+                toolMenu = item.ToToolStripMenuItem(modes);
+
+                list.Add(toolMenu);
+            }
+
+            return list;
         }
 
 
@@ -130,8 +146,9 @@ namespace FlexibleDBMS
             switch (modes)
             {
                 case ToolStripMenuType.ExtraQuery:
+                case ToolStripMenuType.StandartQuery:
                     {
-                        toolMenu = item.ToExtraMenuToolStripMenuItem();
+                        toolMenu = item.ToQueryMenuToolStripMenuItem();
                         break;
                     }
                 case ToolStripMenuType.RecentConnection:
@@ -146,32 +163,6 @@ namespace FlexibleDBMS
             }
 
             return toolMenu;
-        }
-        
-
-        /// <summary>
-        /// Filter Menu Items
-        /// </summary>
-        /// <param name="list"></param>
-        /// <returns></returns>
-        public static IList<ToolStripMenuItem> ToFilterToolStripMenuItemsList(this IList<string> list)
-        {
-            IList<ToolStripMenuItem> filterMenuList = new List<ToolStripMenuItem>();
-            MenuItem menuItem;
-
-            if (list?.Count > 0)
-            {
-                foreach (var r in list)
-                {
-                    if (r?.Length > 0)
-                    {
-                        menuItem = new MenuItem(r, "");
-                        ToolStripMenuItem toolMenu = menuItem.ToFilterToolStripMenuItem();
-                        filterMenuList.Add(toolMenu);
-                    }
-                }
-            }
-            return filterMenuList;
         }
 
 
@@ -255,7 +246,7 @@ namespace FlexibleDBMS
         }
 
      
-          public static ToolStripMenuItem ToExtraMenuToolStripMenuItem(this MenuItem menuItem)
+          public static ToolStripMenuItem ToQueryMenuToolStripMenuItem(this MenuItem menuItem)
         {
             ToolStripMenuItem item = new ToolStripMenuItem()
             {
