@@ -6,6 +6,6 @@ namespace FlexibleDBMS
     {
         string Name { get; set; }
         string Alias { get; set; }
-        IList<T> Collection { get; set; }
+        IList<T> ColumnCollection { get; set; }
     }
 }

@@ -61,7 +61,7 @@ namespace FlexibleDBMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ----------------------------------------------------------------------------------------.
+        ///   Looks up a localized string similar to ---------------------------------------------------------.
         /// </summary>
         internal static string DashedSymbols {
             get {
@@ -70,7 +70,7 @@ namespace FlexibleDBMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to =======================================================================================================================================================.
+        ///   Looks up a localized string similar to ==================================== .
         /// </summary>
         internal static string EqualSymbols {
             get {
@@ -89,11 +89,65 @@ namespace FlexibleDBMS.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Файл конфигурации (*.cfg)|*.cfg|Бэкап конфигурации (*.bak)|*.bak|All files (*.*)|*.*.
+        /// </summary>
+        internal static string OpenDialogCfgFile {
+            get {
+                return ResourceManager.GetString("OpenDialogCfgFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Базы данных (*.db)|*.db|Текстовые файлы (*.txt)|*.txt|All files (*.*)|*.*.
         /// </summary>
-        internal static string OpenDialogTextFiles {
+        internal static string OpenDialogDbFile {
             get {
-                return ResourceManager.GetString("OpenDialogTextFiles", resourceCulture);
+                return ResourceManager.GetString("OpenDialogDbFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Excel файлы (*.xls*)|*.xls*|All files (*.*)|*.*.
+        /// </summary>
+        internal static string OpenDialogExcelFile {
+            get {
+                return ResourceManager.GetString("OpenDialogExcelFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Текстовые файлы (*.txt)|*.txt|Базы данных (*.db)|*.db|All files (*.*)|*.*.
+        /// </summary>
+        internal static string OpenDialogTextFile {
+            get {
+                return ResourceManager.GetString("OpenDialogTextFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Файл обновления (*.zip)|*.zip|All files (*.*)|*.*.
+        /// </summary>
+        internal static string OpenDialogZipFile {
+            get {
+                return ResourceManager.GetString("OpenDialogZipFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to --- / --- / --- / --- / --- / --- / --- / --- / --- / --- / --- / --- /.
+        /// </summary>
+        internal static string SosSlashSymbols {
+            get {
+                return ResourceManager.GetString("SosSlashSymbols", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---.
+        /// </summary>
+        internal static string SosSymbols {
+            get {
+                return ResourceManager.GetString("SosSymbols", resourceCulture);
             }
         }
     }

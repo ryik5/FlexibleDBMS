@@ -34,11 +34,6 @@ namespace FlexibleDBMS
             toolTip1.SetToolTip(labelPath, Application.ExecutablePath);
         }
 
-        public bool OKButtonClicked
-        {
-            get { return boolButtonOk; }
-        }
-
         private void buttonYes_Click(object sender, EventArgs e)
         {
             boolButtonOk = true;

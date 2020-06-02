@@ -6,11 +6,12 @@ namespace FlexibleDBMS
 {
     public interface IWriterable
     {
+      //  Task Delete(string filePath);
         Task Write(string filePath, string content);
         Task Write(string filePath, IList<string> content);
         Task Write(string filePath, string content, Encoding encoding);
         Task Write(string filePath, IList<string> content, Encoding encoding);
-        Task Write(string filePath, ConfigFullNew<AbstractConfig> config);
+        void Write(string filePath, ConfigFull<ConfigAbstract> config);
 
         delegate void WorkFinished(object sender, BoolEventArgs e);
         delegate void InfoMessage(object sender, TextEventArgs e);

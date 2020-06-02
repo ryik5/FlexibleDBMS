@@ -1,68 +1,114 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace FlexibleDBMS
 {
-
-    public interface IMenuStore
+    public abstract class MenuAbstractStore
     {
-        void Add(MenuItem item);
-        void Remove(MenuItem item);
-        MenuItem GetMenuItem(string text);
+        public abstract void Set(IList<ToolStripMenuItem> list);
+        public abstract void Add(ToolStripMenuItem item);
+        public abstract void Remove(string item);
+        public abstract void Refresh();
+        public abstract void Clear();
+        public abstract ToolStripMenuItem GetItem(string text);
+        public abstract IList<ToolStripMenuItem> GetAllItems();
     }
 
-    public class MenuItemStore : IMenuStore
+    public class MenuItemStore : MenuAbstractStore
     {
-        IDictionary<string, MenuItem> MenuItemDictionary { get; set; }
-        public delegate void ItemAddedInCollection(object sender, BoolEventArgs e);
-        public event ItemAddedInCollection EvntCollectionChanged;
+        readonly object locker = new object();
+
+        IDictionary<string, ToolStripMenuItem> ItemDictionary { get; set; }
+        public delegate void ItemAddedInCollection<BoolEventArgs>(object sender, BoolEventArgs e);
+        public event ItemAddedInCollection<BoolEventArgs> EvntCollectionChanged;
 
         public MenuItemStore() { }
 
-        public void Add(MenuItem item)
+        public override void Add(ToolStripMenuItem item)
         {
-            if (MenuItemDictionary == null)
-            { MenuItemDictionary = new Dictionary<string, MenuItem>(); }
+            lock (locker)
+            {
+                if (ItemDictionary == null)
+                { ItemDictionary = new Dictionary<string, ToolStripMenuItem>(); }
 
-            MenuItemDictionary[item.Text] = item;
+                ItemDictionary[item.Text] = item;
+
+                EvntCollectionChanged?.Invoke(this, new BoolEventArgs(true));
+            }
+        }
+
+        public override void Set(IList<ToolStripMenuItem> menuList)
+        {
+            lock (locker)
+            {
+                ItemDictionary = new Dictionary<string, ToolStripMenuItem>();
+
+                if (menuList?.Count > 0)
+                {
+                    foreach (var menu in menuList)
+                    {
+                        Add(menu);
+                    }
+
+                }
+            }
             EvntCollectionChanged?.Invoke(this, new BoolEventArgs(true));
         }
 
-        public void Remove(MenuItem item)
+        public override void Remove(string item)
         {
-            if (!(MenuItemDictionary?.Count > 0) || string.IsNullOrWhiteSpace(item.Text))
-            { return; }
+            lock (locker)
+            {
+                if (!(ItemDictionary?.Count > 0) || string.IsNullOrWhiteSpace(item))
+                { return; }
 
-            if (GetMenuItem(item.Text) == null)
-            { return; }
+                ToolStripMenuItem menu = GetItem(item);
+                if (menu == null)
+                { return; }
 
-            MenuItemDictionary.Remove(item.Text);
+                ItemDictionary.Remove(item);
+
+                EvntCollectionChanged?.Invoke(this, new BoolEventArgs(true));
+            }
+        }
+
+        public override void Refresh()
+        {
             EvntCollectionChanged?.Invoke(this, new BoolEventArgs(true));
         }
 
-        public MenuItem GetMenuItem(string text)
+        public override void Clear()
         {
-            if (MenuItemDictionary == null || string.IsNullOrWhiteSpace(text))
+            ItemDictionary = new Dictionary<string, ToolStripMenuItem>();
+
+            EvntCollectionChanged?.Invoke(this, new BoolEventArgs(true));
+        }
+
+        public override ToolStripMenuItem GetItem(string text)
+        {
+            if (ItemDictionary == null || string.IsNullOrWhiteSpace(text))
             { return null; }
 
-            bool existed = MenuItemDictionary.TryGetValue(text, out MenuItem item);
+            bool existed = ItemDictionary.TryGetValue(text, out ToolStripMenuItem item);
 
             if (!existed)
             { return null; }
 
             return item;
         }
-        public IList<MenuItem> GetAllMenuItems()
+
+        public override IList<ToolStripMenuItem> GetAllItems()
         {
-            if (MenuItemDictionary == null )
+            if (ItemDictionary == null)
             { return null; }
 
-            IList<MenuItem> items = MenuItemDictionary.Values?.ToList();
+            IList<ToolStripMenuItem> items = new List<ToolStripMenuItem>(ItemDictionary.Values?.OrderBy(x => x.Text)?.ToList());
+            if (items?.Count > 0)
+                return items;
+            else
+                return null;
 
-            if (!(items?.Count>0))
-            { return null; }
-
-            return items;
-        }        
+        }
     }
 }

@@ -18,6 +18,6 @@ namespace FlexibleDBMS
         /// <summary>
         /// Columns
         /// </summary>
-        public IList<DBColumnModel> Collection { get; set; }
+        public IList<DBColumnModel> ColumnCollection { get; set; }
     }
 }

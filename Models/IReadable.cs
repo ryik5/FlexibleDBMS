@@ -1,17 +1,23 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FlexibleDBMS
 {
     public interface IReadable
     {
-        Task ReadAsync(string filePath);
-        Task ReadAsync(string filePath, Encoding encoding);
-        Task ReadAsync(string filePath, int maxElementsInDictionary);
-        Task ReadAsync(string filePath, Encoding encoding, int maxElementsInDictionary);
+        public IList<string> Text { get; }
 
-        Task ReadConfigAsync(string filePath);
-        
+        Task<IList<string>> ReadAsync(string filePath);
+        Task<IList<string>> ReadAsync(string filePath, Encoding encoding);
+        Task<IList<string>> ReadAsync(string filePath, int maxElementsInDictionary);
+        Task<IList<string>> ReadAsync(string filePath, Encoding encoding, int maxElementsInDictionary);
+
+        IList<string> Read(string filePath);
+        IList<string> Read(string filePath, Encoding encoding);
+        IList<string> Read(string filePath,  int maxElementsInDictionary);
+        IList<string> Read(string filePath, Encoding encoding, int maxElementsInDictionary);
+
 
         delegate void WorkFinished(object sender, BoolEventArgs e);
         delegate void InfoMessage(object sender, TextEventArgs e);

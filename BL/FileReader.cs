@@ -12,17 +12,16 @@ namespace FlexibleDBMS
         int _maxElementsInDictionary = 1000;
         Encoding _encoding = Encoding.GetEncoding(1251);
         public int importedRows = 0;
-        public IList<string> Text;
-        public ConfigFullNew<AbstractConfig> config;
+        public  IList<string> Text { get; private set; }
+        public ConfigFull<ConfigAbstract> config;
 
         public delegate void CollectionFull(object sender, BoolEventArgs e);
         public event CollectionFull EvntCollectionFull;
 
         public delegate void InfoMessage(object sender, TextEventArgs e);
         public event InfoMessage EvntInfoMessage;
-
-
-        public async Task ReadAsync(string filePath, Encoding encoding, int maxElementsInDictionary)
+        
+        public async Task<IList<string>> ReadAsync(string filePath, Encoding encoding, int maxElementsInDictionary)
         {
             Text = new List<string>(maxElementsInDictionary);
 
@@ -59,36 +58,103 @@ namespace FlexibleDBMS
 
                 await Task.Delay(TimeSpan.FromSeconds(0.2));
             }
+            return Text;
         }
 
-        public async Task ReadAsync(string filePath, Encoding encoding)
+        public async Task<IList<string>> ReadAsync(string filePath, Encoding encoding)
         {
-            await Task.Run(() => ReadAsync(filePath, encoding, _maxElementsInDictionary));
+            Text = await ReadAsync(filePath, encoding, _maxElementsInDictionary);
+            return Text;
         }
 
-        public async Task ReadAsync(string filePath)
+        public async Task<IList<string>> ReadAsync(string filePath, int maxElementsInDictionary)
         {
-            await Task.Run(() => ReadAsync(filePath, _maxElementsInDictionary));
+         Text=   await ReadAsync(filePath, _encoding, maxElementsInDictionary);
+            return Text;
+        } 
+        
+        public async Task<IList<string>> ReadAsync(string filePath)
+        {
+            Text = await  ReadAsync(filePath, _maxElementsInDictionary);
+            return Text;
         }
 
-        public async Task ReadAsync(string filePath, int maxElementsInDictionary)
+
+        public IList<string> Read(string filePath, Encoding encoding, int maxElementsInDictionary)
         {
-            await ReadAsync(filePath, _encoding, maxElementsInDictionary);
+            Text = new List<string>(maxElementsInDictionary);
+
+            const int DefaultBufferSize = 4096;
+            const FileOptions DefaultOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
+
+            string currentRow;
+
+            importedRows = 0;
+
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
+            {
+                using (var reader = new StreamReader(stream, encoding))
+                {
+                    while ((currentRow =  reader.ReadLine())?.Trim()?.Length > 0)
+                    {
+                        Text.Add(currentRow);
+                        importedRows++;
+
+                        if (importedRows > 0 && importedRows % maxElementsInDictionary == 0)
+                        {
+                            EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//collection is full
+                            Task.Delay(TimeSpan.FromSeconds(0.2)).Wait();
+
+                            Text = new List<string>(maxElementsInDictionary);
+                        }
+                    }
+                }
+            }
+
+            if (Text?.Count > 0)
+            {
+                EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//last part of the collection
+
+                 Task.Delay(TimeSpan.FromSeconds(0.2)).Wait();
+            }
+            return Text;
         }
+
+        public IList<string> Read(string filePath, Encoding encoding)
+        {
+         return   Read(filePath, encoding, _maxElementsInDictionary);
+        }
+
+        public IList<string> Read(string filePath, int maxElementsInDictionary)
+        {
+            return Read(filePath, _encoding, maxElementsInDictionary);
+        }
+
+        public IList<string> Read(string filePath)
+        {
+            return Read(filePath, _maxElementsInDictionary);
+        }
+
+
+
+
 
         public void ReadConfig(string filePath)
         {
             config = ReadSerilizedConfig(filePath);
         }
 
-        public async Task ReadConfigAsync(string filePath)
+        private ConfigFull<ConfigAbstract> ReadSerilizedConfig(string filePath)
         {
-            await Task.Run(()=> ReadConfig(filePath));
-        }
+            ConfigFull<ConfigAbstract> config=null;
+            if (!(File.Exists(filePath)))
+                return config;
 
-        private ConfigFullNew<AbstractConfig> ReadSerilizedConfig(string filePath)
-        {
-            ConfigFullNew<AbstractConfig> config=null;
+            FileInfo fi = new FileInfo(filePath);
+            if (fi.Length==0)
+                return config;
+
+
             BinaryFormatter formatter = new BinaryFormatter();
             string message = string.Empty;
             try
@@ -96,7 +162,7 @@ namespace FlexibleDBMS
                 message+=$"Try to read '{filePath}':{Environment.NewLine}";
                 using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate))
                 {
-                    config = (ConfigFullNew<AbstractConfig>)formatter.Deserialize(fs);
+                    config = (ConfigFull<ConfigAbstract>)formatter.Deserialize(fs);
                     message += "Success!";
                 }
             }

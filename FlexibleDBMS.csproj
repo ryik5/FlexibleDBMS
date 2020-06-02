@@ -24,8 +24,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>5</ApplicationRevision>
-    <ApplicationVersion>1.0.4.%2a</ApplicationVersion>
+    <ApplicationRevision>21</ApplicationRevision>
+    <ApplicationVersion>1.0.1.%2a</ApplicationVersion>
     <UseApplicationTrust>true</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -49,7 +49,7 @@
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
@@ -61,12 +61,21 @@
     <ApplicationIcon>RYIK40.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup />
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AutoUpdater.NET, Version=1.6.0.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
+      <HintPath>packages\Autoupdater.NET.Official.1.6.0\lib\net40\AutoUpdater.NET.dll</HintPath>
+    </Reference>
     <Reference Include="EPPlus, Version=5.1.0.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
       <HintPath>packages\EPPlus.5.1.0\lib\net45\EPPlus.dll</HintPath>
     </Reference>
     <Reference Include="MySql.Data, Version=6.9.12.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>packages\MySql.Data.6.9.12\lib\net45\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>packages\NLog.4.7.2\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -76,6 +85,11 @@
     <Reference Include="System.Data.SQLite, Version=1.0.112.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <HintPath>packages\System.Data.SQLite.Core.1.0.112.0\lib\net45\System.Data.SQLite.dll</HintPath>
     </Reference>
+    <Reference Include="System.IO.Abstractions, Version=7.0.0.0, Culture=neutral, PublicKeyToken=96bf224d23c43e59, processorArchitecture=MSIL">
+      <HintPath>packages\System.IO.Abstractions.7.1.10\lib\net40\System.IO.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -83,33 +97,55 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BL\ConfigFullNew.cs" />
+    <Compile Include="Extentions\ForEachAsyncExtension.cs" />
+    <Compile Include="Models\ControlStateStore.cs" />
+    <Compile Include="DBTools\MsSqlUtils.cs" />
+    <Compile Include="DBTools\SQLSelector.cs" />
+    <Compile Include="DBTools\SQLiteImportedDB.cs" />
+    <Compile Include="Extentions\MenuItemToToolStripMenuItemExtensions.cs" />
+    <Compile Include="Models\BoolEventArgs.cs" />
+    <Compile Include="Models\Config.cs" />
+    <Compile Include="Models\ConfigAbstract.cs" />
+    <Compile Include="Models\ConfigFull.cs" />
+    <Compile Include="Models\ConfigStore.cs" />
+    <Compile Include="Models\IModels.cs" />
+    <Compile Include="Models\IParserRowTo.cs" />
+    <Compile Include="DBTools\SQLiteDbAbstract.cs" />
     <Compile Include="Enums\SQLProvider.cs" />
-    <Compile Include="Extentions\SQLConnectionExtensions.cs" />
+    <Compile Include="Extentions\CompareTwoStrings.cs" />
+    <Compile Include="Models\ConfigDictionaryTo.cs" />
+    <Compile Include="DBTools\ISQLConnectionSettings.cs" />
+    <Compile Include="Extentions\CommonConst.cs" />
+    <Compile Include="DBTools\SQLConnectionExtensions.cs" />
     <Compile Include="Models\DBColumnModel.cs" />
     <Compile Include="Models\DBFilterModel.cs" />
     <Compile Include="Models\DBModel.cs" />
     <Compile Include="Models\IModelEntityDB.cs" />
     <Compile Include="Models\IReadable.cs" />
+    <Compile Include="Models\ItemFlipper.cs" />
     <Compile Include="Models\IWriterable.cs" />
     <Compile Include="BL\FileReader.cs" />
     <Compile Include="BL\FileWriter.cs" />
-    <Compile Include="DBTools\ISqlDbConnector.cs" />
-    <Compile Include="Extentions\SQLProviderExtensions.cs" />
+    <Compile Include="DBTools\SqlAbstractConnector.cs" />
     <Compile Include="DBTools\MySQLUtils.cs" />
-    <Compile Include="Models\SQLConnectionSettings.cs" />
+    <Compile Include="Models\ModelCommon.cs" />
+    <Compile Include="Models\ModelCommonStore.cs" />
+    <Compile Include="DBTools\SQLConnectionData.cs" />
+    <Compile Include="DBTools\SQLConnectionSettings.cs" />
     <Compile Include="Enums\TypeConfig.cs" />
     <Compile Include="Enums\EnumExtensions.cs" />
     <Compile Include="Enums\AppModes.cs" />
     <Compile Include="BL\CommandLineArguments.cs" />
-    <Compile Include="BL\EventArgsClasses.cs" />
-    <Compile Include="BL\ExportDataTableToFileExtension.cs" />
+    <Compile Include="DBTools\SQLConnectionStore.cs" />
+    <Compile Include="Models\TextEventArgs.cs" />
+    <Compile Include="BL\EppExtension.cs" />
     <Compile Include="BL\MenuFiltersMaker.cs" />
     <Compile Include="DBTools\DbColumn.cs" />
     <Compile Include="DBTools\DbIndex.cs" />
@@ -117,23 +153,30 @@
     <Compile Include="DBTools\DbTable.cs" />
     <Compile Include="DBTools\DbUpgradeException.cs" />
     <Compile Include="DBTools\SQLiteDbWrapper.cs" />
-    <Compile Include="DBTools\SQLiteDBOperations.cs" />
+    <Compile Include="DBTools\SQLiteModelDBOperations.cs" />
     <Compile Include="BL\FileReaderModels.cs" />
     <Compile Include="Extentions\CommonExtentions.cs" />
     <Compile Include="Models\MenuItemStore.cs" />
+    <Compile Include="Models\ColorEventArgs.cs" />
+    <Compile Include="Update\ApplicationUpdater.cs" />
+    <Compile Include="Update\UserAD.cs" />
+    <Compile Include="Update\UpdateOptions.cs" />
+    <Compile Include="Views\AdministratorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\AdministratorForm.Designer.cs">
+      <DependentUpon>AdministratorForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Views\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Extentions\ToolStripExtentions.cs" />
-    <Compile Include="Models\GetModel.cs" />
+    <Compile Include="Extentions\ToolStripDropDownItemExtentions.cs" />
     <Compile Include="Models\IModel.cs" />
     <Compile Include="Models\MenuItem.cs" />
     <Compile Include="BL\ParserRowTo.cs" />
-    <Compile Include="Models\ModelCarAndOwner.cs" />
-    <Compile Include="Models\ModelOwner.cs" />
     <Compile Include="Models\DBTableModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -145,13 +188,16 @@
       <DependentUpon>HelpForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Enums\MainViewMode.cs" />
-    <Compile Include="Views\SelectDBForm.cs">
+    <Compile Include="Views\GetNewConnectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Views\SelectDBForm.Designer.cs">
-      <DependentUpon>SelectDBForm.cs</DependentUpon>
+    <Compile Include="Views\GetNewConnectionForm.Designer.cs">
+      <DependentUpon>GetNewConnectionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Enums\ToolStripMenuType.cs" />
+    <EmbeddedResource Include="Views\AdministratorForm.resx">
+      <DependentUpon>AdministratorForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -168,9 +214,15 @@
     <EmbeddedResource Include="Views\HelpForm.resx">
       <DependentUpon>HelpForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\SelectDBForm.resx">
-      <DependentUpon>SelectDBForm.cs</DependentUpon>
+    <EmbeddedResource Include="Views\GetNewConnectionForm.resx">
+      <DependentUpon>GetNewConnectionForm.cs</DependentUpon>
     </EmbeddedResource>
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="NLog.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -200,6 +252,7 @@
     <None Include="Resources\LogoRYIK.png" />
     <None Include="Resources\LogoRYIK.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\System.Data.SQLite.Core.1.0.112.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('packages\System.Data.SQLite.Core.1.0.112.0\build\net45\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

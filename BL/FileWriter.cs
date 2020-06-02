@@ -76,39 +76,76 @@ namespace FlexibleDBMS
             await Write(filePath, content, _encoding);
         }
 
-        public async Task Write(string filePath, ConfigFullNew<AbstractConfig> config)
+        private void Delete(string filePath)
         {
-            EvntInfoMessage?.Invoke(this, new TextEventArgs($"Try to write {nameof(ConfigFullNew<AbstractConfig>)}"));
             if (File.Exists(filePath))
             {
-                try { File.Delete(filePath); }
+                try
+                {
+                    File.Delete(filePath);
+                    EvntInfoMessage?.Invoke(this, new TextEventArgs($"File '{filePath}' was deleted successfully"));
+                }
                 catch (Exception excpt)
                 {
-                    EvntInfoMessage?.Invoke(this, new TextEventArgs($"{excpt.Message}"));
+                    EvntInfoMessage?.Invoke(this, new TextEventArgs($"File '{filePath}' wasn't deleted:{Environment.NewLine}{excpt.Message}"));
                 }
-                using (FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate))
+            }
+        }
+        private void Move(string oldFileName, string newFileName)
+        {
+            if (File.Exists(oldFileName))
+            {
+                try
                 {
-                    try
-                    {
-                        EvntInfoMessage?.Invoke(this, new TextEventArgs($"0 {config.GetObjectPropertiesValuesToString().AsString()}"));
-
-                        BinaryFormatter formatter = new BinaryFormatter();
-                        await Task.Run(() =>
-                        formatter.Serialize(fileStream, config)
-                        );
-
-                        EvntInfoMessage?.Invoke(this, new TextEventArgs("ConfigApplication was written."));
-                    }
-                    catch (Exception excpt)
-                    {
-                        EvntInfoMessage?.Invoke(this, new TextEventArgs($"1 {excpt.ToString()}"));
-                    }
-                    EvntWriteFinished?.Invoke(this, new BoolEventArgs(true));//last part of the collection
-
-                    // await fs.FlushAsync();
+                    File.Move(oldFileName, newFileName);
+                    EvntInfoMessage?.Invoke(this, new TextEventArgs($"File '{oldFileName}' was renamed to '{newFileName}' successfully."));
+                }
+                catch (Exception excpt)
+                {
+                    EvntInfoMessage?.Invoke(this, new TextEventArgs($"File '{oldFileName}' wasn't renamed  to '{newFileName}':{Environment.NewLine}{excpt.Message}"));
+                }
+            }
+        }
+        private void CreateDirectory(string backupDirectory)
+        {
+            if (!Directory.Exists(backupDirectory))
+            {
+                try
+                {
+                    Directory.CreateDirectory(backupDirectory);
+                    EvntInfoMessage?.Invoke(this, new TextEventArgs($"Directory '{backupDirectory}' was created successfully."));
+                }
+                catch (Exception excpt)
+                {
+                    EvntInfoMessage?.Invoke(this, new TextEventArgs($"Directory '{backupDirectory}' wasn't created:{Environment.NewLine}{excpt.Message}"));
                 }
             }
         }
 
+        public void Write(string filePath, ConfigFull<ConfigAbstract> config)
+        {
+            string backupDirectory = Path.Combine(Path.GetDirectoryName(filePath), $"bak");
+            string newFileName = Path.Combine(Path.GetDirectoryName(filePath), "bak", $"{DateTime.Now.ToString("yyyy-MM-dd HHmmss")} {Path.GetFileName(filePath)}.bak");
+
+            CreateDirectory(backupDirectory);
+
+            Move(filePath, newFileName);
+
+            EvntInfoMessage?.Invoke(this, new TextEventArgs($"Try to write '{nameof(ConfigFull<ConfigAbstract>)}' in file '{filePath}'"));
+            using (FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate))
+            {
+                try
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(fileStream, config);
+
+                    EvntInfoMessage?.Invoke(this, new TextEventArgs($"{nameof(ConfigFull<ConfigAbstract>)} was written."));
+                }
+                catch (Exception err)
+                {
+                    EvntInfoMessage?.Invoke(this, new TextEventArgs($"Writing error:{Environment.NewLine}{err.ToString()}"));
+                }
+            }
+        }
     }
 }

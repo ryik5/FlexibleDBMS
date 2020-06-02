@@ -4,6 +4,7 @@
     {
         StandartQuery,
         ExtraQuery,
-        RecentConnection
+        RecentConnection,
+        ExternalConfig
     }
 }

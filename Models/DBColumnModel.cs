@@ -26,6 +26,6 @@ namespace FlexibleDBMS
         /// <summary>
         /// collection of Filters of the column
         /// </summary>
-        public IList<DBFilterModel> Collection { get; set; }
+        public IList<DBFilterModel> ColumnCollection { get; set; }
     }
 }

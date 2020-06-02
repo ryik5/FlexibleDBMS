@@ -20,6 +20,6 @@ namespace FlexibleDBMS
         /// <summary>
         /// Tables
         /// </summary>
-        public IList<DBTableModel> Collection { get; set; }
+        public IList<DBTableModel> ColumnCollection { get; set; }
     }
 }
