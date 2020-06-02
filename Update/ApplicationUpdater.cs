@@ -105,7 +105,7 @@ namespace FlexibleDBMS
 
         private async Task<IList<string>> ReadFileAsync(string filePath)
         {
-            IReadable readerConfig = new FileReader();
+            FileReader readerConfig = new FileReader();
             IList<string> file = await readerConfig.ReadAsync(filePath, 2);
             return file;
         }

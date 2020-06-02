@@ -27,6 +27,13 @@ namespace FlexibleDBMS
             logger.Info("");
             logger.Info("-= Загрузка ПО =-");
             logger.Info("");
+            //Блок проверки уровня настройки логгирования
+            logger.Info("Test Info message");
+            logger.Trace("Test1 Trace message");
+            logger.Debug("Test2 Debug message");
+            logger.Warn("Test3 Warn message");
+            logger.Error("Test4 Error message");
+            logger.Fatal("Test5 Fatal message");
 
             //using (System.Threading.Mutex mutex = new System.Threading.Mutex(false, "Global\\" + appGuid))
             //{

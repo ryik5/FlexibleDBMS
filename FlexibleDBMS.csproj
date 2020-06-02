@@ -116,7 +116,6 @@
     <Compile Include="Models\ConfigFull.cs" />
     <Compile Include="Models\ConfigStore.cs" />
     <Compile Include="Models\IModels.cs" />
-    <Compile Include="Models\IParserRowTo.cs" />
     <Compile Include="DBTools\SQLiteDbAbstract.cs" />
     <Compile Include="Enums\SQLProvider.cs" />
     <Compile Include="Extentions\CompareTwoStrings.cs" />
@@ -128,7 +127,6 @@
     <Compile Include="Models\DBFilterModel.cs" />
     <Compile Include="Models\DBModel.cs" />
     <Compile Include="Models\IModelEntityDB.cs" />
-    <Compile Include="Models\IReadable.cs" />
     <Compile Include="Models\ItemFlipper.cs" />
     <Compile Include="Models\IWriterable.cs" />
     <Compile Include="BL\FileReader.cs" />

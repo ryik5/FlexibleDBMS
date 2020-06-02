@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace FlexibleDBMS
 {
-    public class FileReader : IReadable
+    public class FileReader
     {
-        int _maxElementsInDictionary = 1000;
         Encoding _encoding = Encoding.GetEncoding(1251);
         public int importedRows = 0;
         public  IList<string> Text { get; private set; }
@@ -61,90 +60,19 @@ namespace FlexibleDBMS
             return Text;
         }
 
-        public async Task<IList<string>> ReadAsync(string filePath, Encoding encoding)
-        {
-            Text = await ReadAsync(filePath, encoding, _maxElementsInDictionary);
-            return Text;
-        }
-
         public async Task<IList<string>> ReadAsync(string filePath, int maxElementsInDictionary)
         {
          Text=   await ReadAsync(filePath, _encoding, maxElementsInDictionary);
             return Text;
         } 
         
-        public async Task<IList<string>> ReadAsync(string filePath)
-        {
-            Text = await  ReadAsync(filePath, _maxElementsInDictionary);
-            return Text;
-        }
-
-
-        public IList<string> Read(string filePath, Encoding encoding, int maxElementsInDictionary)
-        {
-            Text = new List<string>(maxElementsInDictionary);
-
-            const int DefaultBufferSize = 4096;
-            const FileOptions DefaultOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
-
-            string currentRow;
-
-            importedRows = 0;
-
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
-            {
-                using (var reader = new StreamReader(stream, encoding))
-                {
-                    while ((currentRow =  reader.ReadLine())?.Trim()?.Length > 0)
-                    {
-                        Text.Add(currentRow);
-                        importedRows++;
-
-                        if (importedRows > 0 && importedRows % maxElementsInDictionary == 0)
-                        {
-                            EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//collection is full
-                            Task.Delay(TimeSpan.FromSeconds(0.2)).Wait();
-
-                            Text = new List<string>(maxElementsInDictionary);
-                        }
-                    }
-                }
-            }
-
-            if (Text?.Count > 0)
-            {
-                EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//last part of the collection
-
-                 Task.Delay(TimeSpan.FromSeconds(0.2)).Wait();
-            }
-            return Text;
-        }
-
-        public IList<string> Read(string filePath, Encoding encoding)
-        {
-         return   Read(filePath, encoding, _maxElementsInDictionary);
-        }
-
-        public IList<string> Read(string filePath, int maxElementsInDictionary)
-        {
-            return Read(filePath, _encoding, maxElementsInDictionary);
-        }
-
-        public IList<string> Read(string filePath)
-        {
-            return Read(filePath, _maxElementsInDictionary);
-        }
-
-
-
-
-
+ 
         public void ReadConfig(string filePath)
         {
-            config = ReadSerilizedConfig(filePath);
+            config = ReadSerializedConfig(filePath);
         }
 
-        private ConfigFull<ConfigAbstract> ReadSerilizedConfig(string filePath)
+        private ConfigFull<ConfigAbstract> ReadSerializedConfig(string filePath)
         {
             ConfigFull<ConfigAbstract> config=null;
             if (!(File.Exists(filePath)))

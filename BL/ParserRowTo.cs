@@ -1,6 +1,6 @@
 ﻿namespace FlexibleDBMS
 {
-    public class ParserRowModelCommon : IParserRowTo
+    public class ParserRowModelCommon 
     {
         private readonly string rowSource;
         private readonly string nameColumnsInSource;

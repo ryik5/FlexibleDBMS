@@ -6,10 +6,6 @@ namespace FlexibleDBMS
 {
     public class ModelCommonStore : IModels
     {
-        public delegate void ItemAddedInCollection(object sender, BoolEventArgs e);
-        public event ItemAddedInCollection EvntCollectionChanged;
-
-
         public IDictionary<int, IModel> list { get; set; }
 
         public ModelCommonStore()
@@ -39,15 +35,6 @@ namespace FlexibleDBMS
             return list;
         }
 
-        public string AsString()
-        {
-            string result = string.Empty;
-            foreach (var model in list)
-            {
-                result += $" {model.Value.Name} -  {model.Value.Alias}";
-            }
-            return result;
-        }
 
         public IList<string> ToList()
         {

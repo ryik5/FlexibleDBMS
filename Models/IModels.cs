@@ -7,8 +7,6 @@ namespace FlexibleDBMS
 
         IList<IModel> ToModelList();
 
-        string AsString();
-
         IList<string> ToList();
     }
 }

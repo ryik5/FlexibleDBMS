@@ -10,13 +10,25 @@ namespace FlexibleDBMS
     public static class CommonExtesions
     {
         /// <summary>
-        /// Replace substring of case insensetive in the text
+        ///  Convert: "39270"  => "07/07/2007" OR "39456" => "01/09/2008"
         /// </summary>
-        /// <param name="input">inputed text</param>
-        /// <param name="search">substring for replace</param>
-        /// <param name="replacement">new substring</param>
-        /// <returns>new string where old substring replaced by new one</returns>
-        public static string ReplaceCaseInsensitive(string input, string search, string replacement)
+        /// <param name="date">date as string in 5 digits</param>
+        /// <returns>dd/MM/yyyy</returns>
+        public static string FromOQDateToRealDate(this string date)
+        {
+            double d = double.Parse(date);
+            DateTime conv = DateTime.FromOADate(d);
+            return conv.ToString("dd/MM/yyyy");
+        }
+
+    /// <summary>
+    /// Replace substring of case insensetive in the text
+    /// </summary>
+    /// <param name="input">inputed text</param>
+    /// <param name="search">substring for replace</param>
+    /// <param name="replacement">new substring</param>
+    /// <returns>new string where old substring replaced by new one</returns>
+    public static string ReplaceCaseInsensitive(string input, string search, string replacement)
         {
             string result = Regex.Replace(
                 input,

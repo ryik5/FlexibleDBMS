@@ -73,13 +73,6 @@ namespace FlexibleDBMS
         {
             InitializeComponent();
 
-            //Блок проверки уровня настройки логгирования
-            logger.Info("Test Info message");
-            logger.Trace("Test1 Trace message");
-            logger.Debug("Test2 Debug message");
-            logger.Warn("Test3 Warn message");
-            logger.Error("Test4 Error message");
-            logger.Fatal("Test5 Fatal message");
 
             Updater = new ApplicationUpdater(); 
             Configuration = new ConfigStore();
@@ -119,7 +112,7 @@ namespace FlexibleDBMS
             //Turn Up StatusStrip
             TurnStatusLabelMenues();
 
-            ConfigFull<ConfigAbstract> tmpConfig = ReadCfgFromFile(CommonConst.AppCfgFilePath);
+            ConfigFull<ConfigAbstract> tmpConfig = LoadConfig(CommonConst.AppCfgFilePath);
             ISQLConnectionSettings tmpConnection = GetDefaultConnectionFromConfig(tmpConfig);
 
             AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
@@ -499,7 +492,51 @@ namespace FlexibleDBMS
         ///-////-/////-//////-///////////////////////////////////////////
 
         #region Configuration Unit Block
-        private ConfigUnitStore GetConfigUnitByName(ConfigFull<ConfigAbstract> tmpConfigFull, string text)
+        ConfigFull<ConfigAbstract> loadedExternalConfig;
+
+        public ConfigFull<ConfigAbstract> LoadConfig(string pathToConfig)
+        {
+            ConfigFull<ConfigAbstract> tmpConfig = null;
+            FileReader readerConfig = new FileReader();
+            readerConfig.EvntInfoMessage += new FileReader.InfoMessage(AddLineAtTextboxLog);
+
+            readerConfig.ReadConfig(pathToConfig);
+
+            if (readerConfig?.config != null && readerConfig?.config?.Config?.Count() > 0)
+            {
+                tmpConfig = (readerConfig)?.config;
+            }
+            else
+            {
+                AddLineAtTextboxLog(Properties.Resources.EqualSymbols);
+                AddLineAtTextboxLog($"Config '{CommonConst.AppCfgFilePath}' is empty or broken.");
+                AddLineAtTextboxLog(Properties.Resources.EqualSymbols);
+            }
+
+            readerConfig.EvntInfoMessage -= AddLineAtTextboxLog;
+
+            readerConfig = null;
+            return tmpConfig;
+        }
+
+         void LoadConfigMenuItem_Click(object sender, EventArgs e)
+        {
+            MenuAbstractStore tmpConfigStore = new MenuItemStore();
+            string pathToFile = null;
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                pathToFile = ofd.OpenFileDialogReturnPath(Properties.Resources.OpenDialogCfgFile, "Выберите файл с конфигурацией:");
+                if (ofd.CheckFileExists)
+                { 
+                    loadedExternalConfig = LoadConfig(CommonConst.AppCfgFilePath);
+                    tmpConfigStore.Set(loadedExternalConfig.GetUnitConfigNames().ToToolStripMenuItemList());
+                    MakeMenuItemDropDownFromMenuStore(selectedConfigToolStripMenuItem, tmpConfigStore, ToolStripMenuType.ExternalConfig);
+                 selectedConfigToolStripMenuItem.Text =$"Загружена конфигурация - {loadedExternalConfig.Version} от ({loadedExternalConfig.LastModification})";
+                }
+            }
+        }
+
+        ConfigUnitStore GetConfigUnitByName(ConfigFull<ConfigAbstract> tmpConfigFull, string text)
         {
             AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
             AddLineAtTextboxLog("Ищу: " + text);
@@ -614,7 +651,7 @@ namespace FlexibleDBMS
             return applicationNewConfig;
         }
 
-        public ISQLConnectionSettings GetDefaultConnectionFromConfig(ConfigFull<ConfigAbstract> config)
+        ISQLConnectionSettings GetDefaultConnectionFromConfig(ConfigFull<ConfigAbstract> config)
         {
             ISQLConnectionSettings connectionDefault = new SQLConnectionSettings(null);
             ConfigAbstract configUnit;
@@ -643,7 +680,7 @@ namespace FlexibleDBMS
             return connectionDefault;
         }
 
-        private IList<string> ReturnRecentConnectionNamesFromConfig(ConfigFull<ConfigAbstract> config)
+        IList<string> ReturnRecentConnectionNamesFromConfig(ConfigFull<ConfigAbstract> config)
         {
             IList<string> connections = new List<string>();
 
@@ -656,57 +693,7 @@ namespace FlexibleDBMS
             return connections;
         }
 
-
-        public ConfigFull<ConfigAbstract> ReadCfgFromFile(string pathToConfig)
-        {
-            ConfigFull<ConfigAbstract> tmpConfig = null;
-            IReadable readerConfig = new FileReader();
-            (readerConfig as FileReader).EvntInfoMessage += new FileReader.InfoMessage(AddLineAtTextboxLog);
-
-            (readerConfig as FileReader).ReadConfig(pathToConfig);
-
-            if ((readerConfig as FileReader)?.config != null && (readerConfig as FileReader)?.config?.Config?.Count() > 0)
-            {
-                tmpConfig = (readerConfig as FileReader)?.config;
-            }
-            else
-            {
-                AddLineAtTextboxLog(Properties.Resources.EqualSymbols);
-                AddLineAtTextboxLog($"Config '{CommonConst.AppCfgFilePath}' is empty or broken.");
-                AddLineAtTextboxLog(Properties.Resources.EqualSymbols);
-            }
-
-          (readerConfig as FileReader).EvntInfoMessage -= AddLineAtTextboxLog;
-
-            readerConfig = null;
-            return tmpConfig;
-        }
-
-        ConfigFull<ConfigAbstract> loadedExternalConfig;
-        private void LoadConfigMenuItem_Click(object sender, EventArgs e)
-        {
-            MenuAbstractStore tmpConfigStore = new MenuItemStore();
-            string pathToFile = null;
-            using (OpenFileDialog ofd = new OpenFileDialog())
-            {
-                pathToFile = ofd.OpenFileDialogReturnPath(Properties.Resources.OpenDialogCfgFile, "Выберите файл с конфигурацией:");
-                if (ofd.CheckFileExists)
-                { 
-                    loadedExternalConfig = ReadCfgFromFile(CommonConst.AppCfgFilePath);
-                    tmpConfigStore.Set(loadedExternalConfig.GetUnitConfigNames().ToToolStripMenuItemList());
-                    MakeMenuItemDropDownFromMenuStore(selectedConfigToolStripMenuItem, tmpConfigStore, ToolStripMenuType.ExternalConfig);
-                 selectedConfigToolStripMenuItem.Text =$"Загружена конфигурация - {loadedExternalConfig.Version} от ({loadedExternalConfig.LastModification})";
-                }
-            }
-        }
-        
-
-        void PrintConfigToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            txtbResultShow.Clear();
-            PrintApplicationFullConfig(Configuration.Get);
-        }
-
+ 
         void PrintApplicationFullConfig(ConfigFull<ConfigAbstract> config)
         {
             AddLineAtTextboxLog(Properties.Resources.EqualSymbols);
@@ -782,8 +769,14 @@ namespace FlexibleDBMS
             AddLineAtTextboxLog(connectionDefault?.ToString());
             AddLineAtTextboxLog($"-= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- -= * =-");
         }
+       
+        void PrintConfigToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            txtbResultShow.Clear();
+            PrintApplicationFullConfig(Configuration.Get);
+        }
 
-        private void PrintActiveConnectionConfigMenuItem_Click(object sender, EventArgs e)
+        void PrintActiveConnectionConfigMenuItem_Click(object sender, EventArgs e)
         {
             txtbResultShow.Clear();
             PrintSelectedConfigConnection(Configuration.Get,currentSQLConnectionStore.GetCurrent().Name); 
@@ -817,12 +810,13 @@ namespace FlexibleDBMS
             AddLineAtTextboxLog();
         }
 
-        private void WriteFileToolStripMenuItem_Click(object sender, EventArgs e)
+
+         void WriteFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             WriteConfig();
         }
 
-        private void WriteConfig()
+         void WriteConfig()
         {
             var t = Task.Run(() =>
             MakeCurrentFullConfig(Configuration.Get, currentSQLConnectionStore.GetCurrent()));
@@ -835,7 +829,7 @@ namespace FlexibleDBMS
             });
         }
 
-        public void WriteCfgInFile(ConfigFull<ConfigAbstract> config)
+         void WriteCfgInFile(ConfigFull<ConfigAbstract> config)
         {
             IWriterable writer = new FileWriter();
             // (writer as FileWriter).EvntInfoMessage -= AddLineAtTextboxLog;

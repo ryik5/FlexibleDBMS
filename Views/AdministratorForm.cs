@@ -245,7 +245,7 @@ namespace FlexibleDBMS
 
             //write into Log status info
             AddLineAtTextBoxResultShow($"Количество столбцов в заголовке: {header.ToList().Count}");
-            AddLineAtTextBoxResultShow(header.AsString());
+            AddLineAtTextBoxResultShow(header.ToString());
         }
 
         private async void ModelCommon_collectionFull(object sender, BoolEventArgs e)
@@ -272,19 +272,19 @@ namespace FlexibleDBMS
             AddLineAtTextBoxResultShow("");
             int numberModel = 0;
             IModels model = listModels.ElementAt(numberModel);
-            AddLineAtTextBoxResultShow($"Элемент {numberModel}: {model.AsString()}");
+            AddLineAtTextBoxResultShow($"Элемент {numberModel}: {model.ToString()}");
 
             if (listModels?.Count > 100)
             {
                 numberModel = 100;
                 model = listModels.ElementAt(numberModel);
-                AddLineAtTextBoxResultShow($"Элемент {numberModel}: {model.AsString()}");
+                AddLineAtTextBoxResultShow($"Элемент {numberModel}: {model.ToString()}");
 
                 if (listModels?.Count > 1000)
                 {
                     numberModel = 1000;
                     model = listModels.ElementAt(numberModel);
-                    AddLineAtTextBoxResultShow($"Элемент {numberModel}: {model.AsString()}");
+                    AddLineAtTextBoxResultShow($"Элемент {numberModel}: {model.ToString()}");
                 }
             }
         }
@@ -457,6 +457,19 @@ namespace FlexibleDBMS
         #endregion
 
 
+
+        #region Update date in DB
+        //Some columns store date as 5 digits string as - "39456"
+        //  "39456", // (1/9/2008)
+        //  "36557", // (2/1/2000)
+        //  "39270"  // (7//7/2007)
+
+        //  //We must have a double to convert the OA date to a real date.   
+        //double d = double.Parse(b);
+
+        //  //Get the converted date from the OLE automation date.   
+        //DateTime conv = DateTime.FromOADate(d);
+        // use: string result = date.FromOQDateToRealDate();
 
         #region Update Plate' District
         private async void UpdatePlateRegionToolStripMenuItem_Click(object sender, EventArgs e)
@@ -659,7 +672,7 @@ namespace FlexibleDBMS
         }
         #endregion
 
-
+        #endregion 
 
         private void ComboBoxTable_SelectedIndexChanged(object sender, EventArgs e)
         {

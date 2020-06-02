@@ -15,7 +15,7 @@ namespace FlexibleDBMS
         public int importedRows = 0;
         public IList<IModels> listCommonModels;
         public IModels columnNames;
-        IParserRowTo parsedModel;
+        ParserRowModelCommon parsedModel;
 
         public delegate void Message<TextEventArgs>(object sender, TextEventArgs e);
         public event Message<TextEventArgs> EvntInfoMessage;
@@ -60,8 +60,8 @@ namespace FlexibleDBMS
                             importedRows = 0;
 
                             parsedModel = new ParserRowModelCommon(currentRow);
-                            columnNames = (parsedModel as ParserRowModelCommon).MatchColumnToAlias();
-                            nameColumns = (parsedModel as ParserRowModelCommon).ImportedColumnName;
+                            columnNames = parsedModel.MatchColumnToAlias();
+                            nameColumns = parsedModel.ImportedColumnName;
 
                             EvntHeaderReady?.Invoke(this, new BoolEventArgs(true));//cHeader is ready  
                         } //first found not_empty_line containes name columns
@@ -80,7 +80,7 @@ namespace FlexibleDBMS
                                 {
                                     EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//collection is full
                                     EvntInfoMessage?.Invoke(this, new TextEventArgs($"lastRow: {currentRow}" +
-                                        $"{Environment.NewLine}parsed: {models.AsString()}" +
+                                        $"{Environment.NewLine}parsed: {models.ToString()}" +
                                         $"{Environment.NewLine}Ожидаю пока запишутся данные(до 5 сек.)..."));
 
                                     FileReaderModels.evntWaitHandle.WaitOne(5000);
@@ -137,8 +137,8 @@ namespace FlexibleDBMS
                             importedRows = 0;
 
                             parsedModel = new ParserRowModelCommon(currentRow);
-                            columnNames = (parsedModel as ParserRowModelCommon).MatchColumnToAlias();
-                            nameColumns = (parsedModel as ParserRowModelCommon).ImportedColumnName;
+                            columnNames = parsedModel.MatchColumnToAlias();
+                            nameColumns = parsedModel.ImportedColumnName;
 
                             EvntHeaderReady?.Invoke(this, new BoolEventArgs(true));//cHeader is ready                         
                         } //first found not_empty_line containes name columns
@@ -157,8 +157,8 @@ namespace FlexibleDBMS
                                 {
                                     EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//collection is full
                                     EvntInfoMessage?.Invoke(this, new TextEventArgs($"lastRow: {currentRow}" +
-                                        $"{Environment.NewLine}parsed: {models.AsString()}" +
-                                        $"{Environment.NewLine}Ожидаю пока запишутся данные(до 5 сек.)..."));
+                                        $"{Environment.NewLine}parsed: {models.ToString()}" +
+                                        $"{Environment.NewLine}Ожидаю пока данные запишутся (до 5 сек.)..."));
 
                                     FileReaderModels.evntWaitHandle.WaitOne(5000);
                                     listCommonModels = new List<IModels>(maxElementsInDictionary);
@@ -171,8 +171,8 @@ namespace FlexibleDBMS
             if (listCommonModels?.Count > 0)
             {
                 EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//last part of the collection
-                EvntInfoMessage?.Invoke(this, new TextEventArgs($"Ожидаю пока запишется последняя часть данных(до 2 сек.)..."));
-                FileReaderModels.evntWaitHandle.WaitOne(2000);
+                EvntInfoMessage?.Invoke(this, new TextEventArgs($"Ожидаю пока запишется последняя часть данных (до 5 сек.)..."));
+                FileReaderModels.evntWaitHandle.WaitOne(5000);
             }
         }
     }
