@@ -44,12 +44,12 @@ namespace FlexibleDBMS
         //Forms
         HelpForm helpForm;
         AdministratorForm administratorForm;
-        
+
         //SHow datatables in DataGridView
         DataGridView dgv;
         DataTable dtForShow;  //datatable source of show
         DataTable dtForStore; //datatable store data
-        
+
         SqlAbstractConnector dBOperations;// = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
         ConfigStore Configuration;
         SQLConnectionStore currentSQLConnectionStore = null;
@@ -74,7 +74,7 @@ namespace FlexibleDBMS
             InitializeComponent();
 
 
-            Updater = new ApplicationUpdater(); 
+            Updater = new ApplicationUpdater();
             Configuration = new ConfigStore();
 
             currentSQLConnectionStore = new SQLConnectionStore();
@@ -172,7 +172,7 @@ namespace FlexibleDBMS
             ConfigAbstract configUnit = new Config
             {
                 Name = CommonConst.MAIN,
-                Version= CommonConst.AppVersion,
+                Version = CommonConst.AppVersion,
                 ConfigDictionary = new Dictionary<string, object>()
             };
             ConfigAbstract config = new Config
@@ -209,7 +209,7 @@ namespace FlexibleDBMS
             };
             configUnit.ConfigDictionary[config.Name] = config;
             configFull.Add(configUnit);
-            
+
             config = new Config
             {
                 Name = nameof(ToolStripMenuType.ExtraQuery),
@@ -244,7 +244,7 @@ namespace FlexibleDBMS
             Configuration.Set(configFull);
         }
 
-        private  void CurrentSQLConnectionStore_EvntConfigChanged(object sender, BoolEventArgs args)
+        private void CurrentSQLConnectionStore_EvntConfigChanged(object sender, BoolEventArgs args)
         {
             _ = CurrentSQLConnectionStore_ConfigChanged();
         }
@@ -253,24 +253,27 @@ namespace FlexibleDBMS
         {
             ISQLConnectionSettings oldSettings = currentSQLConnectionStore?.GetPrevious();
             ISQLConnectionSettings newSettings = currentSQLConnectionStore?.GetCurrent();
+                MakeCurrentFullConfig(Configuration?.Get, oldSettings);
+                    queryStandartStore.Clear();
+                    queryExtraStore.Clear();
 
-            //Save current state
+            //Save a current state of the interface Controls
             await Task.Run(() => SaveControlState());
-            await Task.Run(() => LockControl());
+            
+            //Block interface from a user influence
+            await Task.Run(() => BlockControl());
 
             await Task.Run(() =>
             {
                 AddLineAtTextboxLog($"{Properties.Resources.DashedSymbols}{Properties.Resources.DashedSymbols}");
                 AddLineAtTextboxLog("Переключаюсь на новые настройки...");
             });
-
+                        
 
             if (!(string.IsNullOrWhiteSpace(newSettings?.Name)))
             {
                 recentStore.Add(new ToolStripMenuItem(newSettings.Name));
-
-                await Task.Run(() => MakeCurrentFullConfig(Configuration?.Get, oldSettings));
-
+                
                 await Task.Run(() =>
                 {
                     ConfigUnitStore applicationConfig = GetConfigUnitByName(Configuration.Get, newSettings.Name);
@@ -290,22 +293,18 @@ namespace FlexibleDBMS
                             AddLineAtTextboxLog($"Выбрано подключение к серверу: '{newSettings?.Host}'{Environment.NewLine}" +
                             $" БД: '{newSettings?.Database}'{Environment.NewLine}" +
                             $" Основная таблица: '{newSettings?.Table}'{Environment.NewLine}");
-
                             statusInfoMainText.SetConstText($"Выбрана база: {newSettings.Database}");
                         });
 
-                        statusInfoMainText.SetTempText($"Получаю список таблиц...");
 
-                        var cancellationToken = new System.Threading.CancellationTokenSource(5000).Token;
-                        //cancellationToken.CancelAfter(200);
-                        int timeout = 10000;
+                        //fix the case when a DB on the server was not found - cancelation task after 10 sec waiting
+                        statusInfoMainText.SetTempText($"Получаю список таблиц...");
+                        var cancellationToken = new System.Threading.CancellationTokenSource(10000).Token;//timeout = 10 sec
+                        int timeout = 10000; //timeout = 10 sec
                         var task = SetTables(cancellationToken, newSettings);
                         if (await Task.WhenAny(task, Task.Delay(timeout, cancellationToken)) == task)
-                        {
-                            // Task completed within timeout.
-                            // Consider that the task may have faulted or been canceled.
-                            await task;
-                        }
+                        { await task; }
+
 
                         if (tableStore?.GetAllItems()?.Count > 0)
                         {
@@ -314,13 +313,17 @@ namespace FlexibleDBMS
                         }
                         else
                         {
-                            AddLineAtTextboxLog($"{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}");
-                            statusInfoMainText.SetTempText($"Список таблиц с сервера не получен.");
-                            AddLineAtTextboxLog($"{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}");
+                            tableStore.Clear();
+                            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Environment.NewLine}");
+                            AddLineAtTextboxLog($"{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Environment.NewLine}");
+                            statusInfoMainText.SetTempText($"{Properties.Resources.SosSlashSymbolsBack}" +
+                                $"            " +
+                                $"Список таблиц с сервера не получен." +
+                                $"            " +
+                                $"{Properties.Resources.SosSlashSymbols}");
+                            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Environment.NewLine}");
+                            AddLineAtTextboxLog($"{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Environment.NewLine}");
                         }
-                        //Восстановить предыдущее состояние контролов
-                        await Task.Run(() => RestoreControlState());
-
                     }
                     else if (oldSettings?.Database == newSettings?.Database && oldSettings?.Table != newSettings?.Table)
                     {
@@ -335,7 +338,7 @@ namespace FlexibleDBMS
 
         Task SetTables(System.Threading.CancellationToken token, ISQLConnectionSettings newSettings)
         {
-            return Task.Run(() => tableStore.Set(SQLSelector.GetTables(newSettings).GetToolStipMenuItemList()),token);
+            return Task.Run(() => tableStore.Set(SQLSelector.GetTables(newSettings).GetToolStipMenuItemList()), token);
         }
 
         private void DBOperations_EvntInfoMessage(object sender, TextEventArgs e)
@@ -358,10 +361,10 @@ namespace FlexibleDBMS
             StatusInfoMain.Text = statusInfoMainText.GetConstText;
         }
 
-        private  void TablesStore_EvntCollectionChanged(object sender, BoolEventArgs e)
+        private void TablesStore_EvntCollectionChanged(object sender, BoolEventArgs e)
         { StatusTables_anotherThreadAccess(); }
 
-        
+
         private void StatusTables_anotherThreadAccess() //add string into  from other threads
         {
             if (InvokeRequired)
@@ -373,9 +376,7 @@ namespace FlexibleDBMS
                         StatusTables.DropDownItems.Clear();
 
                     if (tableStore?.GetAllItems()?.Count > 0)
-                    {
                         StatusTables.DropDownItems.AddRange(tableStore.GetAllItems().ToArray());
-                    }
 
                     StatusTables.DropDown.Refresh();
                     StatusTables.Text = "Таблицы";
@@ -389,9 +390,7 @@ namespace FlexibleDBMS
                     StatusTables.DropDownItems.Clear();
 
                 if (tableStore?.GetAllItems()?.Count > 0)
-                {
                     StatusTables.DropDownItems.AddRange(tableStore.GetAllItems().ToArray());
-                }
 
                 StatusTables.DropDown.Refresh();
                 StatusTables.Text = "Таблицы";
@@ -423,7 +422,7 @@ namespace FlexibleDBMS
             //настройки имени и пароля вставить в конфиг - файл            
             string serverURL = null;
 
-           _= Updater.SetOptionsAsync(user, serverURL);
+            _ = Updater.SetOptionsAsync(user, serverURL);
             if (!string.IsNullOrWhiteSpace(Updater?.Options?.serverUpdateURI))
             {
                 string constText = statusInfoMainText.GetConstText;
@@ -448,7 +447,7 @@ namespace FlexibleDBMS
         {
             UserAD user = new UserAD();
             string serverURL = null;
-           _= Updater.SetOptionsAsync(user, serverURL);
+            _ = Updater.SetOptionsAsync(user, serverURL);
             return Updater.CheckUpdatePeriodicaly(minutes);
         }
 
@@ -470,7 +469,7 @@ namespace FlexibleDBMS
                     "Выберите заранее подготовленный архив с обновлением или нажмите Отмена, для автоматической генерации системой:");
             }
 
-           _= Updater.SetOptionsAsync(user, serverURL, pathToExternalUpdateZip);
+            _ = Updater.SetOptionsAsync(user, serverURL, pathToExternalUpdateZip);
             if (!string.IsNullOrWhiteSpace(Updater?.Options?.serverUpdateURI))
             {
                 string constText = statusInfoMainText.GetConstText;
@@ -519,7 +518,7 @@ namespace FlexibleDBMS
             return tmpConfig;
         }
 
-         void LoadConfigMenuItem_Click(object sender, EventArgs e)
+        void LoadConfigMenuItem_Click(object sender, EventArgs e)
         {
             MenuAbstractStore tmpConfigStore = new MenuItemStore();
             string pathToFile = null;
@@ -527,11 +526,11 @@ namespace FlexibleDBMS
             {
                 pathToFile = ofd.OpenFileDialogReturnPath(Properties.Resources.OpenDialogCfgFile, "Выберите файл с конфигурацией:");
                 if (ofd.CheckFileExists)
-                { 
+                {
                     loadedExternalConfig = LoadConfig(CommonConst.AppCfgFilePath);
                     tmpConfigStore.Set(loadedExternalConfig.GetUnitConfigNames().ToToolStripMenuItemList());
                     MakeMenuItemDropDownFromMenuStore(selectedConfigToolStripMenuItem, tmpConfigStore, ToolStripMenuType.ExternalConfig);
-                 selectedConfigToolStripMenuItem.Text =$"Загружена конфигурация - {loadedExternalConfig.Version} от ({loadedExternalConfig.LastModification})";
+                    selectedConfigToolStripMenuItem.Text = $"Загружена конфигурация - {loadedExternalConfig.Version} от ({loadedExternalConfig.LastModification})";
                 }
             }
         }
@@ -546,6 +545,8 @@ namespace FlexibleDBMS
             MenuAbstractStore queryStandart = null;
             MenuAbstractStore queryExtra = null;
             MenuAbstractStore recent = null;
+            string version = null;
+            DateTime timeStamp = DateTime.Now;
             string result;
 
             if (tmpConfigFull?.Count() > 0)
@@ -553,20 +554,19 @@ namespace FlexibleDBMS
                 IList<string> recentList = tmpConfigFull.GetUnitConfigNames();
                 if (recentList?.Count > 0)
                 {
-                    result = $"{Properties.Resources.SosSymbols}{Environment.NewLine}" +
-                        $"Recent menu:";
+                    //result = $"{Properties.Resources.SosSymbols}{Environment.NewLine}" + $"Recent menu:";
 
                     recent = new MenuItemStore();
 
                     foreach (var menu in recentList)
                     {
-                        result += $"{Environment.NewLine}{menu}";
+                        //result += $"{Environment.NewLine}{menu}";
 
                         MenuItem item = new MenuItem(menu);
                         recent.Add(item.ToQueryMenuToolStripMenuItem());
                     }
 
-                    AddLineAtTextboxLog(result);
+                  //  AddLineAtTextboxLog(result);
                 }
 
                 foreach (var confUnit in tmpConfigFull?.Config)
@@ -585,9 +585,10 @@ namespace FlexibleDBMS
                             tmpConfigUnit = tmpConf as Config;
                             connection = tmpConfigUnit?.ConfigDictionary?.ToISQLConnectionSettings();
 
-                            AddLineAtTextboxLog($"{Properties.Resources.SosSymbols}{Environment.NewLine}" +
-                                $"SQL connection:{Environment.NewLine}{connection.AsString()}");
+                            //AddLineAtTextboxLog($"{Properties.Resources.SosSymbols}{Environment.NewLine}" + $"SQL connection:{Environment.NewLine}{connection.AsString()}");
                         }
+                         version = (tmpConf as Config).Version;
+                         timeStamp = (tmpConf as Config).LastModification;
 
                         exist = unit.ConfigDictionary.TryGetValue(nameof(ToolStripMenuType.StandartQuery), out tmpConf);
                         if (exist)
@@ -597,16 +598,16 @@ namespace FlexibleDBMS
                             IList<MenuItem> data = tmpConfigUnit?.ConfigDictionary?.ToMenuItems();
                             if (data?.Count > 0)
                             {
-                                result = $"{Properties.Resources.SosSymbols}{Environment.NewLine}" +
-                                    $"Standart menu:";
+                                //result = $"{Properties.Resources.SosSymbols}{Environment.NewLine}" +  $"Standart menu:";
+
                                 foreach (var menu in data)
                                 {
-                                    result += $"{Environment.NewLine}{menu?.Text}:{menu?.Tag}";
+                                    //result += $"{Environment.NewLine}{menu?.Text}:{menu?.Tag}";
 
                                     MenuItem item = new MenuItem(menu?.Text, menu?.Tag);
                                     queryStandart.Add(item.ToQueryMenuToolStripMenuItem());
                                 }
-                                AddLineAtTextboxLog(result);
+                                //AddLineAtTextboxLog(result);
                             }
                         }
 
@@ -618,17 +619,16 @@ namespace FlexibleDBMS
                             IList<MenuItem> data = tmpConfigUnit?.ConfigDictionary?.ToMenuItems();
                             if (data?.Count > 0)
                             {
-                                result = $"{Properties.Resources.SosSymbols}{Environment.NewLine}" +
-                                   $"Extra menu:";
+                                //result = $"{Properties.Resources.SosSymbols}{Environment.NewLine}" +  $"Extra menu:";
 
                                 foreach (var menu in data)
                                 {
-                                    result += $"{Environment.NewLine}{menu?.Text}:{menu?.Tag}";
+                                    //result += $"{Environment.NewLine}{menu?.Text}:{menu?.Tag}";
 
                                     MenuItem item = new MenuItem(menu?.Text, menu?.Tag);
                                     queryExtra.Add(item.ToQueryMenuToolStripMenuItem());
                                 }
-                                AddLineAtTextboxLog(result);
+                                //AddLineAtTextboxLog(result);
                             }
                         }
 
@@ -643,10 +643,12 @@ namespace FlexibleDBMS
                 SQLConnection = connection,
                 QueryStandartMenuStore = queryStandart,
                 QueryExtraMenuStore = queryExtra,
-                RecentMenuStore = recent
+                RecentMenuStore = recent,
+                Version= version,
+                TimeStamp=timeStamp
             };
 
-            AddLineAtTextboxLog($"{Properties.Resources.DashedSymbols}{Properties.Resources.DashedSymbols}");
+            //AddLineAtTextboxLog($"{Properties.Resources.DashedSymbols}{Properties.Resources.DashedSymbols}");
 
             return applicationNewConfig;
         }
@@ -693,101 +695,59 @@ namespace FlexibleDBMS
             return connections;
         }
 
- 
-        void PrintApplicationFullConfig(ConfigFull<ConfigAbstract> config)
+        void PrintConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AddLineAtTextboxLog(Properties.Resources.EqualSymbols);
-            AddLineAtTextboxLog("-= current SQL connectionSettings =-");
-            AddLineAtTextboxLog(currentSQLConnectionStore.GetCurrent()?.ToString());
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
+            txtbResultShow.Clear();
+            PrintFullConfig(Configuration.Get);
+        }
 
+        void PrintFullConfig(ConfigFull<ConfigAbstract> config)
+        {
+            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
+            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
+            AddLineAtTextboxLog();
             AddLineAtTextboxLog("-= currentConfig connectionSettings Names =-");
             AddLineAtTextboxLog(ReturnRecentConnectionNamesFromConfig(config).ToStringNewLine());
             AddLineAtTextboxLog();
             AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
-
-
-            AddLineAtTextboxLog("-= currentConfig =-");
-            PrintConfig(config);
+            AddLineAtTextboxLog();
+            AddLineAtTextboxLog("-= SQL connection =-");
+            AddLineAtTextboxLog(currentSQLConnectionStore.GetCurrent()?.ToString());
+            AddLineAtTextboxLog();
             AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
+            AddLineAtTextboxLog("-= Loaded Full Config =-");
+            IList<string> names = ReturnRecentConnectionNamesFromConfig(config);
+            foreach (var name in names)
+            {
+                AddLineAtTextboxLog();
+                AddLineAtTextboxLog(Properties.Resources.SosSymbols);
+                AddLineAtTextboxLog($"-= {name} =-");
+                PrintSelectedConfigConnection(config, name);
+            }
+
+            AddLineAtTextboxLog();
+            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
+            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
 
             AddLineAtTextboxLog();
         }
 
-        void PrintConfig(ConfigFull<ConfigAbstract> config)
-        {
-            AddLineAtTextboxLog($"Config units(count): - {config?.Count()}");
-            string defaultConnection = null;
-            ISQLConnectionSettings connectionDefault = new SQLConnectionSettings(null);
 
-            if (config?.Count() > 0)
-            {
-                foreach (var confUnit in config?.Config)
-                {
-                    ConfigAbstract unit = confUnit.Value;
-                    AddLineAtTextboxLog(Properties.Resources.SosSymbols);
-                    AddLineAtTextboxLog($"Name - {confUnit.Key} ");
-
-                    if (unit.ConfigDictionary?.Count() > 0)
-                    {
-                        foreach (var confParameter in unit.ConfigDictionary)
-                        {
-                            AddLineAtTextboxLog($"Parameter.Key - {confParameter.Key}:");
-                            ConfigAbstract configUnit = confParameter.Value as Config;
-
-                            if (unit?.Name == CommonConst.MAIN && confParameter.Key == nameof(ISQLConnectionSettings)) //SQLConnectionData
-                            {
-                                if (configUnit?.ConfigDictionary?.Count > 0)
-                                {
-                                    connectionDefault = configUnit?.ConfigDictionary.ToISQLConnectionSettings();
-                                }
-                            }
-                            else
-                            {
-                                if (configUnit?.ConfigDictionary?.Count > 0)
-                                {
-                                    foreach (var parameter in configUnit?.ConfigDictionary)
-                                    {
-                                        AddLineAtTextboxLog($"parameters.Name '{parameter.Key}',  parameter.Value - {  parameter.Value}");
-
-                                        if (unit.Name.Equals(CommonConst.MAIN) && configUnit.Name.Equals(CommonConst.DEFAULT_CONNECTION))
-                                        {
-                                            AddLineAtTextboxLog($"Default connection is {parameter.Value}");
-                                            defaultConnection = parameter.Value.ToString();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            AddLineAtTextboxLog($"-= =-  -=  =- -=  =- -=  =- -=  =- -=  =-");
-            AddLineAtTextboxLog("connectionDefault:");
-            AddLineAtTextboxLog(connectionDefault?.ToString());
-            AddLineAtTextboxLog($"-= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- * -= * =- -= * =-");
-        }
-       
-        void PrintConfigToolStripMenuItem_Click(object sender, EventArgs e)
+        void PrintSelectedConfigConnectionMenuItem_Click(object sender, EventArgs e)
         {
             txtbResultShow.Clear();
-            PrintApplicationFullConfig(Configuration.Get);
+            PrintSelectedConfigConnection(Configuration.Get, currentSQLConnectionStore.GetCurrent().Name);
         }
 
-        void PrintActiveConnectionConfigMenuItem_Click(object sender, EventArgs e)
-        {
-            txtbResultShow.Clear();
-            PrintSelectedConfigConnection(Configuration.Get,currentSQLConnectionStore.GetCurrent().Name); 
-        }
-        
+
         void PrintSelectedConfigConnection(ConfigFull<ConfigAbstract> fullConfig, string selectedConfigName)
         {
             ConfigUnitStore selectedConfig = GetConfigUnitByName(fullConfig, selectedConfigName);
 
             AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
             AddLineAtTextboxLog("-= SQL Connection Settings =-");
+            AddLineAtTextboxLog($"ver. {selectedConfig?.Version} {selectedConfig?.TimeStamp.ToString()}");
+            AddLineAtTextboxLog();
             AddLineAtTextboxLog(selectedConfig?.SQLConnection?.ToString());
             AddLineAtTextboxLog();
             AddLineAtTextboxLog(Properties.Resources.SosSymbols);
@@ -799,7 +759,7 @@ namespace FlexibleDBMS
                 { AddLineAtTextboxLog($"{m?.Text}: {m?.Tag}"); }
             AddLineAtTextboxLog();
             AddLineAtTextboxLog(Properties.Resources.SosSymbols);
-            
+
             AddLineAtTextboxLog("-= Query Extra =-");
             list = selectedConfig?.QueryExtraMenuStore?.GetAllItems();
             if (list?.Count > 0)
@@ -811,12 +771,12 @@ namespace FlexibleDBMS
         }
 
 
-         void WriteFileToolStripMenuItem_Click(object sender, EventArgs e)
+        void WriteFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             WriteConfig();
         }
 
-         void WriteConfig()
+        void WriteConfig()
         {
             var t = Task.Run(() =>
             MakeCurrentFullConfig(Configuration.Get, currentSQLConnectionStore.GetCurrent()));
@@ -829,7 +789,7 @@ namespace FlexibleDBMS
             });
         }
 
-         void WriteCfgInFile(ConfigFull<ConfigAbstract> config)
+        void WriteCfgInFile(ConfigFull<ConfigAbstract> config)
         {
             IWriterable writer = new FileWriter();
             // (writer as FileWriter).EvntInfoMessage -= AddLineAtTextboxLog;
@@ -839,7 +799,7 @@ namespace FlexibleDBMS
         }
         #endregion
 
-         ///-////-/////-//////-///////////////////////////////////////////
+        ///-////-/////-//////-///////////////////////////////////////////
 
         #region Dynamical Menues - RecentConnection, QueryStandart, QueryExtra
         private void QueryExtraStore_EvntCollectionChanged(object sender, BoolEventArgs e)
@@ -849,8 +809,8 @@ namespace FlexibleDBMS
         { MakeMenuItemDropDownFromMenuStore(queryStandartMenu, queryStandartStore, ToolStripMenuType.StandartQuery); }
 
         private void RecentStore_EvntCollectionChanged(object sender, BoolEventArgs e)
-        {             MakeMenuItemDropDownFromMenuStore(changeBaseMenuItem, recentStore, ToolStripMenuType.RecentConnection);         }
-        
+        { MakeMenuItemDropDownFromMenuStore(changeBaseMenuItem, recentStore, ToolStripMenuType.RecentConnection); }
+
         private void MakeMenuItemDropDownFromMenuStore(ToolStripMenuItem target, MenuAbstractStore source, ToolStripMenuType menuType)
         {
             IList<ToolStripMenuItem> menuItems = source.GetAllItems();
@@ -908,7 +868,7 @@ namespace FlexibleDBMS
 
         //removeQueryMenuItem.Text = "Удалить отмеченные пользовательские запросы";
         //removeQueryMenuItem.ToolTipText = "Отметить можно только запросы созданные на данном ПК (подменю 'Пользовательские')";
-        private  void ExtraQueryMenuItem_MouseDown(object sender, MouseEventArgs e)
+        private void ExtraQueryMenuItem_MouseDown(object sender, MouseEventArgs e)
         {
             ToolStripMenuItem toolStrip = sender as ToolStripMenuItem;
             string text = toolStrip.Text;
@@ -931,7 +891,7 @@ namespace FlexibleDBMS
                     }
             }
         }
-        private  void StandartQueryMenuItem_MouseDown(object sender, MouseEventArgs e)
+        private void StandartQueryMenuItem_MouseDown(object sender, MouseEventArgs e)
         {
             ToolStripMenuItem toolStrip = sender as ToolStripMenuItem;
             string text = toolStrip.Text;
@@ -1012,10 +972,19 @@ namespace FlexibleDBMS
 
                 case MouseButtons.Right:
                     {
+                        ApplySelectedConfig(text);
                         //todo
                         //Перезаписать выбранную конфигурацию в систему
                         break;
                     }
+            }
+        }
+        void ApplySelectedConfig(string text)
+        {
+            DialogResult result = MessageBox.Show("Применить выбранную конфигурацию в систему?",$"Применить {text}:",MessageBoxButtons.YesNo,MessageBoxIcon.Question);
+            if (result==DialogResult.OK)
+            {
+                LoadConfig
             }
         }
 
@@ -1164,32 +1133,36 @@ namespace FlexibleDBMS
             // queriesExtraMenu.DropDown.Closing += (o, e) => { e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked; };//не закрывать меню при отметке
             #endregion
 
-            #region Manage
+            #region Manager
             managerMenu.Text = "Управление";
             managerMenu.ToolTipText = "Управление функционалом системы, его настройка, управление базами данных (БД)";
-           
+
             administratorMenuItem.Text = "Администратор баз данных(БД)";
             administratorMenuItem.Click += new EventHandler(administratorMenu_Click);
 
             configurationToolStripMenuItem.Text = "Конфигурация";
             configurationToolStripMenuItem.ToolTipText = "Конфигурация приложения";
 
-            printConfigMenuItem.Text = "Печать конфигурации";
-            printConfigMenuItem.ToolTipText = "Печать конфигурации на экран";
-            printConfigMenuItem.Click += new EventHandler(PrintConfigToolStripMenuItem_Click);
-
-            printCurrentConfigToolStripMenuItem.Text = "Печать текущей конфигурации";
-            printCurrentConfigToolStripMenuItem.ToolTipText = "Печать конфигурации данного подключения на экран";
-            printCurrentConfigToolStripMenuItem.Click += new EventHandler(PrintActiveConnectionConfigMenuItem_Click);
-            selectedConfigToolStripMenuItem.Text = "Выбрать конфигурацию";
-            selectedConfigToolStripMenuItem.ToolTipText = "Работа с выбраной конфигурацией подключения";
             loadConfigMenuItem.Text = "Загрузить конфигурацию с диска";
             loadConfigMenuItem.ToolTipText = "Прочитать конфигурацию";
             loadConfigMenuItem.Click += new EventHandler(LoadConfigMenuItem_Click);
 
+            printConfigMenuItem.Text = "Печать всей конфигурации";
+            printConfigMenuItem.ToolTipText = "Печать всей конфигурации на экран";
+            printConfigMenuItem.Click += new EventHandler(PrintConfigToolStripMenuItem_Click);
+
+            printCurrentConfigToolStripMenuItem.Text = "Печать конфигурации активного соединения";
+            printCurrentConfigToolStripMenuItem.ToolTipText = "Печать конфигурации данного подключения на экран";
+            printCurrentConfigToolStripMenuItem.Click += new EventHandler(PrintSelectedConfigConnectionMenuItem_Click);
+            selectedConfigToolStripMenuItem.Text = "Выбрать конфигурацию";
+            selectedConfigToolStripMenuItem.ToolTipText = "Работа с выбраной конфигурацией подключения";
+
+
+
             writeConfigMenuItem.Text = "Записать конфигурацию";
             writeConfigMenuItem.ToolTipText = "Записать конфигурацию в файл на диске";
             writeConfigMenuItem.Click += new EventHandler(WriteFileToolStripMenuItem_Click);
+
 
             updateToolStripMenuItem.Text = "Обновление приложения";
             updateToolStripMenuItem.ToolTipText = "Работа с обновлениями приложения - подготовка, деплой, получение";
@@ -1469,7 +1442,7 @@ namespace FlexibleDBMS
         /// <summary>
         /// Заблокировать контролы
         /// </summary>
-        private void LockControl()
+        private void BlockControl()
         {
             mainMenu.Enabled = false;
             managerMenu.Enabled = false;
@@ -1513,7 +1486,7 @@ namespace FlexibleDBMS
             await Task.Run(() => statusInfoMainText.SetTempText(constText));
 
             await Task.Run(() => SaveControlState());
-            await Task.Run(() => LockControl());
+            await Task.Run(() => BlockControl());
 
             dtForStore = await dBOperations.GetDataTable(query);
             dtForShow = dtForStore.Copy();
@@ -1522,7 +1495,7 @@ namespace FlexibleDBMS
             await Task.Run(() => statusInfoMainText.SetConstText(constText));
             AddLineAtTextboxLog($"В '{currentSQLConnectionStore.GetCurrent().Database}' найдено: {dtForShow?.Rows?.Count} записей");
             statusInfoMainText.SetTempText($"Найдено записей: {dtForShow?.Rows?.Count}");
-            
+
             // Переключиться на таблицу
             SelectTable();
 
@@ -1582,7 +1555,7 @@ namespace FlexibleDBMS
 
                     if (muliplier > 1)
                     { fileName += $"_{part}"; }
-                    
+
                     fileName += $".xlsx";
 
                     dtTemp = source.Clone();

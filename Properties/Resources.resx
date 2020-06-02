@@ -128,7 +128,7 @@
     <value>..\Resources\RYIK_small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="OpenDialogCfgFile" xml:space="preserve">
-    <value>Файл конфигурации (*.cfg)|*.cfg|Бэкап конфигурации (*.bak)|*.bak|All files (*.*)|*.*</value>
+    <value>Бэкап конфигурации (*.bak)|*.bak|Файл конфигурации (*.cfg)|*.cfg|All files (*.*)|*.*</value>
   </data>
   <data name="OpenDialogDbFile" xml:space="preserve">
     <value>Базы данных (*.db)|*.db|Текстовые файлы (*.txt)|*.txt|All files (*.*)|*.*</value>
@@ -144,6 +144,9 @@
   </data>
   <data name="SosSlashSymbols" xml:space="preserve">
     <value>--- / --- / --- / --- / --- / --- / --- / --- / --- / --- / --- / --- /</value>
+  </data>
+  <data name="SosSlashSymbolsBack" xml:space="preserve">
+    <value>--- / --- / --- / --- / --- / --- / --- / --- / --- / --- / --- </value>
   </data>
   <data name="SosSymbols" xml:space="preserve">
     <value>---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---</value>

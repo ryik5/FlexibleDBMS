@@ -89,7 +89,7 @@ namespace FlexibleDBMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Файл конфигурации (*.cfg)|*.cfg|Бэкап конфигурации (*.bak)|*.bak|All files (*.*)|*.*.
+        ///   Looks up a localized string similar to Бэкап конфигурации (*.bak)|*.bak|Файл конфигурации (*.cfg)|*.cfg|All files (*.*)|*.*.
         /// </summary>
         internal static string OpenDialogCfgFile {
             get {
@@ -139,6 +139,15 @@ namespace FlexibleDBMS.Properties {
         internal static string SosSlashSymbols {
             get {
                 return ResourceManager.GetString("SosSlashSymbols", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to --- / --- / --- / --- / --- / --- / --- / --- / --- / --- / --- .
+        /// </summary>
+        internal static string SosSlashSymbolsBack {
+            get {
+                return ResourceManager.GetString("SosSlashSymbolsBack", resourceCulture);
             }
         }
         

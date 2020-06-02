@@ -1,4 +1,6 @@
-﻿namespace FlexibleDBMS
+﻿using System;
+
+namespace FlexibleDBMS
 {
     public class ConfigStore
     {
@@ -20,6 +22,8 @@
 
     public class ConfigUnitStore
     {
+        public string Version { get; set; }
+        public DateTime TimeStamp { get; set; }
         public ISQLConnectionSettings SQLConnection { get; set; }
         public MenuAbstractStore QueryStandartMenuStore { get; set; }
         public MenuAbstractStore QueryExtraMenuStore { get; set; }
