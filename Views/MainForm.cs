@@ -120,13 +120,14 @@ namespace FlexibleDBMS
 
             if (tmpConfig != null && !(string.IsNullOrWhiteSpace(tmpConnection?.Name)))
             {
-                ConfigUnitStore unitConfig = GetConfigUnitByName(tmpConfig, tmpConnection?.Name);
+                ConfigUnitStore unitConfig =  GetConfigUnitStoreFromFullConfigByName(tmpConfig, tmpConnection?.Name);
 
                 currentSQLConnectionStore.Set(unitConfig?.SQLConnection);
 
                 queryExtraStore.Set(unitConfig?.QueryExtraMenuStore?.GetAllItems());
                 queryStandartStore.Set(unitConfig?.QueryStandartMenuStore?.GetAllItems());
-                recentStore.Set(unitConfig?.RecentMenuStore?.GetAllItems());
+                
+                recentStore.Set(tmpConfig?.GetUnitConfigNames()?.ToToolStripMenuItemList());
 
                 //Установить полную конфигурацию(Иначе считать, что это первый запуск ПО и конфигурация - пустая)
                 Configuration.Set(tmpConfig);
@@ -153,6 +154,7 @@ namespace FlexibleDBMS
 
         ///-////-/////-//////-///////////////////////////////////////////
         ///-////-/////-//////-///////////////////////////////////////////
+
 
         /// <summary>
         /// 
@@ -244,6 +246,7 @@ namespace FlexibleDBMS
             Configuration.Set(configFull);
         }
 
+        #region SQL Connection was Changed
         private void CurrentSQLConnectionStore_EvntConfigChanged(object sender, BoolEventArgs args)
         {
             _ = CurrentSQLConnectionStore_ConfigChanged();
@@ -276,7 +279,7 @@ namespace FlexibleDBMS
                 
                 await Task.Run(() =>
                 {
-                    ConfigUnitStore applicationConfig = GetConfigUnitByName(Configuration.Get, newSettings.Name);
+                    ConfigUnitStore applicationConfig = GetConfigUnitStoreFromFullConfigByName(Configuration.Get, newSettings.Name);
                     queryStandartStore.Set(applicationConfig?.QueryStandartMenuStore?.GetAllItems());
                     queryExtraStore.Set(applicationConfig?.QueryExtraMenuStore?.GetAllItems());
                 });
@@ -345,6 +348,8 @@ namespace FlexibleDBMS
         {
             AddLineAtTextboxLog(e.Message);
         }
+        #endregion
+
 
         /// <summary>
         /// Переключение текста  временно при установке текста как временного
@@ -363,8 +368,7 @@ namespace FlexibleDBMS
 
         private void TablesStore_EvntCollectionChanged(object sender, BoolEventArgs e)
         { StatusTables_anotherThreadAccess(); }
-
-
+        
         private void StatusTables_anotherThreadAccess() //add string into  from other threads
         {
             if (InvokeRequired)
@@ -535,7 +539,7 @@ namespace FlexibleDBMS
             }
         }
 
-        ConfigUnitStore GetConfigUnitByName(ConfigFull<ConfigAbstract> tmpConfigFull, string text)
+        ConfigUnitStore GetConfigUnitStoreFromFullConfigByName(ConfigFull<ConfigAbstract> tmpConfigFull, string text)
         {
             AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
             AddLineAtTextboxLog("Ищу: " + text);
@@ -742,7 +746,7 @@ namespace FlexibleDBMS
 
         void PrintSelectedConfigConnection(ConfigFull<ConfigAbstract> fullConfig, string selectedConfigName)
         {
-            ConfigUnitStore selectedConfig = GetConfigUnitByName(fullConfig, selectedConfigName);
+            ConfigUnitStore selectedConfig = GetConfigUnitStoreFromFullConfigByName(fullConfig, selectedConfigName);
 
             AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
             AddLineAtTextboxLog("-= SQL Connection Settings =-");
@@ -924,7 +928,7 @@ namespace FlexibleDBMS
 
                     if (Configuration.Get?.Count() > 0)
                     {
-                        ConfigUnitStore applicationConfig = GetConfigUnitByName(Configuration.Get, text);
+                        ConfigUnitStore applicationConfig = GetConfigUnitStoreFromFullConfigByName(Configuration.Get, text);
 
                         ISQLConnectionSettings tmpConnection = applicationConfig.SQLConnection;
                         if (!(string.IsNullOrWhiteSpace(tmpConnection?.Name)))
@@ -973,18 +977,21 @@ namespace FlexibleDBMS
                 case MouseButtons.Right:
                     {
                         ApplySelectedConfig(text);
-                        //todo
-                        //Перезаписать выбранную конфигурацию в систему
                         break;
                     }
             }
         }
+
         void ApplySelectedConfig(string text)
         {
             DialogResult result = MessageBox.Show("Применить выбранную конфигурацию в систему?",$"Применить {text}:",MessageBoxButtons.YesNo,MessageBoxIcon.Question);
             if (result==DialogResult.OK)
             {
-                LoadConfig
+                ConfigAbstract selectedConfig = loadedExternalConfig.GetUnit(text);
+                ConfigFull<ConfigAbstract> tmpConfig = Configuration.Get;
+                tmpConfig.Add(selectedConfig);
+                Configuration.Set(tmpConfig);
+                recentStore.Set(tmpConfig?.GetUnitConfigNames()?.ToToolStripMenuItemList());
             }
         }
 

@@ -9,8 +9,7 @@ namespace FlexibleDBMS
         public abstract string Name { get; set; }
         public abstract IDictionary<string, object> ConfigDictionary { get; set; }
         //Для возможности поиска дубляжного значения
-        public override string ToString()
-        { return $"{Name}"; }
+        public override string ToString() => $"{Name}"; 
 
         public override bool Equals(object obj)
         {
@@ -22,6 +21,7 @@ namespace FlexibleDBMS
 
         public override int GetHashCode()
         { return ToString().GetHashCode(); }
+        
         //реализация для выполнения сортировки
         int IComparable<ConfigAbstract>.CompareTo(ConfigAbstract next)
         { return new ConfigComparerAbstract().Compare(this, next); }

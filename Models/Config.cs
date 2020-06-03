@@ -15,6 +15,7 @@ namespace FlexibleDBMS
         public TypeConfig TypeConfigUnit { get; set; } = TypeConfig.None;
 
         public override IDictionary<string, object> ConfigDictionary { get { return config; } set { config = value; } }
+       
         public void Add(ConfigAbstract newConfig)
         {
             if (newConfig == null)

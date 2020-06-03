@@ -10,7 +10,6 @@ namespace FlexibleDBMS
             if (!(config?.Count > 0))
                 return data;
 
-          //  data.Name = config[nameof(ISQLConnectionSettings.Name)]?.ToString();
             data.Database = config[nameof(ISQLConnectionSettings.Database)]?.ToString();
             data.Table = config[nameof(ISQLConnectionSettings.Table)]?.ToString();
             data.ProviderName = config[nameof(ISQLConnectionSettings.ProviderName)]?.ToString().GetSQLProvider();
@@ -42,6 +41,7 @@ namespace FlexibleDBMS
 
             return data;
         }
+      
         public static IList<MenuItem> ToMenuItems(this IDictionary<string, string> config)
         {
             IList<MenuItem> data = new List<MenuItem>();

@@ -11,8 +11,6 @@ namespace FlexibleDBMS
         public MenuFiltersMaker(IDictionary<string, string> dicTranslator)
         { this.dicTranslator = dicTranslator; }
 
-        public MenuFiltersMaker() { }
-
         public ToolStripSplitButton MakeDropDownToSplitButton(string menuTag, string menuText)
         {
             MenuItem menuItem = new MenuItem(menuText.Translate(dicTranslator), menuText);
