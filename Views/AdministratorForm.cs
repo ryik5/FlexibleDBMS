@@ -183,9 +183,9 @@ namespace FlexibleDBMS
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 if (typeFile == ImportedFileType.Text)
-                    filePath = ofd.OpenFileDialogReturnPath(Properties.Resources.OpenDialogTextFile, "Выберите для импорта текстовый файл с данными и резделителями:");
+                    filePath = ofd.OpenFileDialogReturnPath(Properties.Resources.DialogTextFile, "Выберите для импорта текстовый файл с данными и резделителями:");
                 else if (typeFile == ImportedFileType.Excel)
-                    filePath = ofd.OpenFileDialogReturnPath(Properties.Resources.OpenDialogExcelFile, "Выберите для импорта Excel файл с данными. Первая строчка должна содержать названия колонок:");
+                    filePath = ofd.OpenFileDialogReturnPath(Properties.Resources.DialogExcelFile, "Выберите для импорта Excel файл с данными. Первая строчка должна содержать названия колонок:");
             }
 
             if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
@@ -396,7 +396,7 @@ namespace FlexibleDBMS
                 DataTable dtForStore = null;
                 string queryCheck;
 
-                AddLineAtTextBoxResultShow(Properties.Resources.DashedSymbols);
+                AddLineAtTextBoxResultShow(Properties.Resources.SymbolsDashed);
                 AddLineAtTextBoxResultShow($"- Selected DB: '{settings.Database}'");
                 IList<string> columnsLeave = new List<string>();
                 IList<string> columnsDelete = new List<string>();
@@ -424,8 +424,8 @@ namespace FlexibleDBMS
                             else { columnsDelete.Add($"{column.ColumnName}"); }
                         }
                     }
-                    AddLineAtTextBoxResultShow(Properties.Resources.SosSymbols);
-                    AddLineAtTextBoxResultShow(Properties.Resources.SosSymbols);
+                    AddLineAtTextBoxResultShow(Properties.Resources.SymbolsSos);
+                    AddLineAtTextBoxResultShow(Properties.Resources.SymbolsSos);
 
                     (dBOperations as SQLiteModelDBOperations).ClearDataTable("MainData", columnsLeave); // delete columns in the table 'MainData' except columns - columnsLeave
                     (dBOperations as SQLiteModelDBOperations).ClearDataTable("ColumnNameAndAlias", "ColumnName", columnsDelete); // delete from 'ColumnNameAndAlias' where ColumnName contained columnsDelete
@@ -444,14 +444,14 @@ namespace FlexibleDBMS
                 }
 
                 AddLineAtTextBoxResultShow($"-  The End  -:");
-                AddLineAtTextBoxResultShow(Properties.Resources.DashedSymbols);
+                AddLineAtTextBoxResultShow(Properties.Resources.SymbolsDashed);
                 AddLineAtTextBoxResultShow();
             }
             else
             {
-                AddLineAtTextBoxResultShow($"{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}");
+                AddLineAtTextBoxResultShow($"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
                 AddLineAtTextBoxResultShow($"На данный момент настроена очистка только локальных SQLite БД");
-                AddLineAtTextBoxResultShow($"{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}");
+                AddLineAtTextBoxResultShow($"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
             }
         }
         #endregion
@@ -495,7 +495,7 @@ namespace FlexibleDBMS
                 IList<string> columns = new List<string>();
                 string queryCheck = null;
 
-                AddLineAtTextBoxResultShow(Properties.Resources.DashedSymbols);
+                AddLineAtTextBoxResultShow(Properties.Resources.SymbolsDashed);
                 AddLineAtTextBoxResultShow($"- Selected DB: '{pathToSqliteDB}'");
                 string columnsLeave = string.Empty;
                 string columnsDelete = string.Empty;
@@ -606,9 +606,9 @@ namespace FlexibleDBMS
                         }
                     }
 
-                    AddLineAtTextBoxResultShow(Properties.Resources.DashedSymbols);
+                    AddLineAtTextBoxResultShow(Properties.Resources.SymbolsDashed);
                     AddLineAtTextBoxResultShow(columns.ToStringNewLine());
-                    AddLineAtTextBoxResultShow(Properties.Resources.DashedSymbols);
+                    AddLineAtTextBoxResultShow(Properties.Resources.SymbolsDashed);
 
                     //update table  'ColumnNameAndAlias' 
                     if (!isExistedColumnDistrictPlate)
@@ -645,15 +645,15 @@ namespace FlexibleDBMS
                     }
                     else
                     {
-                        AddLineAtTextBoxResultShow(Properties.Resources.DashedSymbols);
+                        AddLineAtTextBoxResultShow(Properties.Resources.SymbolsDashed);
                         AddLineAtTextBoxResultShow("Данная база подготовлена в другой программе и не подлежит оптимизации");
-                        AddLineAtTextBoxResultShow(Properties.Resources.DashedSymbols);
+                        AddLineAtTextBoxResultShow(Properties.Resources.SymbolsDashed);
                     }
                 }
             }
-            AddLineAtTextBoxResultShow(Properties.Resources.DashedSymbols);
+            AddLineAtTextBoxResultShow(Properties.Resources.SymbolsDashed);
             AddLineAtTextBoxResultShow("Все задачи по обновлению принадлежности номеров а/м регионам завершены");
-            AddLineAtTextBoxResultShow(Properties.Resources.DashedSymbols);
+            AddLineAtTextBoxResultShow(Properties.Resources.SymbolsDashed);
 
             ShowMessage("Готово!");
 

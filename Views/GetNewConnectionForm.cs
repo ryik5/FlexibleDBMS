@@ -331,7 +331,7 @@ namespace FlexibleDBMS
         {
             string db = null;
             using (OpenFileDialog ofd = new OpenFileDialog())
-            { db = ofd.OpenFileDialogReturnPath(Properties.Resources.OpenDialogDbFile, "Выберите файл с БД SQLite:"); }
+            { db = ofd.OpenFileDialogReturnPath(Properties.Resources.DialogDbFile, "Выберите файл с БД SQLite:"); }
 
             ISQLConnectionSettings newSettings = new SQLConnectionSettings()
             {

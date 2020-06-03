@@ -115,18 +115,18 @@ namespace FlexibleDBMS
             ConfigFull<ConfigAbstract> tmpConfig = LoadConfig(CommonConst.AppCfgFilePath);
             ISQLConnectionSettings tmpConnection = GetDefaultConnectionFromConfig(tmpConfig);
 
-            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
             AddLineAtTextboxLog($"Имя последнего коннекта:{Environment.NewLine}{tmpConnection?.Name}");
 
             if (tmpConfig != null && !(string.IsNullOrWhiteSpace(tmpConnection?.Name)))
             {
-                ConfigUnitStore unitConfig =  GetConfigUnitStoreFromFullConfigByName(tmpConfig, tmpConnection?.Name);
+                ConfigUnitStore unitConfig = GetConfigUnitStoreFromFullConfigByName(tmpConfig, tmpConnection?.Name);
 
                 currentSQLConnectionStore.Set(unitConfig?.SQLConnection);
 
                 queryExtraStore.Set(unitConfig?.QueryExtraMenuStore?.GetAllItems());
                 queryStandartStore.Set(unitConfig?.QueryStandartMenuStore?.GetAllItems());
-                
+
                 recentStore.Set(tmpConfig?.GetUnitConfigNames()?.ToToolStripMenuItemList());
 
                 //Установить полную конфигурацию(Иначе считать, что это первый запуск ПО и конфигурация - пустая)
@@ -256,27 +256,27 @@ namespace FlexibleDBMS
         {
             ISQLConnectionSettings oldSettings = currentSQLConnectionStore?.GetPrevious();
             ISQLConnectionSettings newSettings = currentSQLConnectionStore?.GetCurrent();
-                MakeCurrentFullConfig(Configuration?.Get, oldSettings);
-                    queryStandartStore.Clear();
-                    queryExtraStore.Clear();
+            MakeCurrentFullConfig(Configuration?.Get, oldSettings);
+            queryStandartStore.Clear();
+            queryExtraStore.Clear();
 
             //Save a current state of the interface Controls
             await Task.Run(() => SaveControlState());
-            
+
             //Block interface from a user influence
             await Task.Run(() => BlockControl());
 
             await Task.Run(() =>
             {
-                AddLineAtTextboxLog($"{Properties.Resources.DashedSymbols}{Properties.Resources.DashedSymbols}");
+                AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashed}{Properties.Resources.SymbolsDashed}");
                 AddLineAtTextboxLog("Переключаюсь на новые настройки...");
             });
-                        
+
 
             if (!(string.IsNullOrWhiteSpace(newSettings?.Name)))
             {
                 recentStore.Add(new ToolStripMenuItem(newSettings.Name));
-                
+
                 await Task.Run(() =>
                 {
                     ConfigUnitStore applicationConfig = GetConfigUnitStoreFromFullConfigByName(Configuration.Get, newSettings.Name);
@@ -312,20 +312,20 @@ namespace FlexibleDBMS
                         if (tableStore?.GetAllItems()?.Count > 0)
                         {
                             AddLineAtTextboxLog($"Список таблиц содержит: {tableStore?.GetAllItems()?.Count} элемента(ов)");
-                            AddLineAtTextboxLog($"{Properties.Resources.DashedSymbols}{Properties.Resources.DashedSymbols}");
+                            AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashed}{Properties.Resources.SymbolsDashed}");
                         }
                         else
                         {
                             tableStore.Clear();
-                            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Environment.NewLine}");
-                            AddLineAtTextboxLog($"{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Environment.NewLine}");
-                            statusInfoMainText.SetTempText($"{Properties.Resources.SosSlashSymbolsBack}" +
+                            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
+                            AddLineAtTextboxLog($"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
+                            statusInfoMainText.SetTempText($"{Properties.Resources.SymbolsSosSlashBack}" +
                                 $"            " +
                                 $"Список таблиц с сервера не получен." +
                                 $"            " +
-                                $"{Properties.Resources.SosSlashSymbols}");
-                            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Environment.NewLine}");
-                            AddLineAtTextboxLog($"{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}{Environment.NewLine}");
+                                $"{Properties.Resources.SymbolsSosSlash}");
+                            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
+                            AddLineAtTextboxLog($"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
                         }
                     }
                     else if (oldSettings?.Database == newSettings?.Database && oldSettings?.Table != newSettings?.Table)
@@ -368,7 +368,7 @@ namespace FlexibleDBMS
 
         private void TablesStore_EvntCollectionChanged(object sender, BoolEventArgs e)
         { StatusTables_anotherThreadAccess(); }
-        
+
         private void StatusTables_anotherThreadAccess() //add string into  from other threads
         {
             if (InvokeRequired)
@@ -469,7 +469,7 @@ namespace FlexibleDBMS
 
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
-                pathToExternalUpdateZip = ofd.OpenFileDialogReturnPath(Properties.Resources.OpenDialogZipFile,
+                pathToExternalUpdateZip = ofd.OpenFileDialogReturnPath(Properties.Resources.DialogZipFile,
                     "Выберите заранее подготовленный архив с обновлением или нажмите Отмена, для автоматической генерации системой:");
             }
 
@@ -511,9 +511,9 @@ namespace FlexibleDBMS
             }
             else
             {
-                AddLineAtTextboxLog(Properties.Resources.EqualSymbols);
+                AddLineAtTextboxLog(Properties.Resources.SymbolsEqual);
                 AddLineAtTextboxLog($"Config '{CommonConst.AppCfgFilePath}' is empty or broken.");
-                AddLineAtTextboxLog(Properties.Resources.EqualSymbols);
+                AddLineAtTextboxLog(Properties.Resources.SymbolsEqual);
             }
 
             readerConfig.EvntInfoMessage -= AddLineAtTextboxLog;
@@ -528,20 +528,21 @@ namespace FlexibleDBMS
             string pathToFile = null;
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
-                pathToFile = ofd.OpenFileDialogReturnPath(Properties.Resources.OpenDialogCfgFile, "Выберите файл с конфигурацией:");
+                pathToFile = ofd.OpenFileDialogReturnPath(Properties.Resources.DialogBakFile, "Выберите файл с конфигурацией:");
                 if (ofd.CheckFileExists)
                 {
                     loadedExternalConfig = LoadConfig(CommonConst.AppCfgFilePath);
                     tmpConfigStore.Set(loadedExternalConfig.GetUnitConfigNames().ToToolStripMenuItemList());
                     MakeMenuItemDropDownFromMenuStore(selectedConfigToolStripMenuItem, tmpConfigStore, ToolStripMenuType.ExternalConfig);
                     selectedConfigToolStripMenuItem.Text = $"Загружена конфигурация - {loadedExternalConfig.Version} от ({loadedExternalConfig.LastModification})";
+                    applyLoadedConfigToolStripMenuItem.ToolTipText = $"Загружена конфигурация - {loadedExternalConfig.Version} от ({loadedExternalConfig.LastModification})";
                 }
             }
         }
 
         ConfigUnitStore GetConfigUnitStoreFromFullConfigByName(ConfigFull<ConfigAbstract> tmpConfigFull, string text)
         {
-            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
             AddLineAtTextboxLog("Ищу: " + text);
             AddLineAtTextboxLog();
 
@@ -570,7 +571,7 @@ namespace FlexibleDBMS
                         recent.Add(item.ToQueryMenuToolStripMenuItem());
                     }
 
-                  //  AddLineAtTextboxLog(result);
+                    //  AddLineAtTextboxLog(result);
                 }
 
                 foreach (var confUnit in tmpConfigFull?.Config)
@@ -591,8 +592,8 @@ namespace FlexibleDBMS
 
                             //AddLineAtTextboxLog($"{Properties.Resources.SosSymbols}{Environment.NewLine}" + $"SQL connection:{Environment.NewLine}{connection.AsString()}");
                         }
-                         version = (tmpConf as Config).Version;
-                         timeStamp = (tmpConf as Config).LastModification;
+                        version = (tmpConf as Config).Version;
+                        timeStamp = (tmpConf as Config).LastModification;
 
                         exist = unit.ConfigDictionary.TryGetValue(nameof(ToolStripMenuType.StandartQuery), out tmpConf);
                         if (exist)
@@ -648,8 +649,8 @@ namespace FlexibleDBMS
                 QueryStandartMenuStore = queryStandart,
                 QueryExtraMenuStore = queryExtra,
                 RecentMenuStore = recent,
-                Version= version,
-                TimeStamp=timeStamp
+                Version = version,
+                TimeStamp = timeStamp
             };
 
             //AddLineAtTextboxLog($"{Properties.Resources.DashedSymbols}{Properties.Resources.DashedSymbols}");
@@ -707,31 +708,31 @@ namespace FlexibleDBMS
 
         void PrintFullConfig(ConfigFull<ConfigAbstract> config)
         {
-            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
-            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
             AddLineAtTextboxLog();
             AddLineAtTextboxLog("-= currentConfig connectionSettings Names =-");
             AddLineAtTextboxLog(ReturnRecentConnectionNamesFromConfig(config).ToStringNewLine());
             AddLineAtTextboxLog();
-            AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
+            AddLineAtTextboxLog(Properties.Resources.SymbolsDashed);
             AddLineAtTextboxLog();
             AddLineAtTextboxLog("-= SQL connection =-");
             AddLineAtTextboxLog(currentSQLConnectionStore.GetCurrent()?.ToString());
             AddLineAtTextboxLog();
-            AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
+            AddLineAtTextboxLog(Properties.Resources.SymbolsDashed);
             AddLineAtTextboxLog("-= Loaded Full Config =-");
             IList<string> names = ReturnRecentConnectionNamesFromConfig(config);
             foreach (var name in names)
             {
                 AddLineAtTextboxLog();
-                AddLineAtTextboxLog(Properties.Resources.SosSymbols);
+                AddLineAtTextboxLog(Properties.Resources.SymbolsSos);
                 AddLineAtTextboxLog($"-= {name} =-");
                 PrintSelectedConfigConnection(config, name);
             }
 
             AddLineAtTextboxLog();
-            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
-            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
 
             AddLineAtTextboxLog();
         }
@@ -748,13 +749,13 @@ namespace FlexibleDBMS
         {
             ConfigUnitStore selectedConfig = GetConfigUnitStoreFromFullConfigByName(fullConfig, selectedConfigName);
 
-            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
             AddLineAtTextboxLog("-= SQL Connection Settings =-");
             AddLineAtTextboxLog($"ver. {selectedConfig?.Version} {selectedConfig?.TimeStamp.ToString()}");
             AddLineAtTextboxLog();
             AddLineAtTextboxLog(selectedConfig?.SQLConnection?.ToString());
             AddLineAtTextboxLog();
-            AddLineAtTextboxLog(Properties.Resources.SosSymbols);
+            AddLineAtTextboxLog(Properties.Resources.SymbolsSos);
 
             AddLineAtTextboxLog("-= Query Standart =-");
             IList<ToolStripMenuItem> list = selectedConfig?.QueryStandartMenuStore?.GetAllItems();
@@ -762,7 +763,7 @@ namespace FlexibleDBMS
                 foreach (var m in list)
                 { AddLineAtTextboxLog($"{m?.Text}: {m?.Tag}"); }
             AddLineAtTextboxLog();
-            AddLineAtTextboxLog(Properties.Resources.SosSymbols);
+            AddLineAtTextboxLog(Properties.Resources.SymbolsSos);
 
             AddLineAtTextboxLog("-= Query Extra =-");
             list = selectedConfig?.QueryExtraMenuStore?.GetAllItems();
@@ -770,17 +771,24 @@ namespace FlexibleDBMS
                 foreach (var m in list)
                 { AddLineAtTextboxLog($"{m?.Text}: {m?.Tag}"); }
             AddLineAtTextboxLog();
-            AddLineAtTextboxLog($"{Properties.Resources.EqualSymbols}{Properties.Resources.EqualSymbols}");
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
             AddLineAtTextboxLog();
         }
 
 
         void WriteFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            WriteConfig();
+            string filePath;
+            using (SaveFileDialog sfd = new SaveFileDialog())
+            {
+                filePath = sfd.SaveFileDialogReturnPath($"{CommonConst.AppName}", Properties.Resources.DialogCfgFile,
+                    "Укажите месторасположение и имя файла:");
+            }
+
+            WriteConfig(filePath ?? CommonConst.AppCfgFilePath);
         }
 
-        void WriteConfig()
+        void WriteConfig(string fileName)
         {
             var t = Task.Run(() =>
             MakeCurrentFullConfig(Configuration.Get, currentSQLConnectionStore.GetCurrent()));
@@ -788,17 +796,17 @@ namespace FlexibleDBMS
             {
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
-                    WriteCfgInFile(Configuration.Get);
+                    WriteCfgInFile(loadedExternalConfig ?? Configuration.Get, fileName);
                 }
             });
         }
 
-        void WriteCfgInFile(ConfigFull<ConfigAbstract> config)
+        void WriteCfgInFile(ConfigFull<ConfigAbstract> config, string fileName)
         {
             IWriterable writer = new FileWriter();
             // (writer as FileWriter).EvntInfoMessage -= AddLineAtTextboxLog;
             (writer as FileWriter).EvntInfoMessage += AddLineAtTextboxLog;
-            writer.Write(CommonConst.AppCfgFilePath, config);
+            writer.Write(fileName, config);
             //  (writer as FileWriter).EvntInfoMessage -= AddLineAtTextboxLog;
         }
         #endregion
@@ -984,14 +992,36 @@ namespace FlexibleDBMS
 
         void ApplySelectedConfig(string text)
         {
-            DialogResult result = MessageBox.Show("Применить выбранную конфигурацию в систему?",$"Применить {text}:",MessageBoxButtons.YesNo,MessageBoxIcon.Question);
-            if (result==DialogResult.OK)
+            DialogResult dialog = MessageBox.Show("Применить выбранную конфигурацию в систему?", $"Применить {text}:", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dialog == DialogResult.OK)
             {
                 ConfigAbstract selectedConfig = loadedExternalConfig.GetUnit(text);
                 ConfigFull<ConfigAbstract> tmpConfig = Configuration.Get;
                 tmpConfig.Add(selectedConfig);
                 Configuration.Set(tmpConfig);
                 recentStore.Set(tmpConfig?.GetUnitConfigNames()?.ToToolStripMenuItemList());
+
+                statusInfoMainText.SetTempText($"В конфигурацию добавлено '{text}' ver. '{(selectedConfig as Config).Version}' от '{(selectedConfig as Config).LastModification}'");
+            }
+            else
+            {
+                statusInfoMainText.SetTempText($"Конфигурация не изменилась. Запросов '{Configuration.Get.GetUnitConfigNames().Count}' - " +
+                    $"ver. '{Configuration.Get.Version}' от '{Configuration.Get.LastModification}'");
+            }
+        }
+
+        private void ApplyLoadedConfigToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult dialog = MessageBox.Show("Заменить конфигурацию системы на загруженную?", $"Заменить на {loadedExternalConfig.Version} от  {loadedExternalConfig.LastModification}:", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dialog == DialogResult.OK)
+            {
+                Configuration.Set(loadedExternalConfig);
+
+                statusInfoMainText.SetTempText($"Заменена конфигурация на ver. '{loadedExternalConfig.Version}' от '{loadedExternalConfig.LastModification}'");
+            }
+            else
+            {
+                statusInfoMainText.SetTempText($"Загруженная конфигурация проигнорирована.");
             }
         }
 
@@ -1167,9 +1197,11 @@ namespace FlexibleDBMS
 
 
             writeConfigMenuItem.Text = "Записать конфигурацию";
-            writeConfigMenuItem.ToolTipText = "Записать конфигурацию в файл на диске";
+            writeConfigMenuItem.ToolTipText = "Сохранить конфигурацию в файл на диске";
             writeConfigMenuItem.Click += new EventHandler(WriteFileToolStripMenuItem_Click);
 
+            applyLoadedConfigToolStripMenuItem.Text = "Заменить всю конфигурацию на загруженную";
+            applyLoadedConfigToolStripMenuItem.Click += new EventHandler(ApplyLoadedConfigToolStripMenuItem_Click);
 
             updateToolStripMenuItem.Text = "Обновление приложения";
             updateToolStripMenuItem.ToolTipText = "Работа с обновлениями приложения - подготовка, деплой, получение";
@@ -1195,6 +1227,7 @@ namespace FlexibleDBMS
                 { (m as ToolStripItem).MouseHover += new EventHandler(ToolStripMenuItem_MouseHover); }
             }
         }
+
         #endregion
 
         ///-////-/////-//////-///////////////////////////////////////////
@@ -1520,15 +1553,40 @@ namespace FlexibleDBMS
             dgv.Enabled = false;
             mainMenu.Enabled = false;
             txtBodyQuery.Enabled = false;
+            string report = txtbNameQuery.Text.Trim();
+            string reportBody = txtBodyQuery.Text.Trim();
+            int countWordsInQuery = reportBody.Split(' ').Length;
+            string filePath;
+            if (countWordsInQuery < 4)
+            {
+                if (string.IsNullOrWhiteSpace(reportBody))
+                    filePath = $"{report}";
+                else
+                    filePath = $"{report}_{reportBody}";
+            }
+            else
+            {
+                filePath = $"{CommonConst.appFileVersionInfo.ProductName}";
 
-            await WriteDataTableInTableExcel(dtForShow);
+                if (!string.IsNullOrWhiteSpace(report))
+                { filePath += $"_{report}"; }
+            }
+
+
+            using (SaveFileDialog sfd = new SaveFileDialog())
+            {
+                filePath = sfd.SaveFileDialogReturnPath(filePath, Properties.Resources.DialogExcelFile,
+                    "Укажите месторасположение и имя файла, если необходимо:");
+            }
+
+            await WriteDataTableInTableExcel(dtForShow, filePath);
 
             txtBodyQuery.Enabled = true;
             mainMenu.Enabled = true;
             dgv.Enabled = true;
         }
 
-        private async Task WriteDataTableInTableExcel(DataTable source)
+        private async Task WriteDataTableInTableExcel(DataTable source, string fullFileName)
         {
             if (source != null || source?.Columns?.Count > 0 || source?.Rows?.Count > 0)
             {
@@ -1539,26 +1597,19 @@ namespace FlexibleDBMS
                 //muliplier of skipping millions
                 int muliplier = (int)Math.Ceiling((decimal)source.Rows.Count / (decimal)1000000);
 
-                string fileName;
+                string fileName = string.Empty; ;
                 FileInfo fi;
                 DataTable dtTemp;
 
                 for (int part = 0; part < muliplier; part++)
                 {
-                    if (countWordsInQuery < 4)
-                    {
-                        if (string.IsNullOrWhiteSpace(reportBody))
-                            fileName = $"{report}";
-                        else
-                            fileName = $"{report}_{reportBody}";
-                    }
-                    else
-                    {
-                        fileName = $"{CommonConst.appFileVersionInfo.ProductName}";
 
-                        if (!string.IsNullOrWhiteSpace(report))
-                        { fileName += $"_{report}"; }
+
+                    if (!string.IsNullOrWhiteSpace(fullFileName))
+                    {
+                        fileName = fullFileName;
                     }
+
 
                     if (muliplier > 1)
                     { fileName += $"_{part}"; }
@@ -1611,7 +1662,7 @@ namespace FlexibleDBMS
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             MakeCurrentFullConfig(Configuration.Get, currentSQLConnectionStore.GetCurrent());
-            WriteCfgInFile(Configuration.Get);
+            WriteCfgInFile(Configuration.Get, CommonConst.AppCfgFilePath);
 
             ApplicationQuit();
         }
@@ -1634,7 +1685,7 @@ namespace FlexibleDBMS
             statusInfoMainText.EvntSetText -= StatusInfoMainText_SetTemporaryText;
             logger.Info("");
             logger.Info("");
-            logger.Info($"{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}");
+            logger.Info($"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
 
 
             dtForShow?.Dispose();
@@ -1724,7 +1775,7 @@ namespace FlexibleDBMS
         {
             if (e.KeyChar == (char)13)//если нажата Enter
             {
-                AddLineAtTextboxLog(Properties.Resources.DashedSymbols);
+                AddLineAtTextboxLog(Properties.Resources.SymbolsDashed);
 
                 string query = (sender as TextBox).Text.Trim();
 

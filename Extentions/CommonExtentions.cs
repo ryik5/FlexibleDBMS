@@ -173,6 +173,16 @@ namespace FlexibleDBMS
 
             return filePath;
         }
+        public static string SaveFileDialogReturnPath(this SaveFileDialog sfd,string fileName, string fileFilter, string title) //Return its name 
+        {
+            sfd.FileName = fileName??@"";
+            sfd.Title = title;
+            sfd.Filter = fileFilter;
+            sfd.ShowDialog();
+            string filePath = sfd.FileName;
+
+            return filePath;
+        }
 
         public static void AppendLine(this TextBox source, string value = "\r\n")
         {

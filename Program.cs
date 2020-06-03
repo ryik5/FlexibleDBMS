@@ -22,7 +22,7 @@ namespace FlexibleDBMS
             GetCustomAttributes(typeof(System.Runtime.InteropServices.GuidAttribute), false).GetValue(0)).Value;
 
             logger.Info("");
-            logger.Info($"{Properties.Resources.SosSlashSymbols}{Properties.Resources.SosSlashSymbols}");
+            logger.Info($"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
             logger.Info("");
             logger.Info("");
             logger.Info("-= Загрузка ПО =-");
