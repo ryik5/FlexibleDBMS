@@ -66,8 +66,10 @@ namespace FlexibleDBMS
         ApplicationUpdater Updater;
 
 
+
         ///-////-/////-//////-///////////////////////////////////////////
         ///-////-/////-//////-///////////////////////////////////////////
+
 
         public MainForm()
         {
@@ -161,7 +163,7 @@ namespace FlexibleDBMS
         /// </summary>
         /// <param name="newConfig">Configuration.Get</param>
         /// <param name="newConnection">currentSQLConnectionStore?.GetCurrent()</param>
-        public void MakeCurrentFullConfig(ConfigFull<ConfigAbstract> newConfig = null, ISQLConnectionSettings newConnection = null)
+        void MakeCurrentFullConfig(ConfigFull<ConfigAbstract> newConfig = null, ISQLConnectionSettings newConnection = null)
         {
             ConfigFull<ConfigAbstract> configFull = newConfig;
 
@@ -247,12 +249,12 @@ namespace FlexibleDBMS
         }
 
         #region SQL Connection was Changed
-        private void CurrentSQLConnectionStore_EvntConfigChanged(object sender, BoolEventArgs args)
+        void CurrentSQLConnectionStore_EvntConfigChanged(object sender, BoolEventArgs args)
         {
             _ = CurrentSQLConnectionStore_ConfigChanged();
         }
 
-        private async Task CurrentSQLConnectionStore_ConfigChanged()
+        async Task CurrentSQLConnectionStore_ConfigChanged()
         {
             ISQLConnectionSettings oldSettings = currentSQLConnectionStore?.GetPrevious();
             ISQLConnectionSettings newSettings = currentSQLConnectionStore?.GetCurrent();
@@ -344,7 +346,7 @@ namespace FlexibleDBMS
             return Task.Run(() => tableStore.Set(SQLSelector.GetTables(newSettings).GetToolStipMenuItemList()), token);
         }
 
-        private void DBOperations_EvntInfoMessage(object sender, TextEventArgs e)
+        void DBOperations_EvntInfoMessage(object sender, TextEventArgs e)
         {
             AddLineAtTextboxLog(e.Message);
         }
@@ -356,7 +358,7 @@ namespace FlexibleDBMS
         /// </summary>
         /// <param name="sender">StatusInfoMain</param>
         /// <param name="e">true - временно, false - постоянно</param>
-        private async void StatusInfoMainText_SetTemporaryText(object sender, TextEventArgs e)
+        async void StatusInfoMainText_SetTemporaryText(object sender, TextEventArgs e)
         {
             logger.Trace("StatusInfoMainText: " + e.Message);
             AddLineAtTextboxLog(e?.Message);
@@ -366,10 +368,10 @@ namespace FlexibleDBMS
             StatusInfoMain.Text = statusInfoMainText.GetConstText;
         }
 
-        private void TablesStore_EvntCollectionChanged(object sender, BoolEventArgs e)
+        void TablesStore_EvntCollectionChanged(object sender, BoolEventArgs e)
         { StatusTables_anotherThreadAccess(); }
 
-        private void StatusTables_anotherThreadAccess() //add string into  from other threads
+        void StatusTables_anotherThreadAccess() //add string into  from other threads
         {
             if (InvokeRequired)
                 Invoke(new MethodInvoker(delegate
@@ -407,7 +409,7 @@ namespace FlexibleDBMS
 
 
         #region Update Application
-        private void PrepareUpdateMenuItem_Click(object sender, EventArgs e)
+        void PrepareUpdateMenuItem_Click(object sender, EventArgs e)
         {
             UserAD user = null;
             string serverURL = null;
@@ -415,12 +417,12 @@ namespace FlexibleDBMS
             Updater.PrepareUpdateFiles();
         }
 
-        private void CheckUpdateMenuItem_Click(object sender, EventArgs e)
+        void CheckUpdateMenuItem_Click(object sender, EventArgs e)
         {
             CheckUpdate();
         }
 
-        private void CheckUpdate()
+        void CheckUpdate()
         {
             UserAD user = new UserAD();
             //настройки имени и пароля вставить в конфиг - файл            
@@ -447,7 +449,7 @@ namespace FlexibleDBMS
         /// </summary>
         /// <param name="minutes">check period of a new Update</param>
         /// <returns></returns>
-        private Task CheckUpdatePeriodicaly(int minutes = 1)
+        Task CheckUpdatePeriodicaly(int minutes = 1)
         {
             UserAD user = new UserAD();
             string serverURL = null;
@@ -455,12 +457,12 @@ namespace FlexibleDBMS
             return Updater.CheckUpdatePeriodicaly(minutes);
         }
 
-        private void UploadUpdateMenuItem_Click(object sender, EventArgs e)
+        void UploadUpdateMenuItem_Click(object sender, EventArgs e)
         {
             UploadUpdate();
         }
 
-        private void UploadUpdate()
+        void UploadUpdate()
         {
             UserAD user = new UserAD();
             //настройки имени и пароля вставить в конфиг - файл
@@ -494,10 +496,11 @@ namespace FlexibleDBMS
 
         ///-////-/////-//////-///////////////////////////////////////////
 
+
         #region Configuration Unit Block
         ConfigFull<ConfigAbstract> loadedExternalConfig;
 
-        public ConfigFull<ConfigAbstract> LoadConfig(string pathToConfig)
+        ConfigFull<ConfigAbstract> LoadConfig(string pathToConfig)
         {
             ConfigFull<ConfigAbstract> tmpConfig = null;
             FileReader readerConfig = new FileReader();
@@ -811,25 +814,27 @@ namespace FlexibleDBMS
         }
         #endregion
 
+
         ///-////-/////-//////-///////////////////////////////////////////
 
+
         #region Dynamical Menues - RecentConnection, QueryStandart, QueryExtra
-        private void QueryExtraStore_EvntCollectionChanged(object sender, BoolEventArgs e)
+        void QueryExtraStore_EvntCollectionChanged(object sender, BoolEventArgs e)
         { MakeMenuItemDropDownFromMenuStore(queryExtraMenu, queryExtraStore, ToolStripMenuType.ExtraQuery); }
 
-        private void QueryStandartStore_EvntCollectionChanged(object sender, BoolEventArgs e)
+        void QueryStandartStore_EvntCollectionChanged(object sender, BoolEventArgs e)
         { MakeMenuItemDropDownFromMenuStore(queryStandartMenu, queryStandartStore, ToolStripMenuType.StandartQuery); }
 
-        private void RecentStore_EvntCollectionChanged(object sender, BoolEventArgs e)
+        void RecentStore_EvntCollectionChanged(object sender, BoolEventArgs e)
         { MakeMenuItemDropDownFromMenuStore(changeBaseMenuItem, recentStore, ToolStripMenuType.RecentConnection); }
 
-        private void MakeMenuItemDropDownFromMenuStore(ToolStripMenuItem target, MenuAbstractStore source, ToolStripMenuType menuType)
+        void MakeMenuItemDropDownFromMenuStore(ToolStripMenuItem target, MenuAbstractStore source, ToolStripMenuType menuType)
         {
             IList<ToolStripMenuItem> menuItems = source.GetAllItems();
             AddToMenuItemDropDownItems(target, menuItems, menuType);
         }
 
-        private void AddToMenuItemDropDownItems(ToolStripMenuItem target, IList<ToolStripMenuItem> source, ToolStripMenuType menuType)
+        void AddToMenuItemDropDownItems(ToolStripMenuItem target, IList<ToolStripMenuItem> source, ToolStripMenuType menuType)
         {
             if (target != null && source?.ToArray()?.Count() > 0)
             {
@@ -880,7 +885,7 @@ namespace FlexibleDBMS
 
         //removeQueryMenuItem.Text = "Удалить отмеченные пользовательские запросы";
         //removeQueryMenuItem.ToolTipText = "Отметить можно только запросы созданные на данном ПК (подменю 'Пользовательские')";
-        private void ExtraQueryMenuItem_MouseDown(object sender, MouseEventArgs e)
+        void ExtraQueryMenuItem_MouseDown(object sender, MouseEventArgs e)
         {
             ToolStripMenuItem toolStrip = sender as ToolStripMenuItem;
             string text = toolStrip.Text;
@@ -903,7 +908,7 @@ namespace FlexibleDBMS
                     }
             }
         }
-        private void StandartQueryMenuItem_MouseDown(object sender, MouseEventArgs e)
+        void StandartQueryMenuItem_MouseDown(object sender, MouseEventArgs e)
         {
             ToolStripMenuItem toolStrip = sender as ToolStripMenuItem;
             string text = toolStrip.Text;
@@ -925,7 +930,7 @@ namespace FlexibleDBMS
                     }
             }
         }
-        private void RecentConnectionMenuItem_MouseDown(object sender, MouseEventArgs e)
+        void RecentConnectionMenuItem_MouseDown(object sender, MouseEventArgs e)
         {
             ToolStripMenuItem toolStrip = sender as ToolStripMenuItem;
             string text = toolStrip.Text;
@@ -965,7 +970,7 @@ namespace FlexibleDBMS
                     }
             }
         }
-        private void SelectedConfigMenuItem_MouseDown(object sender, MouseEventArgs e)
+        void SelectedConfigMenuItem_MouseDown(object sender, MouseEventArgs e)
         {
             ToolStripMenuItem toolStrip = sender as ToolStripMenuItem;
             string text = toolStrip.Text;
@@ -1010,7 +1015,7 @@ namespace FlexibleDBMS
             }
         }
 
-        private void ApplyLoadedConfigToolStripMenuItem_Click(object sender, EventArgs e)
+        void ApplyLoadedConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DialogResult dialog = MessageBox.Show("Заменить конфигурацию системы на загруженную?", $"Заменить на {loadedExternalConfig.Version} от  {loadedExternalConfig.LastModification}:", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (dialog == DialogResult.OK)
@@ -1025,7 +1030,7 @@ namespace FlexibleDBMS
             }
         }
 
-        private string MenuItemToQuery(ToolStripMenuItem item)
+        string MenuItemToQuery(ToolStripMenuItem item)
         {
             string queryName = item?.Text?.ToString();
             string queryBody = item?.Tag?.ToString();
@@ -1042,13 +1047,15 @@ namespace FlexibleDBMS
         }
         #endregion
 
+
         ///-////-/////-//////-///////////////////////////////////////////
+
 
         #region Start Application settings
         /// <summary>
         /// StatusStrip
         /// </summary>
-        private void TurnStatusLabelMenues()
+        void TurnStatusLabelMenues()
         {
             statusInfoMainText.SetConstText("");
 
@@ -1066,7 +1073,7 @@ namespace FlexibleDBMS
             StatusTables.MouseUp += StatusSplitButton1_Click;
         }
 
-        private void StatusSplitButton1_Click(object sender, MouseEventArgs e)
+        void StatusSplitButton1_Click(object sender, MouseEventArgs e)
         {
             string text = null;
             if (sender is ToolStripMenuItem)
@@ -1094,7 +1101,7 @@ namespace FlexibleDBMS
             }
         }
 
-        private void TurnAplication()
+        void TurnAplication()
         {
             //Main Application
             bmpLogo = Properties.Resources.LogoRYIK;
@@ -1140,7 +1147,7 @@ namespace FlexibleDBMS
             dgv.BringToFront();
         }
 
-        private void TurnUpToolStripMenuItems()
+        void TurnUpToolStripMenuItems()
         {
             #region Main
             mainMenu.Text = "Главное";
@@ -1227,10 +1234,11 @@ namespace FlexibleDBMS
                 { (m as ToolStripItem).MouseHover += new EventHandler(ToolStripMenuItem_MouseHover); }
             }
         }
-
         #endregion
 
+
         ///-////-/////-//////-///////////////////////////////////////////
+
 
         #region AdministratorForm
         /// <summary>
@@ -1238,12 +1246,12 @@ namespace FlexibleDBMS
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>        
-        private void administratorMenu_Click(object sender, EventArgs e)
+        void administratorMenu_Click(object sender, EventArgs e)
         {
             RunAdministratorForm();
         }
 
-        private void RunAdministratorForm()
+        void RunAdministratorForm()
         {
             ISQLConnectionSettings tmpConnection = currentSQLConnectionStore?.GetCurrent();
 
@@ -1264,7 +1272,7 @@ namespace FlexibleDBMS
             Hide();
         }
 
-        private void AdministratorForm_FormClosing(object sender, FormClosingEventArgs e)
+        void AdministratorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             ISQLConnectionSettings tmp = administratorForm?.currentSQLConnectionStore?.GetCurrent();
             //Set connection, DBConnection, toolstrip and Config
@@ -1292,7 +1300,9 @@ namespace FlexibleDBMS
         }
         #endregion
 
+
         ///-////-/////-//////-///////////////////////////////////////////
+
 
         #region Filters
         /// <summary>
@@ -1300,7 +1310,7 @@ namespace FlexibleDBMS
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void UpdateFiltersMenuItem_Click(object sender, EventArgs e)
+        async void UpdateFiltersMenuItem_Click(object sender, EventArgs e)
         {
             statusInfoMainText.SetTempText("Построение фильтров...");
 
@@ -1328,7 +1338,7 @@ namespace FlexibleDBMS
             statusInfoMainText.SetTempText("Построение фильтров завершено.");
         }
 
-        private void StatusInfoFilter_Click(object sender, EventArgs e)
+        void StatusInfoFilter_Click(object sender, EventArgs e)
         {
             ToolStripSplitButton f;
 
@@ -1380,7 +1390,7 @@ namespace FlexibleDBMS
             }
         }
 
-        private async Task BuildFilters()
+        async Task BuildFilters()
         {
             AddLineAtTextboxLog("Выполняется чтение базы и формирование библиотеки уникальных слов.");
             AddLineAtTextboxLog("Фильтры строятся на основе данных алиасов колонок:");
@@ -1392,7 +1402,7 @@ namespace FlexibleDBMS
             AddLineAtTextboxLog("Построение фильтров завершено");
         }
 
-        private void BuildFiltersMenues(IModelEntityDB<DBColumnModel> filtersTable)
+        void BuildFiltersMenues(IModelEntityDB<DBColumnModel> filtersTable)
         {
             MenuFiltersMaker menuMaker;
             ToolStripSplitButton filterSplitButton = null;
@@ -1427,7 +1437,7 @@ namespace FlexibleDBMS
         }
 
         //выбранный пункт из ДропДаунМеню сделать названием фильтра
-        private void Menu_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        void Menu_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             string text = (e.ClickedItem.Text).Split('(')[0].Trim();
             (sender as ToolStripSplitButton).Text = text;
@@ -1450,6 +1460,7 @@ namespace FlexibleDBMS
         }
         #endregion
 
+
         ///-////-/////-//////-///////////////////////////////////////////
 
 
@@ -1460,7 +1471,7 @@ namespace FlexibleDBMS
         /// <summary>
         /// Запомнить текущее состояние контролов
         /// </summary>
-        private void SaveControlState()
+        void SaveControlState()
         {
             bool[] enabledControls = new bool[]
                        {
@@ -1482,7 +1493,7 @@ namespace FlexibleDBMS
         /// <summary>
         /// Заблокировать контролы
         /// </summary>
-        private void BlockControl()
+        void BlockControl()
         {
             mainMenu.Enabled = false;
             managerMenu.Enabled = false;
@@ -1497,7 +1508,7 @@ namespace FlexibleDBMS
         /// <summary>
         /// Восстановить предыдущее состояние контролов
         /// </summary>
-        private void RestoreControlState()
+        void RestoreControlState()
         {
             state?.RestoreStateq(controlState?.History?.Pop());
 
@@ -1512,8 +1523,7 @@ namespace FlexibleDBMS
             Task.Delay(500).Wait();
         }
 
-
-        private async Task GetData(string query)
+        async Task GetData(string query)
         {
             dgv.Columns.Clear();
 
@@ -1544,10 +1554,12 @@ namespace FlexibleDBMS
         }
         #endregion
 
+
         ///-////-/////-//////-///////////////////////////////////////////
 
+
         #region Export to Excel
-        private async void ExportMenuItem_Click(object sender, EventArgs e)
+        async void ExportMenuItem_Click(object sender, EventArgs e)
         {
             statusInfoMainText.SetTempText($"Идет генерация отчетов...");
             dgv.Enabled = false;
@@ -1586,7 +1598,7 @@ namespace FlexibleDBMS
             dgv.Enabled = true;
         }
 
-        private async Task WriteDataTableInTableExcel(DataTable source, string fullFileName)
+        async Task WriteDataTableInTableExcel(DataTable source, string fullFileName)
         {
             if (source != null || source?.Columns?.Count > 0 || source?.Rows?.Count > 0)
             {
@@ -1634,7 +1646,7 @@ namespace FlexibleDBMS
             }
         }
 
-        private async Task ExportToFile(FileInfo fi, DataTable dtTemp, string nameSheet)
+        async Task ExportToFile(FileInfo fi, DataTable dtTemp, string nameSheet)
         {
             try
             {
@@ -1651,15 +1663,17 @@ namespace FlexibleDBMS
         }
         #endregion
 
+
         ///-////-/////-//////-///////////////////////////////////////////
 
+
         #region Quit Menu
-        private void ApplicationRestart(object sender, EventArgs e)
+        void ApplicationRestart(object sender, EventArgs e)
         {
             Application.Restart();
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             MakeCurrentFullConfig(Configuration.Get, currentSQLConnectionStore.GetCurrent());
             WriteCfgInFile(Configuration.Get, CommonConst.AppCfgFilePath);
@@ -1667,12 +1681,12 @@ namespace FlexibleDBMS
             ApplicationQuit();
         }
 
-        private void ApplicationExit(object sender, EventArgs e)
+        void ApplicationExit(object sender, EventArgs e)
         {
             ApplicationQuit();
         }
 
-        private void ApplicationQuit()
+        void ApplicationQuit()
         {
             Text = @"Closing application...";
 
@@ -1702,17 +1716,21 @@ namespace FlexibleDBMS
         }
         #endregion
 
+
         ///-////-/////-//////-///////////////////////////////////////////
 
+
         #region Help Menu
-        private void HelpAbout(object sender, EventArgs e)
+        void HelpAbout(object sender, EventArgs e)
         {
             helpForm = new HelpForm();
             helpForm.Show();
         }
         #endregion
 
+
         ///-////-/////-//////-///////////////////////////////////////////
+
 
         #region Control Behavior
         /// <summary>
@@ -1733,7 +1751,7 @@ namespace FlexibleDBMS
             PresenterTabCotrol.SelectedTab = tabPageTable;
         }
 
-        private void ToolStripMenuItem_MouseHover(object sender, EventArgs e)
+        void ToolStripMenuItem_MouseHover(object sender, EventArgs e)
         {
             string text = null;
             if (sender is ToolStripMenuItem)
@@ -1745,10 +1763,10 @@ namespace FlexibleDBMS
                 statusInfoMainText.SetTempText(text);
         }
 
-        private void AddLineAtTextboxLog(object sender, TextEventArgs text)
+        void AddLineAtTextboxLog(object sender, TextEventArgs text)
         { AddLineAtTextboxLog(text?.Message); }
 
-        private void AddLineAtTextboxLog(string text = null)
+        void AddLineAtTextboxLog(string text = null)
         {
             if (OperatingModes == AppModes.Admin)
             {
@@ -1761,7 +1779,7 @@ namespace FlexibleDBMS
             }
         }
 
-        private void SetToolTipFromTextBox(object sender, EventArgs e)
+        void SetToolTipFromTextBox(object sender, EventArgs e)
         {
             string text = (sender as TextBox).Text;
             if (!(string.IsNullOrEmpty(text) || string.IsNullOrWhiteSpace(text)))
@@ -1771,7 +1789,7 @@ namespace FlexibleDBMS
             }
         }
 
-        private void TxtbQuery_KeyPress(object sender, KeyPressEventArgs e)
+        void TxtbQuery_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)13)//если нажата Enter
             {
@@ -1837,20 +1855,11 @@ namespace FlexibleDBMS
                 }
             }
         }
-
-        private void DgvDataSourceAccessFromOtherThread(DataTable dt)
-        {
-            if (InvokeRequired)
-                Invoke(new MethodInvoker(delegate
-                {
-                    dgv.DataSource = dt;
-                }));
-            else
-                dgv.DataSource = dt;
-        }
-
         #endregion
+
+
         ///-////-/////-//////-///////////////////////////////////////////
+
 
         #region Start Environment Application
         public void CheckEnvironment()
@@ -1893,8 +1902,6 @@ namespace FlexibleDBMS
 
             arguments.EvntInfoMessage -= AddLineAtTextboxLog;
         }
-
-
         #endregion
 
         ///-////-/////-//////-///////////////////////////////////////////
