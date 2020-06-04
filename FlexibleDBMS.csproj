@@ -115,6 +115,7 @@
     <Compile Include="Models\ConfigAbstract.cs" />
     <Compile Include="Models\ConfigFull.cs" />
     <Compile Include="Models\ConfigStore.cs" />
+    <Compile Include="Models\DataTableStore.cs" />
     <Compile Include="Models\IModels.cs" />
     <Compile Include="DBTools\SQLiteDbAbstract.cs" />
     <Compile Include="Enums\SQLProvider.cs" />
@@ -142,6 +143,7 @@
     <Compile Include="Enums\AppModes.cs" />
     <Compile Include="BL\CommandLineArguments.cs" />
     <Compile Include="DBTools\SQLConnectionStore.cs" />
+    <Compile Include="Models\ModelCommonStringStore.cs" />
     <Compile Include="Models\TextEventArgs.cs" />
     <Compile Include="BL\EppExtension.cs" />
     <Compile Include="BL\MenuFiltersMaker.cs" />

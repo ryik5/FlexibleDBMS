@@ -405,7 +405,7 @@ namespace FlexibleDBMS
                 if (isImportedDB)
                 {
                     DbTable db = schemaDB.Tables.Values.First(x => x.TableName.Equals("MainData"));
-
+                    var cancellationToken = new System.Threading.CancellationTokenSource(10000).Token;
                     if (columns?.Count > 0)
                     {
                         columnsDelete = columns;
@@ -417,8 +417,8 @@ namespace FlexibleDBMS
                         {
                             queryCheck = $"SELECT {column.ColumnName} FROM {db.TableName} WHERE LENGTH(TRIM({column.ColumnName})) > 0  LIMIT 10;";
                             AddLineAtTextBoxResultShow(queryCheck);
-
-                            dtForStore = await dBOperations.GetDataTable(queryCheck);
+                            cancellationToken = new System.Threading.CancellationTokenSource(10000).Token;
+                            dtForStore = (dBOperations as SQLiteModelDBOperations).GetTable( queryCheck);
 
                             if (dtForStore.Rows.Count > 0) { columnsLeave.Add($"{column.ColumnName}"); }
                             else { columnsDelete.Add($"{column.ColumnName}"); }

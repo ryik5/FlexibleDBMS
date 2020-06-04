@@ -33,6 +33,7 @@ namespace FlexibleDBMS
             return sqlConnector;
         }
 
+
         public static ModelCommonStringStore GetTables(ISQLConnectionSettings tmpSettings)
         {
             ModelCommonStringStore models = null;
@@ -60,6 +61,34 @@ namespace FlexibleDBMS
 
             return models;
         }
+        static ModelCommonStringStore MS_SQL_Tables(ISQLConnectionSettings tmpSettings)
+        {
+            string query = $"SELECT * FROM sys.objects WHERE type in (N'U')";
+
+            ModelCommonStringStore models = GetListForModelStore(new MsSqlUtils(tmpSettings), query);
+
+            return models;
+        }
+
+        static ModelCommonStringStore My_SQL_Tables(ISQLConnectionSettings tmpSettings)
+        {
+            string query = $"SHOW TABLES FROM {tmpSettings.Database}";
+
+            ModelCommonStringStore models = GetListForModelStore(new MySQLUtils(tmpSettings), query);
+
+            return models;
+        }
+
+        static ModelCommonStringStore SQLite_Tables(ISQLConnectionSettings tmpSettings)
+        {
+            string query = $"SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1";
+
+            ModelCommonStringStore models = GetListForModelStore(new SQLiteModelDBOperations(tmpSettings), query);
+
+            return models;
+        }
+
+
 
         public static ModelCommonStringStore GetColumns(ISQLConnectionSettings tmpSettings)
         {
@@ -85,65 +114,6 @@ namespace FlexibleDBMS
                 default:
                     break;
             }
-
-            return models;
-        }
-
-        public static ModelCommonStringStore GetDataSample(ISQLConnectionSettings tmpSettings, string column)
-        {
-            ModelCommonStringStore models = null;
-
-            string query = $"SELECT DISTINCT {column} FROM {tmpSettings.Table} WHERE LENGTH(TRIM({column})) > 0 LIMIT 20;"; //GROUP BY {column} 
-
-            switch (tmpSettings.ProviderName)
-            {
-                case SQLProvider.SQLite:
-                    {
-                        models = GetListForModelStore(new SQLiteModelDBOperations(tmpSettings), query);
-                        break;
-                    }
-                case SQLProvider.My_SQL:
-                    {
-                        models = GetListForModelStore(new MySQLUtils(tmpSettings), query);
-                        break;
-                    }
-                case SQLProvider.MS_SQL:
-                    {
-                        query = $"SELECT TOP 20 {column} FROM {tmpSettings.Table} WHERE LEN({column}) > 0 GROUP BY {column};";
-                        models = GetListForModelStore(new MsSqlUtils(tmpSettings), query);
-                        break;
-                    }
-                default:
-                    break;
-            }
-
-            return models;
-        }
-        
-
-        static ModelCommonStringStore MS_SQL_Tables(ISQLConnectionSettings tmpSettings)
-        {
-            string query = $"SELECT * FROM sys.objects WHERE type in (N'U')";
-
-            ModelCommonStringStore models = GetListForModelStore(new MsSqlUtils(tmpSettings), query);
-
-            return models;
-        }
-
-        static ModelCommonStringStore My_SQL_Tables(ISQLConnectionSettings tmpSettings)
-        {
-            string query = $"SHOW TABLES FROM {tmpSettings.Database}";
-
-            ModelCommonStringStore models = GetListForModelStore(new MySQLUtils(tmpSettings), query);
-
-            return models;
-        }
-
-        static ModelCommonStringStore SQLite_Tables(ISQLConnectionSettings tmpSettings)
-        {
-            string query = $"SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1";
-
-            ModelCommonStringStore models = GetListForModelStore(new SQLiteModelDBOperations(tmpSettings), query);
 
             return models;
         }
@@ -177,6 +147,38 @@ namespace FlexibleDBMS
             return models;
         }
 
+
+
+        public static ModelCommonStringStore GetDataSample(ISQLConnectionSettings tmpSettings, string column)
+        {
+            ModelCommonStringStore models = null;
+
+            string query = $"SELECT DISTINCT {column} FROM {tmpSettings.Table} WHERE LENGTH(TRIM({column})) > 0 LIMIT 20;"; //GROUP BY {column} 
+
+            switch (tmpSettings.ProviderName)
+            {
+                case SQLProvider.SQLite:
+                    {
+                        models = GetListForModelStore(new SQLiteModelDBOperations(tmpSettings), query);
+                        break;
+                    }
+                case SQLProvider.My_SQL:
+                    {
+                        models = GetListForModelStore(new MySQLUtils(tmpSettings), query);
+                        break;
+                    }
+                case SQLProvider.MS_SQL:
+                    {
+                        query = $"SELECT TOP 20 {column} FROM {tmpSettings.Table} WHERE LEN({column}) > 0 GROUP BY {column};";
+                        models = GetListForModelStore(new MsSqlUtils(tmpSettings), query);
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            return models;
+        }
         static ModelCommonStringStore GetListForModelStore(SqlAbstractConnector sqlConnector, string query)
         {
             ModelCommonStringStore models = new ModelCommonStringStore();
@@ -199,6 +201,38 @@ namespace FlexibleDBMS
             catch (Exception err) { }
 
             return models;
+        }
+
+
+
+        public static DataTableStore GetDataTableStore(ISQLConnectionSettings tmpSettings, string query)
+        {
+            SqlAbstractConnector sqlConnector = SetConnector(tmpSettings);
+            sqlConnector.EvntInfoMessage += SqlConnector_EvntInfoMessage;
+
+            DataTableStore dataTableStore = GetDataTableStore(sqlConnector, query);
+
+            sqlConnector.EvntInfoMessage -= SqlConnector_EvntInfoMessage;
+            return dataTableStore;
+        }
+
+        static DataTableStore GetDataTableStore(SqlAbstractConnector sqlConnector, string query)
+        {
+            DataTableStore data = new DataTableStore();
+            try
+            {
+                using DataTable dt = sqlConnector.GetTable(query);
+                data.Set(dt);
+                dt?.Dispose();
+            }
+            catch (Exception err) { data.Errors = err.Message + " " + message; }
+
+            return data;
+        }
+        static string message { get; set; }
+        private static void SqlConnector_EvntInfoMessage(object sender, TextEventArgs e)
+        {
+            message = e.Message;
         }
     }
 }

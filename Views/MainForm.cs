@@ -50,7 +50,6 @@ namespace FlexibleDBMS
         DataTable dtForShow;  //datatable source of show
         DataTable dtForStore; //datatable store data
 
-        SqlAbstractConnector dBOperations;// = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
         ConfigStore Configuration;
         SQLConnectionStore currentSQLConnectionStore = null;
         IModelEntityDB<DBColumnModel> filtersTable = null; // меню фильтров в строке статуса
@@ -58,7 +57,7 @@ namespace FlexibleDBMS
         MenuAbstractStore recentStore;
         MenuAbstractStore queryExtraStore;
         MenuAbstractStore queryStandartStore;
-        MenuAbstractStore tableStore;
+        MenuAbstractStore tableNameStore;
         BindingList<string> lstColumn = new BindingList<string>();
 
         ItemFlipper statusInfoMainText;
@@ -83,8 +82,8 @@ namespace FlexibleDBMS
             recentStore = new MenuItemStore();
             queryExtraStore = new MenuItemStore();
             queryStandartStore = new MenuItemStore();
-            tableStore = new MenuItemStore();
-            (tableStore as MenuItemStore).EvntCollectionChanged += new MenuItemStore.ItemAddedInCollection<BoolEventArgs>(TablesStore_EvntCollectionChanged);
+            tableNameStore = new MenuItemStore();
+            (tableNameStore as MenuItemStore).EvntCollectionChanged += new MenuItemStore.ItemAddedInCollection<BoolEventArgs>(TablesStore_EvntCollectionChanged);
 
             statusInfoMainText = new ItemFlipper();
             statusInfoMainText.EvntSetText += new ItemFlipper.AddedItemInCollection<TextEventArgs>(StatusInfoMainText_SetTemporaryText);
@@ -288,8 +287,6 @@ namespace FlexibleDBMS
 
                 if (!(string.IsNullOrWhiteSpace(newSettings?.Database)))
                 {
-                    dBOperations = SQLSelector.SetConnector(newSettings);
-                    dBOperations.EvntInfoMessage += new SqlAbstractConnector.Message<TextEventArgs>(DBOperations_EvntInfoMessage);
 
                     if (oldSettings?.Database != newSettings?.Database)
                     {
@@ -311,14 +308,14 @@ namespace FlexibleDBMS
                         { await task; }
 
 
-                        if (tableStore?.GetAllItems()?.Count > 0)
+                        if (tableNameStore?.GetAllItems()?.Count > 0)
                         {
-                            AddLineAtTextboxLog($"Список таблиц содержит: {tableStore?.GetAllItems()?.Count} элемента(ов)");
+                            AddLineAtTextboxLog($"Список таблиц содержит: {tableNameStore?.GetAllItems()?.Count} элемента(ов)");
                             AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashed}{Properties.Resources.SymbolsDashed}");
                         }
                         else
                         {
-                            tableStore.Clear();
+                            tableNameStore.Clear();
                             AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
                             AddLineAtTextboxLog($"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
                             statusInfoMainText.SetTempText($"{Properties.Resources.SymbolsSosSlashBack}" +
@@ -343,12 +340,7 @@ namespace FlexibleDBMS
 
         Task SetTables(System.Threading.CancellationToken token, ISQLConnectionSettings newSettings)
         {
-            return Task.Run(() => tableStore.Set(SQLSelector.GetTables(newSettings).GetToolStipMenuItemList()), token);
-        }
-
-        void DBOperations_EvntInfoMessage(object sender, TextEventArgs e)
-        {
-            AddLineAtTextboxLog(e.Message);
+            return Task.Run(() => tableNameStore.Set(SQLSelector.GetTables(newSettings).GetToolStipMenuItemList()), token);
         }
         #endregion
 
@@ -381,8 +373,8 @@ namespace FlexibleDBMS
                     if (StatusTables.DropDownItems?.Count > 0)
                         StatusTables.DropDownItems.Clear();
 
-                    if (tableStore?.GetAllItems()?.Count > 0)
-                        StatusTables.DropDownItems.AddRange(tableStore.GetAllItems().ToArray());
+                    if (tableNameStore?.GetAllItems()?.Count > 0)
+                        StatusTables.DropDownItems.AddRange(tableNameStore.GetAllItems().ToArray());
 
                     StatusTables.DropDown.Refresh();
                     StatusTables.Text = "Таблицы";
@@ -395,8 +387,8 @@ namespace FlexibleDBMS
                 if (StatusTables.DropDownItems?.Count > 0)
                     StatusTables.DropDownItems.Clear();
 
-                if (tableStore?.GetAllItems()?.Count > 0)
-                    StatusTables.DropDownItems.AddRange(tableStore.GetAllItems().ToArray());
+                if (tableNameStore?.GetAllItems()?.Count > 0)
+                    StatusTables.DropDownItems.AddRange(tableNameStore.GetAllItems().ToArray());
 
                 StatusTables.DropDown.Refresh();
                 StatusTables.Text = "Таблицы";
@@ -1390,6 +1382,7 @@ namespace FlexibleDBMS
             }
         }
 
+        SqlAbstractConnector dBOperations;// = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
         async Task BuildFilters()
         {
             AddLineAtTextboxLog("Выполняется чтение базы и формирование библиотеки уникальных слов.");
@@ -1397,9 +1390,17 @@ namespace FlexibleDBMS
             AddLineAtTextboxLog(string.Join(", ", CommonConst.TRANSLATION.Values.ToArray()));
             AddLineAtTextboxLog();
 
+            dBOperations = SQLSelector.SetConnector(currentSQLConnectionStore?.GetCurrent());
+            dBOperations.EvntInfoMessage += new SqlAbstractConnector.Message<TextEventArgs>(DBOperations_EvntInfoMessage);
+
             await Task.Run(() => filtersTable = (dBOperations as SQLiteModelDBOperations).GetFilterList(CommonConst.TRANSLATION, "CarAndOwner"));
 
             AddLineAtTextboxLog("Построение фильтров завершено");
+        }
+
+        void DBOperations_EvntInfoMessage(object sender, TextEventArgs e)
+        {
+            AddLineAtTextboxLog(e.Message);
         }
 
         void BuildFiltersMenues(IModelEntityDB<DBColumnModel> filtersTable)
@@ -1523,35 +1524,76 @@ namespace FlexibleDBMS
             Task.Delay(500).Wait();
         }
 
+        /// <summary>
+        /// timeout of this task = 30 sec
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
         async Task GetData(string query)
         {
             dgv.Columns.Clear();
+            ISQLConnectionSettings newSettings = currentSQLConnectionStore?.GetCurrent();
 
-            string currentDb = currentSQLConnectionStore.GetCurrent().Database;
-            AddLineAtTextboxLog($"Запрос:{Environment.NewLine}{query}{Environment.NewLine}к базе данных:{Environment.NewLine}{currentDb}");
+            AddLineAtTextboxLog($"Запрос:{Environment.NewLine}{query}{Environment.NewLine}к базе данных:{Environment.NewLine}{newSettings.Database}");
             AddLineAtTextboxLog();
 
             string constText = statusInfoMainText.GetConstText;
-            await Task.Run(() => statusInfoMainText.SetConstText($"Ждите. Выполняется поиск в БД - '{currentSQLConnectionStore.GetCurrent().Database}'..."));
-            await Task.Run(() => statusInfoMainText.SetTempText(constText));
+            statusInfoMainText.SetConstText($"Ждите. Выполняется поиск в БД - '{newSettings.Database}'...");
+            statusInfoMainText.SetTempText(constText);
 
+            //Save a current state of the interface Controls
             await Task.Run(() => SaveControlState());
+
+            //Block interface from a user influence
             await Task.Run(() => BlockControl());
 
-            dtForStore = await dBOperations.GetDataTable(query);
-            dtForShow = dtForStore.Copy();
-            dgv.DataSource = dtForShow;
+            if (!(string.IsNullOrWhiteSpace(newSettings?.Database)))
+            {
+                //timeout = 30 sec
+                var cancellationToken = new System.Threading.CancellationTokenSource(30000).Token;
+                int timeout = 30000;
+                var task = GetTables(cancellationToken, newSettings, query);
+                if (await Task.WhenAny(task, Task.Delay(timeout, cancellationToken)) == task)
+                { await task; }
 
-            await Task.Run(() => statusInfoMainText.SetConstText(constText));
-            AddLineAtTextboxLog($"В '{currentSQLConnectionStore.GetCurrent().Database}' найдено: {dtForShow?.Rows?.Count} записей");
-            statusInfoMainText.SetTempText($"Найдено записей: {dtForShow?.Rows?.Count}");
+                await Task.Run(() => statusInfoMainText.SetConstText(constText));
 
-            // Переключиться на таблицу
-            SelectTable();
+                if (ResultData?.GetDataTable()?.Rows?.Count > 0)
+                {
+                    dtForStore = ResultData.GetDataTable();
+
+                    // Переключиться на таблицу
+                    SelectTable();
+
+                    AddLineAtTextboxLog($"В '{newSettings.Database}' найдено: {dtForStore?.Rows?.Count} записей");
+                    statusInfoMainText.SetTempText($"Найдено записей: {dtForStore?.Rows?.Count}");
+                }
+                else
+                {
+                    dtForStore = new DataTable();
+
+                    // Переключиться на лог
+                    SelectLog();
+
+                    AddLineAtTextboxLog($"Ошибка получения данных {ResultData?.Errors}");
+                    AddLineAtTextboxLog($"Проверьте доступность БД: {newSettings.Database}");
+                    AddLineAtTextboxLog($"и корректность запроса: {query}");
+                }
+
+                dtForShow = dtForStore.Copy();
+                dgv.DataSource = dtForShow;
+            }
 
             //Восстановить предыдущее состояние контролов
             await Task.Run(() => RestoreControlState());
         }
+
+        DataTableStore ResultData = new DataTableStore();
+        Task GetTables(System.Threading.CancellationToken token, ISQLConnectionSettings settings, string query)
+        {
+            return Task.Run(() => ResultData.Set(SQLSelector.GetDataTableStore(settings, query)), token);
+        }
+
         #endregion
 
 
@@ -1695,7 +1737,7 @@ namespace FlexibleDBMS
             (recentStore as MenuItemStore).EvntCollectionChanged -= RecentStore_EvntCollectionChanged;
             (queryExtraStore as MenuItemStore).EvntCollectionChanged -= QueryExtraStore_EvntCollectionChanged;
             (queryStandartStore as MenuItemStore).EvntCollectionChanged -= QueryStandartStore_EvntCollectionChanged;
-            (tableStore as MenuItemStore).EvntCollectionChanged -= TablesStore_EvntCollectionChanged;
+            (tableNameStore as MenuItemStore).EvntCollectionChanged -= TablesStore_EvntCollectionChanged;
             statusInfoMainText.EvntSetText -= StatusInfoMainText_SetTemporaryText;
             logger.Info("");
             logger.Info("");
@@ -1744,7 +1786,7 @@ namespace FlexibleDBMS
         }
 
         /// <summary>
-        /// Переключиться на таблицу
+        /// Переключиться на вкладку с табличной формой отображения
         /// </summary>
         void SelectTable()
         {
