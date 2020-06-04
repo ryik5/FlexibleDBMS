@@ -225,7 +225,7 @@ namespace FlexibleDBMS
                 data.Set(dt);
                 dt?.Dispose();
             }
-            catch (Exception err) { data.Errors = err.Message + " " + message; }
+            catch (Exception err) { data.Errors = $"{err.Message}{Environment.NewLine}{message}"; }
 
             return data;
         }

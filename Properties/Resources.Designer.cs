@@ -134,7 +134,16 @@ namespace FlexibleDBMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ==================================== .
+        ///   Looks up a localized string similar to ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------.
+        /// </summary>
+        internal static string SymbolsDashedLong {
+            get {
+                return ResourceManager.GetString("SymbolsDashedLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ====================================.
         /// </summary>
         internal static string SymbolsEqual {
             get {
@@ -143,7 +152,25 @@ namespace FlexibleDBMS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---.
+        ///   Looks up a localized string similar to ============================================================================================================.
+        /// </summary>
+        internal static string SymbolsEqualLong {
+            get {
+                return ResourceManager.GetString("SymbolsEqualLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  =&gt;    .
+        /// </summary>
+        internal static string SymbolsResult {
+            get {
+                return ResourceManager.GetString("SymbolsResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ---   ---   ---   ---   ---   ---   ---   ---   ---   ---   .
         /// </summary>
         internal static string SymbolsSos {
             get {

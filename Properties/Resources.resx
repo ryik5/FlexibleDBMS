@@ -142,11 +142,20 @@
   <data name="SymbolsDashed" xml:space="preserve">
     <value>---------------------------------------------------------</value>
   </data>
+  <data name="SymbolsDashedLong" xml:space="preserve">
+    <value>---------------------------------------------------------------------------------------------------------------------------------------------------------------------------</value>
+  </data>
   <data name="SymbolsEqual" xml:space="preserve">
-    <value>==================================== </value>
+    <value>====================================</value>
+  </data>
+  <data name="SymbolsEqualLong" xml:space="preserve">
+    <value>============================================================================================================</value>
+  </data>
+  <data name="SymbolsResult" xml:space="preserve">
+    <value> =&gt;    </value>
   </data>
   <data name="SymbolsSos" xml:space="preserve">
-    <value>---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---   ---</value>
+    <value>---   ---   ---   ---   ---   ---   ---   ---   ---   ---   </value>
   </data>
   <data name="SymbolsSosSlash" xml:space="preserve">
     <value>--- / --- / --- / --- / --- / --- / --- / --- / --- / --- / --- / --- /</value>

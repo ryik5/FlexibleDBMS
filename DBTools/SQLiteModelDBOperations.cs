@@ -202,53 +202,56 @@ namespace FlexibleDBMS
         {
             DataTable dt = new DataTable();
 
-                if (CheckUpDBStructure(settings.Table))
-                {
-                    //убрать двойные пробелы из запроса
-                    Regex regex = new Regex(@"\s+", RegexOptions.IgnoreCase);
-                    query = regex.Replace(query, @" ");
+            if (CheckUpDBStructure(settings.Table))
+            {
+                //убрать двойные пробелы из запроса
+                Regex regex = new Regex(@"\s+", RegexOptions.IgnoreCase);
+                query = regex.Replace(query, @" ");
 
-                    string newQuery = query;
+                string newQuery = query;
 
                 if (SQLiteImportedDB.Check(settings.Database))
+                {
+                    if (!(columnsAndAliases?.Count > 0))
+                    { MakeNewDictionary(); }
+
+                    if (query.IndexOf(CommonConst.QUERY_COMMON, StringComparison.OrdinalIgnoreCase) != -1)//.ToUpperInvariant().StartsWith(COMMONQUERY)
                     {
-                        if (!(columnsAndAliases?.Count > 0))
-                        { MakeNewDictionary(); }
+                        newQuery = "SELECT ";
 
-                        if (query.IndexOf(CommonConst.QUERY_COMMON, StringComparison.OrdinalIgnoreCase) != -1)//.ToUpperInvariant().StartsWith(COMMONQUERY)
+                        using SqLiteDbWrapper readData1 = new SqLiteDbWrapper(connString);
+                        using (DataTable dt1 = readData1?.GetQueryResultAsTable(CommonConst.QUERY_ALIAS))
                         {
-                            newQuery = "SELECT ";
-
-                            using SqLiteDbWrapper readData1 = new SqLiteDbWrapper(connString);
-                            using (DataTable dt1 = readData1?.GetQueryResultAsTable(CommonConst.QUERY_ALIAS))
+                            if (dt1?.Rows.Count > 0)
                             {
-                                if (dt1?.Rows.Count > 0)
+                                foreach (DataRow r in dt1?.Rows)
                                 {
-                                    foreach (DataRow r in dt1?.Rows)
-                                    {
-                                        newQuery += $"{r.Field<string>("ColumnName")} as '{r.Field<string>("ColumnName")} ({r.Field<string>("ColumnAlias")})', ";
-                                    }
+                                    newQuery += $"{r.Field<string>("ColumnName")} as '{r.Field<string>("ColumnName")} ({r.Field<string>("ColumnAlias")})', ";
                                 }
                             }
-
-                            newQuery = $"{newQuery.TrimEnd(' ').TrimEnd(',')} FROM MAINDATA ";
-                            newQuery = CommonExtesions.ReplaceCaseInsensitive(query, CommonConst.QUERY_COMMON, newQuery);
-
-                            EvntInfoMessage?.Invoke(this, new TextEventArgs($"Произведена замена запроса на newQuery:{Environment.NewLine}'{query}'{Environment.NewLine}на: '{newQuery}'"));
                         }
-                        else
-                        {
-                            newQuery = ReplaceColumnByAlias(columnsAndAliases, query); //replace words by new Dictionary
-                        }
+
+                        newQuery = $"{newQuery.TrimEnd(' ').TrimEnd(',')} FROM MAINDATA ";
+                        newQuery = CommonExtesions.ReplaceCaseInsensitive(query, CommonConst.QUERY_COMMON, newQuery);
+
+                        EvntInfoMessage?.Invoke(this, new TextEventArgs($"Произведена замена запроса на newQuery:{Environment.NewLine}'{query}'{Environment.NewLine}на: '{newQuery}'"));
                     }
-
-                    EvntInfoMessage?.Invoke(this, new TextEventArgs($"Получаю по запросу:{Environment.NewLine}'{newQuery}'{Environment.NewLine}данные из БД: '{settings.Database}'..."));
-
-                    using SqLiteDbWrapper readData = new SqLiteDbWrapper(connString);
-                    dt = readData?.GetQueryResultAsTable(newQuery);
+                    else
+                    {
+                        newQuery = ReplaceColumnByAlias(columnsAndAliases, query); //replace words by new Dictionary
+                    }
                 }
-                else
-                { EvntInfoMessage?.Invoke(this, new TextEventArgs($"Со структурой таблицы '{settings.Table}' базы данных '{settings.Database}' проблема!")); }
+
+                EvntInfoMessage?.Invoke(this, new TextEventArgs(
+                    $"{Environment.NewLine}Запрос к БД" +
+                    $"{Environment.NewLine} =>  '{settings.Database}'" +
+                    $"{Environment.NewLine} =>  '{newQuery}'"));
+
+                using SqLiteDbWrapper readData = new SqLiteDbWrapper(connString);
+                dt = readData?.GetQueryResultAsTable(newQuery);
+            }
+            else
+            { EvntInfoMessage?.Invoke(this, new TextEventArgs($"Со структурой таблицы '{settings.Table}' базы данных '{settings.Database}' проблема!")); }
 
             return dt;
         }

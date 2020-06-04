@@ -267,36 +267,36 @@ namespace FlexibleDBMS
             //Block interface from a user influence
             await Task.Run(() => BlockControl());
 
-            await Task.Run(() =>
-            {
-                AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashed}{Properties.Resources.SymbolsDashed}");
-                AddLineAtTextboxLog("Переключаюсь на новые настройки...");
-            });
+            //await Task.Run(() =>
+            //{
+                AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashedLong}{Environment.NewLine}" +
+                    $"Переключаюсь на новые настройки...");
+            //});
 
 
             if (!(string.IsNullOrWhiteSpace(newSettings?.Name)))
             {
                 recentStore.Add(new ToolStripMenuItem(newSettings.Name));
 
-                await Task.Run(() =>
-                {
+                //await Task.Run(() =>
+                //{
                     ConfigUnitStore applicationConfig = GetConfigUnitStoreFromFullConfigByName(Configuration.Get, newSettings.Name);
                     queryStandartStore.Set(applicationConfig?.QueryStandartMenuStore?.GetAllItems());
                     queryExtraStore.Set(applicationConfig?.QueryExtraMenuStore?.GetAllItems());
-                });
+                //});
 
                 if (!(string.IsNullOrWhiteSpace(newSettings?.Database)))
                 {
 
                     if (oldSettings?.Database != newSettings?.Database)
                     {
-                        await Task.Run(() =>
-                        {
+                        //await Task.Run(() =>
+                        //{
                             AddLineAtTextboxLog($"Выбрано подключение к серверу: '{newSettings?.Host}'{Environment.NewLine}" +
                             $" БД: '{newSettings?.Database}'{Environment.NewLine}" +
                             $" Основная таблица: '{newSettings?.Table}'{Environment.NewLine}");
                             statusInfoMainText.SetConstText($"Выбрана база: {newSettings.Database}");
-                        });
+                        //});
 
 
                         //fix the case when a DB on the server was not found - cancelation task after 10 sec waiting
@@ -311,20 +311,15 @@ namespace FlexibleDBMS
                         if (tableNameStore?.GetAllItems()?.Count > 0)
                         {
                             AddLineAtTextboxLog($"Список таблиц содержит: {tableNameStore?.GetAllItems()?.Count} элемента(ов)");
-                            AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashed}{Properties.Resources.SymbolsDashed}");
                         }
                         else
                         {
                             tableNameStore.Clear();
-                            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
-                            AddLineAtTextboxLog($"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
-                            statusInfoMainText.SetTempText($"{Properties.Resources.SymbolsSosSlashBack}" +
+                            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}{Properties.Resources.SymbolsSosSlashBack}" +
                                 $"            " +
                                 $"Список таблиц с сервера не получен." +
                                 $"            " +
-                                $"{Properties.Resources.SymbolsSosSlash}");
-                            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
-                            AddLineAtTextboxLog($"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
+                                $"{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
                         }
                     }
                     else if (oldSettings?.Database == newSettings?.Database && oldSettings?.Table != newSettings?.Table)
@@ -333,6 +328,8 @@ namespace FlexibleDBMS
                     }
                 }
             }
+
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashedLong}");
 
             //Восстановить предыдущее состояние контролов
             await Task.Run(() => RestoreControlState());
@@ -703,33 +700,20 @@ namespace FlexibleDBMS
 
         void PrintFullConfig(ConfigFull<ConfigAbstract> config)
         {
-            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
-            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog("-= currentConfig connectionSettings Names =-");
-            AddLineAtTextboxLog(ReturnRecentConnectionNamesFromConfig(config).ToStringNewLine());
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog(Properties.Resources.SymbolsDashed);
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog("-= SQL connection =-");
-            AddLineAtTextboxLog(currentSQLConnectionStore.GetCurrent()?.ToString());
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog(Properties.Resources.SymbolsDashed);
-            AddLineAtTextboxLog("-= Loaded Full Config =-");
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqualLong}{Environment.NewLine}{Properties.Resources.SymbolsEqualLong}{Environment.NewLine}" +
+                $"-= currentConfig connectionSettings Names =-{Environment.NewLine}" +
+                $"{ReturnRecentConnectionNamesFromConfig(config).ToStringNewLine()}{Environment.NewLine}{Properties.Resources.SymbolsDashed}{Environment.NewLine}" +
+                $"-= SQL connection =-{Environment.NewLine}{currentSQLConnectionStore.GetCurrent()?.ToString()}{Properties.Resources.SymbolsDashed}{Environment.NewLine}" +
+                $"-= Loaded Full Config =-");
             IList<string> names = ReturnRecentConnectionNamesFromConfig(config);
             foreach (var name in names)
             {
-                AddLineAtTextboxLog();
-                AddLineAtTextboxLog(Properties.Resources.SymbolsSos);
-                AddLineAtTextboxLog($"-= {name} =-");
+                AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsSos}{Environment.NewLine}" +
+                    $"-= {name} =-{Environment.NewLine}");
                 PrintSelectedConfigConnection(config, name);
             }
 
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
-            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
-
-            AddLineAtTextboxLog();
+            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsEqualLong}{Environment.NewLine}{Properties.Resources.SymbolsEqualLong}{Environment.NewLine}");
         }
 
 
@@ -744,30 +728,26 @@ namespace FlexibleDBMS
         {
             ConfigUnitStore selectedConfig = GetConfigUnitStoreFromFullConfigByName(fullConfig, selectedConfigName);
 
-            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
-            AddLineAtTextboxLog("-= SQL Connection Settings =-");
-            AddLineAtTextboxLog($"ver. {selectedConfig?.Version} {selectedConfig?.TimeStamp.ToString()}");
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog(selectedConfig?.SQLConnection?.ToString());
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog(Properties.Resources.SymbolsSos);
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Environment.NewLine}" +
+                $"-= SQL Connection Settings =-{Environment.NewLine}" +
+                $"ver. {selectedConfig?.Version} {selectedConfig?.TimeStamp.ToString()}{Environment.NewLine}{Environment.NewLine}" +
+                $"{selectedConfig?.SQLConnection?.ToString()}{Environment.NewLine}{Environment.NewLine}{Properties.Resources.SymbolsSos}{Environment.NewLine}" +
 
-            AddLineAtTextboxLog("-= Query Standart =-");
+                $"-= Query Standart =-");
             IList<ToolStripMenuItem> list = selectedConfig?.QueryStandartMenuStore?.GetAllItems();
             if (list?.Count > 0)
                 foreach (var m in list)
                 { AddLineAtTextboxLog($"{m?.Text}: {m?.Tag}"); }
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog(Properties.Resources.SymbolsSos);
 
-            AddLineAtTextboxLog("-= Query Extra =-");
+            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsEqual}{Environment.NewLine}" +
+                
+                $"-= Query Extra =-");
             list = selectedConfig?.QueryExtraMenuStore?.GetAllItems();
             if (list?.Count > 0)
                 foreach (var m in list)
                 { AddLineAtTextboxLog($"{m?.Text}: {m?.Tag}"); }
-            AddLineAtTextboxLog();
-            AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
-            AddLineAtTextboxLog();
+
+            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsEqual}{Environment.NewLine}");
         }
 
 
@@ -1466,8 +1446,8 @@ namespace FlexibleDBMS
 
 
         #region Get Data from DB  
-        ControlState state = new ControlState();
-        ControlStateCaretaker controlState = new ControlStateCaretaker();
+        readonly ControlState state = new ControlState();
+        readonly ControlStateCaretaker controlState = new ControlStateCaretaker();
 
         /// <summary>
         /// Запомнить текущее состояние контролов
@@ -1534,11 +1514,13 @@ namespace FlexibleDBMS
             dgv.Columns.Clear();
             ISQLConnectionSettings newSettings = currentSQLConnectionStore?.GetCurrent();
 
-            AddLineAtTextboxLog($"Запрос:{Environment.NewLine}{query}{Environment.NewLine}к базе данных:{Environment.NewLine}{newSettings.Database}");
-            AddLineAtTextboxLog();
+            AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsDashedLong}" +
+                $"{Environment.NewLine}Выполнен запрос{Environment.NewLine}{Properties.Resources.SymbolsResult}{query}" +
+                $"{Environment.NewLine}к базе данных{Environment.NewLine}{Properties.Resources.SymbolsResult}{newSettings.Database}" +
+                $"{Environment.NewLine}{Properties.Resources.SymbolsDashed}{Environment.NewLine}");
 
             string constText = statusInfoMainText.GetConstText;
-            statusInfoMainText.SetConstText($"Ждите. Выполняется поиск в БД - '{newSettings.Database}'...");
+            statusInfoMainText.SetConstText($"Ждите. Выполняется поиск в БД {Properties.Resources.SymbolsResult} '{newSettings.Database}'...");
             statusInfoMainText.SetTempText(constText);
 
             //Save a current state of the interface Controls
@@ -1550,7 +1532,9 @@ namespace FlexibleDBMS
             if (!(string.IsNullOrWhiteSpace(newSettings?.Database)))
             {
                 //timeout = 30 sec
-                var cancellationToken = new System.Threading.CancellationTokenSource(30000).Token;
+                var cancellation = new System.Threading.CancellationTokenSource();
+                cancellation.CancelAfter(30000);
+                var cancellationToken = cancellation.Token;// new System.Threading.CancellationTokenSource(30000).Token;
                 int timeout = 30000;
                 var task = GetTables(cancellationToken, newSettings, query);
                 if (await Task.WhenAny(task, Task.Delay(timeout, cancellationToken)) == task)
@@ -1575,17 +1559,23 @@ namespace FlexibleDBMS
                     // Переключиться на лог
                     SelectLog();
 
-                    AddLineAtTextboxLog($"Ошибка получения данных {ResultData?.Errors}");
-                    AddLineAtTextboxLog($"Проверьте доступность БД: {newSettings.Database}");
-                    AddLineAtTextboxLog($"и корректность запроса: {query}");
+                    AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsSosSlashBack}{Environment.NewLine}" +
+                        $"Ошибка получения данных{Environment.NewLine}{Properties.Resources.SymbolsResult}" +
+                        $"{ResultData?.Errors}{Environment.NewLine}" +
+                        $"Проверьте доступность БД{Environment.NewLine}{Properties.Resources.SymbolsResult}" +
+                        $"{newSettings.Database}{Environment.NewLine}" +
+                        $"и корректность запроса{Environment.NewLine}{Properties.Resources.SymbolsResult}" +
+                        $"{query}{Environment.NewLine}{Properties.Resources.SymbolsSosSlashBack}{Environment.NewLine}");
                 }
 
                 dtForShow = dtForStore.Copy();
                 dgv.DataSource = dtForShow;
+                cancellation.Dispose();
             }
 
             //Восстановить предыдущее состояние контролов
             await Task.Run(() => RestoreControlState());
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashedLong}");
         }
 
         DataTableStore ResultData = new DataTableStore();
@@ -1839,7 +1829,6 @@ namespace FlexibleDBMS
 
                 string query = (sender as TextBox).Text.Trim();
 
-                AddLineAtTextboxLog($"Query:{Environment.NewLine}{query}");
                 string[] arrQuery = query.Split(' ');
 
                 if ((
