@@ -12,7 +12,7 @@ namespace FlexibleDBMS
         public override string Name { get; set; } = "";
         public virtual string Version { get; set; } = Application.ProductVersion;
         public DateTime LastModification { get; set; } = DateTime.Now;
-        public TypeConfig TypeConfigUnit { get; set; } = TypeConfig.None;
+        public ConfigType TypeConfigUnit { get; set; } = ConfigType.None;
 
         public override IDictionary<string, object> ConfigDictionary { get { return config; } set { config = value; } }
        

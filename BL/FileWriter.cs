@@ -62,18 +62,18 @@ namespace FlexibleDBMS
             EvntWriteFinished?.Invoke(this, new BoolEventArgs(true));//last part of the collection
         }
 
-        public async Task Write(string filePath, IList<string> content)
+        public Task Write(string filePath, IList<string> content)
         {
             Encoding _encoding = Encoding.GetEncoding(1251);
 
-            await Write(filePath, content, _encoding);
+            return Write(filePath, content, _encoding);
         }
 
-        public async Task Write(string filePath, string content)
+        public Task Write(string filePath, string content)
         {
             Encoding _encoding = Encoding.GetEncoding(1251);
 
-            await Write(filePath, content, _encoding);
+            return Write(filePath, content, _encoding);
         }
 
         private void Delete(string filePath)
@@ -124,10 +124,9 @@ namespace FlexibleDBMS
 
         public void Write(string filePath, ConfigFull<ConfigAbstract> config)
         {
-            string backupDirectory = Path.Combine(Path.GetDirectoryName(filePath), $"bak");
-            string newFileName = Path.Combine(Path.GetDirectoryName(filePath), "bak", $"{DateTime.Now.ToString("yyyy-MM-dd HHmmss")} {Path.GetFileName(filePath)}.bak");
+            string newFileName = Path.Combine(CommonConst.LocalBackupFolder, $"{DateTime.Now.ToString("yyyy-MM-dd HHmmss")} {Path.GetFileName(filePath)}.bak");
 
-            CreateDirectory(backupDirectory);
+            CreateDirectory(CommonConst.LocalBackupFolder);
 
             Move(filePath, newFileName);
 

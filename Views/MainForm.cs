@@ -778,6 +778,7 @@ namespace FlexibleDBMS
 
         void WriteCfgInFile(ConfigFull<ConfigAbstract> config, string fileName)
         {
+            logger.Info(fileName);
             IWriterable writer = new FileWriter();
             // (writer as FileWriter).EvntInfoMessage -= AddLineAtTextboxLog;
             (writer as FileWriter).EvntInfoMessage += AddLineAtTextboxLog;

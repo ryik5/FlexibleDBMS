@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -21,14 +22,27 @@ namespace FlexibleDBMS
             return conv.ToString("dd/MM/yyyy");
         }
 
-    /// <summary>
-    /// Replace substring of case insensetive in the text
-    /// </summary>
-    /// <param name="input">inputed text</param>
-    /// <param name="search">substring for replace</param>
-    /// <param name="replacement">new substring</param>
-    /// <returns>new string where old substring replaced by new one</returns>
-    public static string ReplaceCaseInsensitive(string input, string search, string replacement)
+        public static void Logger(LogTypes typo, string Event)
+        {
+            //
+          //  lock (obj)
+            {
+                using (StreamWriter writer = new StreamWriter(CommonConst.AppLogFilePath, true))//"D:\\templog.txt"
+                {
+                    writer.WriteLine($"{CommonConst.TimeStamp}|{typo}|{Event}");
+                    writer.Flush();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Replace substring of case insensetive in the text
+        /// </summary>
+        /// <param name="input">inputed text</param>
+        /// <param name="search">substring for replace</param>
+        /// <param name="replacement">new substring</param>
+        /// <returns>new string where old substring replaced by new one</returns>
+        public static string ReplaceCaseInsensitive(string input, string search, string replacement)
         {
             string result = Regex.Replace(
                 input,

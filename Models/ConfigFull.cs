@@ -10,7 +10,7 @@ namespace FlexibleDBMS
     {
         public string Version { get; set; } = Application.ProductVersion;
         public DateTime LastModification { get; set; } = DateTime.Now;
-        public TypeConfig TypeConfigUnit { get; set; } = TypeConfig.Application;
+        public ConfigType TypeConfigUnit { get; set; } = ConfigType.Application;
 
         IDictionary<string, T> config { get; set; }
 

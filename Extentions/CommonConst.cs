@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 
@@ -7,17 +8,21 @@ namespace FlexibleDBMS
 {
     public static class CommonConst
     {
-        public static string TimeStamp { get { return DateTime.Now.ToString("yyyy-MM-dd HHmmss "); } }
+        public static string TimeStamp { get { return DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"); } }
+        public static string DayStamp { get { return DateTime.Now.ToString("yyyy-MM-dd"); } }
         public static DateTime DateTimeStamp { get { return DateTime.Now; } }
 
         public readonly static System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
         public readonly static System.Diagnostics.FileVersionInfo appFileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
         public readonly static string AppVersion = assembly.GetName().Version.ToString();
-        public readonly static string LocalAppFolder = Application.StartupPath;
+        public readonly static string LocalAppFolder= Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+        public readonly static string LocalBackupFolder = Path.Combine(LocalAppFolder, "bak");
+        public readonly static string LocalLogFolder = Path.Combine(LocalAppFolder, "logs");
         public readonly static string LocalTempFolder = Path.Combine(LocalAppFolder, "Temp");
         public readonly static string LocalUpdateFolder = Path.Combine(LocalAppFolder, "Update");
         public readonly static string AppName = Path.GetFileNameWithoutExtension(Application.ExecutablePath);
-        public readonly static string AppCfgFilePath = $"{AppName}.cfg"; 
+        public readonly static string AppCfgFilePath = Path.Combine(LocalAppFolder, $"{AppName}.cfg");
+        public  static string AppLogFilePath = Path.Combine(LocalLogFolder, $"{DayStamp}.log");
         public readonly static string AppFileUpdateXml = $"{AppName}.xml";
         public readonly static string AppFileUpdateUrl = $"{AppName}.url";
         public static string AppFileUpdateZip = $"{AppName} {AppVersion}.zip";

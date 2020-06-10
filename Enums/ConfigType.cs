@@ -3,7 +3,7 @@
 namespace FlexibleDBMS
 {
     [Serializable]
-    public enum TypeConfig
+    public enum ConfigType
     {
         None,
         Application,

@@ -104,6 +104,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\LogTypes.cs" />
     <Compile Include="Extentions\ForEachAsyncExtension.cs" />
     <Compile Include="Models\ControlStateStore.cs" />
     <Compile Include="DBTools\MsSqlUtils.cs" />
@@ -138,7 +139,7 @@
     <Compile Include="Models\ModelCommonStore.cs" />
     <Compile Include="DBTools\SQLConnectionData.cs" />
     <Compile Include="DBTools\SQLConnectionSettings.cs" />
-    <Compile Include="Enums\TypeConfig.cs" />
+    <Compile Include="Enums\ConfigType.cs" />
     <Compile Include="Enums\EnumExtensions.cs" />
     <Compile Include="Enums\AppModes.cs" />
     <Compile Include="BL\CommandLineArguments.cs" />
