@@ -22,15 +22,38 @@ namespace FlexibleDBMS
             return conv.ToString("dd/MM/yyyy");
         }
 
+       static readonly object obj = new object();
         public static void Logger(LogTypes typo, string Event)
         {
-            //
-          //  lock (obj)
+            string path = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string pathToLogDir, pathToLog;
+            try
             {
-                using (StreamWriter writer = new StreamWriter(CommonConst.AppLogFilePath, true))//"D:\\templog.txt"
+                pathToLogDir = Path.Combine(Path.GetDirectoryName(path), $"logs");
+                if (!Directory.Exists(pathToLogDir))
+                    Directory.CreateDirectory(pathToLogDir);
+
+                pathToLog = Path.Combine(pathToLogDir, $"{DateTime.Now.ToString("yyyy-MM-dd")}.log");
+                lock (obj)
                 {
-                    writer.WriteLine($"{CommonConst.TimeStamp}|{typo}|{Event}");
-                    writer.Flush();
+                    using (StreamWriter writer = new StreamWriter(pathToLog, true))
+                    {
+
+                        writer.WriteLine($"{DateTime.Now.ToString("yyyy.MM.dd|hh:mm:ss")}|{typo}|{Event}");
+                        writer.Flush();
+                    }
+                }
+            }
+            catch (Exception err)
+            {
+                pathToLog = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + ".log");
+                lock (obj)
+                {
+                    using (StreamWriter writer = new StreamWriter(pathToLog, true))
+                    {
+                        writer.WriteLine($"{DateTime.Now.ToString("yyyy.MM.dd|hh:mm:ss")}|{err.ToString()}");
+                        writer.Flush();
+                    }
                 }
             }
         }

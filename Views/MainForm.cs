@@ -12,10 +12,9 @@ namespace FlexibleDBMS
 {
     public partial class MainForm : Form
     {
-        static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         static string method = System.Reflection.MethodBase.GetCurrentMethod().Name;
         //method = System.Reflection.MethodBase.GetCurrentMethod().Name;
-        //logger.Trace("-= " + method + " =-");
+        //CommonExtesions.Logger(LogTypes.Info,"-= " + method + " =-");
 
         //Application Modes
         AppModes OperatingModes = AppModes.User;
@@ -349,7 +348,7 @@ namespace FlexibleDBMS
         /// <param name="e">true - временно, false - постоянно</param>
         async void StatusInfoMainText_SetTemporaryText(object sender, TextEventArgs e)
         {
-            logger.Trace("StatusInfoMainText: " + e.Message);
+            CommonExtesions.Logger(LogTypes.Info, "StatusInfoMainText: " + e.Message);
             AddLineAtTextboxLog(e?.Message);
 
             StatusInfoMain.Text = e.Message;
@@ -778,7 +777,7 @@ namespace FlexibleDBMS
 
         void WriteCfgInFile(ConfigFull<ConfigAbstract> config, string fileName)
         {
-            logger.Info(fileName);
+           CommonExtesions.Logger(LogTypes.Info,fileName);
             IWriterable writer = new FileWriter();
             // (writer as FileWriter).EvntInfoMessage -= AddLineAtTextboxLog;
             (writer as FileWriter).EvntInfoMessage += AddLineAtTextboxLog;
@@ -814,7 +813,7 @@ namespace FlexibleDBMS
                 target.DropDownItems.Clear();
 
                 method = System.Reflection.MethodBase.GetCurrentMethod().Name;
-                logger.Info("-= " + method + " =-");
+               CommonExtesions.Logger(LogTypes.Info,"-= " + method + " =-");
 
                 IList<ToolStripMenuItem> sourceList = new List<ToolStripMenuItem>();
                 foreach (var m in source.ToArray())
@@ -1730,9 +1729,9 @@ namespace FlexibleDBMS
             (queryStandartStore as MenuItemStore).EvntCollectionChanged -= QueryStandartStore_EvntCollectionChanged;
             (tableNameStore as MenuItemStore).EvntCollectionChanged -= TablesStore_EvntCollectionChanged;
             statusInfoMainText.EvntSetText -= StatusInfoMainText_SetTemporaryText;
-            logger.Info("");
-            logger.Info("");
-            logger.Info($"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
+           CommonExtesions.Logger(LogTypes.Info,"");
+           CommonExtesions.Logger(LogTypes.Info,"");
+           CommonExtesions.Logger(LogTypes.Info,$"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
 
 
             dtForShow?.Dispose();
@@ -1804,11 +1803,11 @@ namespace FlexibleDBMS
             if (OperatingModes == AppModes.Admin)
             {
                 txtbResultShow.AppendLine($"{text}");
-                logger.Trace($"{text}");
+                CommonExtesions.Logger(LogTypes.Info,$"{text}");
             }
             else
             {
-                logger.Info($"{text}");
+               CommonExtesions.Logger(LogTypes.Info,$"{text}");
             }
         }
 

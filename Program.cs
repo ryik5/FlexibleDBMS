@@ -11,29 +11,30 @@ namespace FlexibleDBMS
         [STAThread]
         static void Main()
         {
+            //load libraries from this assembly
+            AssemblyLoader.RegisterAssemblyLoader();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
             // get GIUD application
             string appGuid =
             ((System.Runtime.InteropServices.GuidAttribute)System.Reflection.Assembly.GetExecutingAssembly().
             GetCustomAttributes(typeof(System.Runtime.InteropServices.GuidAttribute), false).GetValue(0)).Value;
 
-            logger.Info("");
-            logger.Info($"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
-            logger.Info("");
-            logger.Info("");
-            logger.Info("-= Загрузка ПО =-");
-            logger.Info("");
+            CommonExtesions.Logger(LogTypes.Info, "");
+            CommonExtesions.Logger(LogTypes.Info, $"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
+            CommonExtesions.Logger(LogTypes.Info, "");
+            CommonExtesions.Logger(LogTypes.Info, "");
+            CommonExtesions.Logger(LogTypes.Info, "-= Загрузка ПО =-");
+            CommonExtesions.Logger(LogTypes.Info, "");
             //Блок проверки уровня настройки логгирования
-            logger.Info("Test Info message");
-            logger.Trace("Test1 Trace message");
-            logger.Debug("Test2 Debug message");
-            logger.Warn("Test3 Warn message");
-            logger.Error("Test4 Error message");
-            logger.Fatal("Test5 Fatal message");
+            CommonExtesions.Logger(LogTypes.Info,"Test Info message");
+            CommonExtesions.Logger(LogTypes.Info, "Test1 Trace message");
+            CommonExtesions.Logger(LogTypes.Info, "Test2 Debug message");
+            CommonExtesions.Logger(LogTypes.Info, "Test3 Warn message");
+            CommonExtesions.Logger(LogTypes.Info, "Test4 Error message");
+            CommonExtesions.Logger(LogTypes.Info, "Test5 Fatal message");
 
             //using (System.Threading.Mutex mutex = new System.Threading.Mutex(false, "Global\\" + appGuid))
             //{
