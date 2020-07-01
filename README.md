@@ -15,11 +15,12 @@ This application provides the easy way to reuse SQL queries for different types 
 Install at .NET framework at least ver. 4.5
 Run FlexibleDBMS.exe
 
-- Importing text files and Excel ones into a local SQLite DB
-- Compacting of DB with imported data by removing unneeded or empty columns
-- Adding links on different kind of databases to MRU.
+- Import text files or Excel ones into a local SQLite DB
+- Compress of the DB with imported data by removing unneeded or empty columns
+- Add links on different kind of databases to MRU.
 - Add flexible queries by use in a created query of pair symbols '{}' as replacing of a seek word in query while search in unchanged DB.
 - Add hard coded frequently used queries to seek in a DB with high changeable data tables.
+
 
 ### Links
 * [What?](https://github.com/ryik5/FlexibleDBMS/README.md)
