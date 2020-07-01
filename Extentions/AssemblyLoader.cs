@@ -90,8 +90,8 @@ namespace FlexibleDBMS
                     using (var deflated = new DeflateStream(stream, CompressionMode.Decompress))
                     using (var reader = new BinaryReader(deflated))
                     {
-                        var one_megabyte = 1024 * 1024;
-                        assemblyRawBytes = reader.ReadBytes(one_megabyte);
+                        var ten_megabytes =10* 1024 * 1024;
+                        assemblyRawBytes = reader.ReadBytes(ten_megabytes);
                     }
                 }
             }
