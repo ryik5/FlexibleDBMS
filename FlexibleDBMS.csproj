@@ -250,6 +250,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="RYIK40.ico" />
+    <EmbeddedResource Include="x64\SQLite.Interop.dll" />
+    <EmbeddedResource Include="x86\SQLite.Interop.dll" />
     <None Include="System.Data.SQLite.dll" />
   </ItemGroup>
   <ItemGroup>
