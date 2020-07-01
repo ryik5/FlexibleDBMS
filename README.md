@@ -22,3 +22,6 @@ Then you can use the app.
 * [Usage](https://github.com/ryik5/FlexibleDBMS/README.md)
 * [Documentation](https://github.com/ryik5/FlexibleDBMS/README.md)
 * [Contributing](https://github.com/ryik5/FlexibleDBMS/README.md)
+
+### Maker packed files for 'Resources' folder
+<a href='https://github.com/ryik5/GuiPackager'>GuiPackager</a>
