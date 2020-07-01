@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace FlexibleDBMS
 {
-    public static class CommonExtesions
+    public static class CommonExtensions
     {
         /// <summary>
         ///  Convert: "39270"  => "07/07/2007" OR "39456" => "01/09/2008"

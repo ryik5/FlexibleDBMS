@@ -22,19 +22,19 @@ namespace FlexibleDBMS
             ((System.Runtime.InteropServices.GuidAttribute)System.Reflection.Assembly.GetExecutingAssembly().
             GetCustomAttributes(typeof(System.Runtime.InteropServices.GuidAttribute), false).GetValue(0)).Value;
 
-            CommonExtesions.Logger(LogTypes.Info, "");
-            CommonExtesions.Logger(LogTypes.Info, $"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
-            CommonExtesions.Logger(LogTypes.Info, "");
-            CommonExtesions.Logger(LogTypes.Info, "");
-            CommonExtesions.Logger(LogTypes.Info, "-= Загрузка ПО =-");
-            CommonExtesions.Logger(LogTypes.Info, "");
+            CommonExtensions.Logger(LogTypes.Info, "");
+            CommonExtensions.Logger(LogTypes.Info, $"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
+            CommonExtensions.Logger(LogTypes.Info, "");
+            CommonExtensions.Logger(LogTypes.Info, "");
+            CommonExtensions.Logger(LogTypes.Info, "-= Загрузка ПО =-");
+            CommonExtensions.Logger(LogTypes.Info, "");
             //Блок проверки уровня настройки логгирования
-            CommonExtesions.Logger(LogTypes.Info,"Test Info message");
-            CommonExtesions.Logger(LogTypes.Info, "Test1 Trace message");
-            CommonExtesions.Logger(LogTypes.Info, "Test2 Debug message");
-            CommonExtesions.Logger(LogTypes.Info, "Test3 Warn message");
-            CommonExtesions.Logger(LogTypes.Info, "Test4 Error message");
-            CommonExtesions.Logger(LogTypes.Info, "Test5 Fatal message");
+            CommonExtensions.Logger(LogTypes.Info,"Test Info message");
+            CommonExtensions.Logger(LogTypes.Info, "Test1 Trace message");
+            CommonExtensions.Logger(LogTypes.Info, "Test2 Debug message");
+            CommonExtensions.Logger(LogTypes.Info, "Test3 Warn message");
+            CommonExtensions.Logger(LogTypes.Info, "Test4 Error message");
+            CommonExtensions.Logger(LogTypes.Info, "Test5 Fatal message");
 
             //using (System.Threading.Mutex mutex = new System.Threading.Mutex(false, "Global\\" + appGuid))
             //{

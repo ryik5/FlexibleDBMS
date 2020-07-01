@@ -57,8 +57,8 @@ namespace FlexibleDBMS
             }
             else
             {
-                CommonExtesions.Logger(LogTypes.Info,$"При инициализации не указан адрес сервера обновлений.");
-                CommonExtesions.Logger(LogTypes.Info, $"Ищу файл '{CommonConst.PathToUrl}'");
+                CommonExtensions.Logger(LogTypes.Info,$"При инициализации не указан адрес сервера обновлений.");
+                CommonExtensions.Logger(LogTypes.Info, $"Ищу файл '{CommonConst.PathToUrl}'");
                 if (!string.IsNullOrWhiteSpace(CommonConst.PathToUrl) && File.Exists(CommonConst.PathToUrl))
                 {
                     IList<string> file = await ReadFileAsync(CommonConst.PathToUrl);
@@ -66,9 +66,9 @@ namespace FlexibleDBMS
                     {
                         foreach (var f in file)
                         {
-                            CommonExtesions.Logger(LogTypes.Info,f);
+                            CommonExtensions.Logger(LogTypes.Info,f);
                             this._serverUpdateURI = f;
-                            CommonExtesions.Logger(LogTypes.Info,$"Адрес источника обновлений найден в файле как: '{f}'");
+                            CommonExtensions.Logger(LogTypes.Info,$"Адрес источника обновлений найден в файле как: '{f}'");
                             break;
                         }
 
@@ -91,12 +91,12 @@ namespace FlexibleDBMS
 
             if (Options?.DoObjectPropertiesAsStringDictionary().Count > 0 && !string.IsNullOrWhiteSpace(CommonConst.PathToUrl))
             {
-                CommonExtesions.Logger(LogTypes.Info,"Параметры для скачивания/загрузки обновлений:");
-                CommonExtesions.Logger(LogTypes.Info,Options.DoObjectPropertiesAsStringDictionary().AsString());
+                CommonExtensions.Logger(LogTypes.Info,"Параметры для скачивания/загрузки обновлений:");
+                CommonExtensions.Logger(LogTypes.Info,Options.DoObjectPropertiesAsStringDictionary().AsString());
             }
             else
             {
-                CommonExtesions.Logger(LogTypes.Info,$"Операции загрузки/выгрузки обновлений не доступны.");
+                CommonExtensions.Logger(LogTypes.Info,$"Операции загрузки/выгрузки обновлений не доступны.");
             }
         }
 
@@ -139,7 +139,7 @@ namespace FlexibleDBMS
             if (!uploadingStatus ||!stopUpdate)//!string.IsNullOrWhiteSpace(Options?.serverUpdateURI))
             {
                 EvntStatus?.Invoke(this, new TextEventArgs($"Адрес сервера обновлений: {this._serverUpdateURI}"));
-                CommonExtesions.Logger(LogTypes.Info,$"Адрес сервера обновлений: {Options.serverUpdateURI}");
+                CommonExtensions.Logger(LogTypes.Info,$"Адрес сервера обновлений: {Options.serverUpdateURI}");
 
                 AutoUpdater.Mandatory = true;
                 // AutoUpdater.ReportErrors = true;
@@ -149,7 +149,7 @@ namespace FlexibleDBMS
             }
             else
             {
-                CommonExtesions.Logger(LogTypes.Info,$"Не указан адрес сервера обновлений: {Options?.serverUpdateURI}");
+                CommonExtensions.Logger(LogTypes.Info,$"Не указан адрес сервера обновлений: {Options?.serverUpdateURI}");
             }
         }
 
@@ -205,7 +205,7 @@ namespace FlexibleDBMS
                 }
                 else
                 {
-                    CommonExtesions.Logger(LogTypes.Info,$"Не указан адрес сервера обновлений: {Options?.serverUpdateURI}");
+                    CommonExtensions.Logger(LogTypes.Info,$"Не указан адрес сервера обновлений: {Options?.serverUpdateURI}");
                 }
             };
             return Task.Run(() =>
@@ -230,7 +230,7 @@ namespace FlexibleDBMS
                             xmlnode = xmldoc.GetElementsByTagName("version");
                             string foundNewVersionApp = xmlnode[0].InnerText;
                             EvntStatus?.Invoke(this, new TextEventArgs($"Программа будет обновлена до версии: {foundNewVersionApp}"));
-                            CommonExtesions.Logger(LogTypes.Info,$"Программа будет обновлена до версии: {foundNewVersionApp}");
+                            CommonExtensions.Logger(LogTypes.Info,$"Программа будет обновлена до версии: {foundNewVersionApp}");
 
                             ApplicationExit();
                         }
@@ -238,7 +238,7 @@ namespace FlexibleDBMS
                     catch (Exception exception)
                     {
                         EvntStatus?.Invoke(this, new TextEventArgs($"Ошибка проверки обновлений: {exception.Message} | {exception.GetType().ToString()}"));
-                        CommonExtesions.Logger(LogTypes.Info,$"Ошибка проверки обновлений: {exception.Message} | {exception.GetType().ToString()}");
+                        CommonExtensions.Logger(LogTypes.Info,$"Ошибка проверки обновлений: {exception.Message} | {exception.GetType().ToString()}");
                     }
                     // Uncomment the following line if you want to show standard update dialog instead.
                     // AutoUpdater.ShowUpdateForm(args);
@@ -303,7 +303,7 @@ namespace FlexibleDBMS
             }
             else
             {
-                CommonExtesions.Logger(LogTypes.Info,$"Не указан адрес сервера обновлений: {Options?.serverUpdateURI}");
+                CommonExtensions.Logger(LogTypes.Info,$"Не указан адрес сервера обновлений: {Options?.serverUpdateURI}");
             }
             uploader.StatusFinishedUploading -= Uploader_StatusFinishedUploading;
             uploader.StatusText -= Uploader_MessageStatus;
@@ -359,8 +359,8 @@ namespace FlexibleDBMS
             }
             catch (Exception err)
             {
-                CommonExtesions.Logger(LogTypes.Info,"Archieving error: " + err.Message);
-                CommonExtesions.Logger(LogTypes.Info,err.ToString());
+                CommonExtensions.Logger(LogTypes.Info,"Archieving error: " + err.Message);
+                CommonExtensions.Logger(LogTypes.Info,err.ToString());
             }
 
 
@@ -371,7 +371,7 @@ namespace FlexibleDBMS
                 DeleteFile(file);
             }
 
-            CommonExtesions.Logger(LogTypes.Info,"Делаю бэкап архива");
+            CommonExtensions.Logger(LogTypes.Info,"Делаю бэкап архива");
             CopyFile(Options.pathToUpdateZip, pathToBak);
         }
 
@@ -389,8 +389,8 @@ namespace FlexibleDBMS
             }
             catch (Exception err)
             {
-                CommonExtesions.Logger(LogTypes.Info,"GetVersion error: " + err.Message);
-                CommonExtesions.Logger(LogTypes.Info,err.ToString());
+                CommonExtensions.Logger(LogTypes.Info,"GetVersion error: " + err.Message);
+                CommonExtensions.Logger(LogTypes.Info,err.ToString());
             }
 
             Directory.Delete(pathToDir, true);
@@ -400,21 +400,21 @@ namespace FlexibleDBMS
 
         private void WriteFileHashInOptions(string filePath) //pathToUpdateZip
         {
-            CommonExtesions.Logger(LogTypes.Info,"Вычисляю хэш обновления");
+            CommonExtensions.Logger(LogTypes.Info,"Вычисляю хэш обновления");
             if (File.Exists(filePath))
             {
                 Options.appUpdateMD5 = CalculateHash(filePath);
             }
             else
             {
-                CommonExtesions.Logger(LogTypes.Info,$"Отсутствует файл обновления '{filePath}' для вычисления хэш-суммы.");
+                CommonExtensions.Logger(LogTypes.Info,$"Отсутствует файл обновления '{filePath}' для вычисления хэш-суммы.");
             }
 
         }
 
         private void MakeUpdateXML()
         {
-            CommonExtesions.Logger(LogTypes.Info,"MakeUpdateXML");
+            CommonExtensions.Logger(LogTypes.Info,"MakeUpdateXML");
 
             Contract.Requires(Options != null,
                     "Не создан экземпляр UpdatingParameters!");
@@ -454,11 +454,11 @@ namespace FlexibleDBMS
                     XmlSerializer serializer = new XmlSerializer(document.GetType());//, atribXmlOver
                     serializer.Serialize(fs, document, ns); //clear any xmlns attributes from the root element
                 }
-                CommonExtesions.Logger(LogTypes.Info,$"XML файл сохранен как {Path.GetFullPath(Options.pathToXml)}");
+                CommonExtensions.Logger(LogTypes.Info,$"XML файл сохранен как {Path.GetFullPath(Options.pathToXml)}");
             }
             catch
             {
-                CommonExtesions.Logger(LogTypes.Info,$"Ошибка сохранения XML файла {Options.pathToXml}");
+                CommonExtensions.Logger(LogTypes.Info,$"Ошибка сохранения XML файла {Options.pathToXml}");
             }
         }
 
@@ -467,12 +467,12 @@ namespace FlexibleDBMS
             try
             {
                 File.Delete(file);
-                CommonExtesions.Logger(LogTypes.Info,$"Deleted => '{file}'");
+                CommonExtensions.Logger(LogTypes.Info,$"Deleted => '{file}'");
             }
             catch (Exception err)
             {
-                CommonExtesions.Logger(LogTypes.Info,$"Delete error {err.Message}, |=> '{file}'");
-                CommonExtesions.Logger(LogTypes.Info,err.ToString());
+                CommonExtensions.Logger(LogTypes.Info,$"Delete error {err.Message}, |=> '{file}'");
+                CommonExtensions.Logger(LogTypes.Info,err.ToString());
             }
         }
 
@@ -481,12 +481,12 @@ namespace FlexibleDBMS
             try
             {
                 File.Copy(source, target, true);
-                CommonExtesions.Logger(LogTypes.Info,$"Copied => '{target}'");
+                CommonExtensions.Logger(LogTypes.Info,$"Copied => '{target}'");
             }
             catch (Exception err)
             {
-                CommonExtesions.Logger(LogTypes.Info,$"Copy error {err.Message}, from: '{source}' |=> to: '{target}'");
-                CommonExtesions.Logger(LogTypes.Info,err.ToString());
+                CommonExtensions.Logger(LogTypes.Info,$"Copy error {err.Message}, from: '{source}' |=> to: '{target}'");
+                CommonExtensions.Logger(LogTypes.Info,err.ToString());
             }
         }
 
@@ -542,7 +542,7 @@ namespace FlexibleDBMS
 
         public void Upload()
         {
-            CommonExtesions.Logger(LogTypes.Info,"Начало отправки обновления на сервер...");
+            CommonExtensions.Logger(LogTypes.Info,"Начало отправки обновления на сервер...");
             uploadingError = false;
 
             Contract.Requires(_parameters != null);
@@ -568,9 +568,9 @@ namespace FlexibleDBMS
             }).Wait();
 
             if (!uploadingError)
-            { CommonExtesions.Logger(LogTypes.Info,$"Обновление на сервер доставлено -> {_parameters.serverUpdateURI}"); }
+            { CommonExtensions.Logger(LogTypes.Info,$"Обновление на сервер доставлено -> {_parameters.serverUpdateURI}"); }
             else
-            { CommonExtesions.Logger(LogTypes.Info,$"Ошибки доставлено обновления на сервер -> {_parameters.serverUpdateURI}"); }
+            { CommonExtensions.Logger(LogTypes.Info,$"Ошибки доставлено обновления на сервер -> {_parameters.serverUpdateURI}"); }
         }
 
         FilePathSourceAndTarget[] MakeArrayFilePathesFromTwoListsOfFilePathes(List<IFileInfo> source, List<IFileInfo> target)
@@ -592,11 +592,11 @@ namespace FlexibleDBMS
             try
             {
                 await Task.Run(() => target.Delete());
-                CommonExtesions.Logger(LogTypes.Info,$"Файл {target.FullName} удален успешно");
+                CommonExtensions.Logger(LogTypes.Info,$"Файл {target.FullName} удален успешно");
             }
             catch (Exception err)
             {
-                CommonExtesions.Logger(LogTypes.Info,$"Файл {target.FullName} удалить не удалось: {err.ToString()}");
+                CommonExtensions.Logger(LogTypes.Info,$"Файл {target.FullName} удалить не удалось: {err.ToString()}");
                 uploadingError = true;
             } //@"\\server\folder\Myfile.txt"
 
@@ -609,19 +609,19 @@ namespace FlexibleDBMS
             var target = pathes.Get().TargetPath;
             Contract.Requires(source != null && !string.IsNullOrEmpty(source.FullName) && !source.Equals(target));
 
-            CommonExtesions.Logger(LogTypes.Info,$"Идет отправка файла {source.FullName} -> {target.FullName}");
+            CommonExtensions.Logger(LogTypes.Info,$"Идет отправка файла {source.FullName} -> {target.FullName}");
             //  StatusText?.Invoke(this, new TextEventArgs($"Идет отправка файла {source.FullName} -> {target.FullName}"));
 
             try
             {
                 await Task.Run(() => fileSystem.File.Copy(source.FullName, target.FullName, true));
-                CommonExtesions.Logger(LogTypes.Info,$"Файл '{target.FullName}' на сервер доставлен успешно.");
+                CommonExtensions.Logger(LogTypes.Info,$"Файл '{target.FullName}' на сервер доставлен успешно.");
                 StatusFinishedUploading?.Invoke(this, new BoolEventArgs(true));
                 StatusText?.Invoke(this, new TextEventArgs($"Файл '{target.FullName}' на сервер доставлен успешно."));
             }
             catch (Exception err)
             {
-                CommonExtesions.Logger(LogTypes.Info,$"Отправка файла '{target.FullName}' на сервер выполнена с ошибками! {err.ToString()}");
+                CommonExtensions.Logger(LogTypes.Info,$"Отправка файла '{target.FullName}' на сервер выполнена с ошибками! {err.ToString()}");
                 StatusFinishedUploading?.Invoke(this, new BoolEventArgs(false));
                 StatusText?.Invoke(this, new TextEventArgs($"Отправка файла '{target.FullName}' на сервер выполнена с ошибками! {err.ToString()}"));
             }

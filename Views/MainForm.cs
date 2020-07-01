@@ -4,7 +4,9 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -73,7 +75,6 @@ namespace FlexibleDBMS
         {
             InitializeComponent();
 
-
             Updater = new ApplicationUpdater();
             Configuration = new ConfigStore();
 
@@ -91,6 +92,7 @@ namespace FlexibleDBMS
             Updater.EvntStatus += new ApplicationUpdater.InfoMessage<TextEventArgs>(StatusInfoMainText_SetTemporaryText); // new ApplicationUpdater.InfoMessage(AddLineAtTextboxLog);
         }
 
+        
 
         ///-////-/////-//////-///////////////////////////////////////////
         ///-////-/////-//////-///////////////////////////////////////////
@@ -348,7 +350,7 @@ namespace FlexibleDBMS
         /// <param name="e">true - временно, false - постоянно</param>
         async void StatusInfoMainText_SetTemporaryText(object sender, TextEventArgs e)
         {
-            CommonExtesions.Logger(LogTypes.Info, "StatusInfoMainText: " + e.Message);
+            CommonExtensions.Logger(LogTypes.Info, "StatusInfoMainText: " + e.Message);
             AddLineAtTextboxLog(e?.Message);
 
             StatusInfoMain.Text = e.Message;
@@ -777,7 +779,7 @@ namespace FlexibleDBMS
 
         void WriteCfgInFile(ConfigFull<ConfigAbstract> config, string fileName)
         {
-           CommonExtesions.Logger(LogTypes.Info,fileName);
+           CommonExtensions.Logger(LogTypes.Info,fileName);
             IWriterable writer = new FileWriter();
             // (writer as FileWriter).EvntInfoMessage -= AddLineAtTextboxLog;
             (writer as FileWriter).EvntInfoMessage += AddLineAtTextboxLog;
@@ -813,7 +815,7 @@ namespace FlexibleDBMS
                 target.DropDownItems.Clear();
 
                 method = System.Reflection.MethodBase.GetCurrentMethod().Name;
-               CommonExtesions.Logger(LogTypes.Info,"-= " + method + " =-");
+               CommonExtensions.Logger(LogTypes.Info,"-= " + method + " =-");
 
                 IList<ToolStripMenuItem> sourceList = new List<ToolStripMenuItem>();
                 foreach (var m in source.ToArray())
@@ -1729,9 +1731,9 @@ namespace FlexibleDBMS
             (queryStandartStore as MenuItemStore).EvntCollectionChanged -= QueryStandartStore_EvntCollectionChanged;
             (tableNameStore as MenuItemStore).EvntCollectionChanged -= TablesStore_EvntCollectionChanged;
             statusInfoMainText.EvntSetText -= StatusInfoMainText_SetTemporaryText;
-           CommonExtesions.Logger(LogTypes.Info,"");
-           CommonExtesions.Logger(LogTypes.Info,"");
-           CommonExtesions.Logger(LogTypes.Info,$"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
+           CommonExtensions.Logger(LogTypes.Info,"");
+           CommonExtensions.Logger(LogTypes.Info,"");
+           CommonExtensions.Logger(LogTypes.Info,$"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
 
 
             dtForShow?.Dispose();
@@ -1803,11 +1805,11 @@ namespace FlexibleDBMS
             if (OperatingModes == AppModes.Admin)
             {
                 txtbResultShow.AppendLine($"{text}");
-                CommonExtesions.Logger(LogTypes.Info,$"{text}");
+                CommonExtensions.Logger(LogTypes.Info,$"{text}");
             }
             else
             {
-               CommonExtesions.Logger(LogTypes.Info,$"{text}");
+               CommonExtensions.Logger(LogTypes.Info,$"{text}");
             }
         }
 

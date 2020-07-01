@@ -150,7 +150,7 @@ namespace FlexibleDBMS
         {
             EvntInfoMessage?.Invoke(this, new TextEventArgs($"Ищу в словаре из {dic?.Count} слов замену для слов в запросе:" +
                 $"{Environment.NewLine}'{query}"));
-            if (!(CommonExtesions.CheckQueryToReplaceWords(query)))
+            if (!(CommonExtensions.CheckQueryToReplaceWords(query)))
             {
                 return query;
             }
@@ -232,7 +232,7 @@ namespace FlexibleDBMS
                         }
 
                         newQuery = $"{newQuery.TrimEnd(' ').TrimEnd(',')} FROM MAINDATA ";
-                        newQuery = CommonExtesions.ReplaceCaseInsensitive(query, CommonConst.QUERY_COMMON, newQuery);
+                        newQuery = CommonExtensions.ReplaceCaseInsensitive(query, CommonConst.QUERY_COMMON, newQuery);
 
                         EvntInfoMessage?.Invoke(this, new TextEventArgs($"Произведена замена запроса на newQuery:{Environment.NewLine}'{query}'{Environment.NewLine}на: '{newQuery}'"));
                     }
