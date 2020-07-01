@@ -74,11 +74,11 @@ namespace FlexibleDBMS
 
             try
             {
-                CommonExtensions.Logger(LogTypes.Info, $"OnResolveAssembly, targetAssemblyName: {targetAssemblyName}");
+                CommonExtensions.Logger(LogTypes.Trace, $"OnResolveAssembly, targetAssemblyName: {targetAssemblyName}");
                 AssemblyName assemblyName = new AssemblyName(targetAssemblyName);
 
                 string resourceName = DetermineEmbeddedResourceName(assemblyName, executingAssembly);
-                CommonExtensions.Logger(LogTypes.Info, $"OnResolveAssembly, resourceName: {resourceName}");
+                CommonExtensions.Logger(LogTypes.Trace, $"OnResolveAssembly, resourceName: {resourceName}");
 
                 using (Stream stream = executingAssembly.GetManifestResourceStream(resourceName))
                 {
@@ -90,12 +90,12 @@ namespace FlexibleDBMS
                     using (var deflated = new DeflateStream(stream, CompressionMode.Decompress))
                     using (var reader = new BinaryReader(deflated))
                     {
-                        var ten_megabytes =10* 1024 * 1024;
+                        var ten_megabytes = 10 * 1024 * 1024;
                         assemblyRawBytes = reader.ReadBytes(ten_megabytes);
                     }
                 }
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 CommonExtensions.Logger(LogTypes.Error, $"err: {err.ToString()}");
                 CommonExtensions.Logger(LogTypes.Error, $"error  -/-/-/-/   OnResolveAssembly, targetAssemblyName: {targetAssemblyName}");
@@ -112,15 +112,9 @@ namespace FlexibleDBMS
             //after it
             //for every deflated files set a flag 'Build Action' in Property(Solution Explorer) as -  'Embedded Resource'
             //then change for matched every library dll in 'Preferences' a flag 'Copy Local' as 'False'
-            var env = Environment.Is64BitProcess ? "x64" : "x86";
-            CommonExtensions.Logger( LogTypes.Info,$"DetermineEmbeddedResourceName, 1: {executingAssembly.GetName().Name}|2: {assemblyName.Name}");
-           string resourceName = $"{executingAssembly.GetName().Name}.Resources.{assemblyName.Name}.dll.deflated";
+            CommonExtensions.Logger(LogTypes.Trace, $"DetermineEmbeddedResourceName, 1: {executingAssembly.GetName().Name}|2: {assemblyName.Name}");
+            string resourceName = $"{executingAssembly.GetName().Name}.Resources.{assemblyName.Name}.dll.deflated";
             
-            if (assemblyName.Name.ToLower().Contains("sqlite.interop"))
-            {
-                resourceName = $"{executingAssembly.GetName().Name}.Resources.{env}.{assemblyName.Name}.dll.deflated";
-            }
-
             //This logic finds the assembly manifest name even if it's not an case match for the requested assembly                          
             var matchingResource = executingAssembly
                 .GetManifestResourceNames()
