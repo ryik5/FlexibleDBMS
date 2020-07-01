@@ -12,7 +12,8 @@ This application provides the easy way to reuse SQL queries for different types 
 
 ### Usage
 
-Install at .NET framework at least ver. 4.5
+before using it has to check and install .NET framework ver. 4.5 or above
+
 Run FlexibleDBMS.exe
 
 - Import text files or Excel ones into a local SQLite DB
