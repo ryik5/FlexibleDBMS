@@ -249,6 +249,11 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\SQLite.Designer.dll" />
+    <Content Include="Resources\System.Data.SQLite.EF6.dll" />
+    <Content Include="Resources\System.Data.SQLite.Linq.dll" />
+    <Content Include="Resources\System.Data.SQLite.x64.dll" />
+    <Content Include="Resources\System.Data.SQLite.x86.dll" />
     <Content Include="RYIK40.ico" />
     <None Include="README.md" />
     <None Include="System.Data.SQLite.dll" />
