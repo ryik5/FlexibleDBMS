@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -14,7 +13,7 @@ namespace FlexibleDBMS
 {
     public partial class MainForm : Form
     {
-        static string method = System.Reflection.MethodBase.GetCurrentMethod().Name;
+        static string method = MethodBase.GetCurrentMethod().Name;
         //method = System.Reflection.MethodBase.GetCurrentMethod().Name;
         //CommonExtesions.Logger(LogTypes.Info,"-= " + method + " =-");
 
@@ -92,7 +91,7 @@ namespace FlexibleDBMS
             Updater.EvntStatus += new ApplicationUpdater.InfoMessage<TextEventArgs>(StatusInfoMainText_SetTemporaryText); // new ApplicationUpdater.InfoMessage(AddLineAtTextboxLog);
         }
 
-        
+
 
         ///-////-/////-//////-///////////////////////////////////////////
         ///-////-/////-//////-///////////////////////////////////////////
@@ -270,8 +269,8 @@ namespace FlexibleDBMS
 
             //await Task.Run(() =>
             //{
-                AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashedLong}{Environment.NewLine}" +
-                    $"Переключаюсь на новые настройки...");
+            AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashedLong}{Environment.NewLine}" +
+                $"Переключаюсь на новые настройки...");
             //});
 
 
@@ -281,9 +280,9 @@ namespace FlexibleDBMS
 
                 //await Task.Run(() =>
                 //{
-                    ConfigUnitStore applicationConfig = GetConfigUnitStoreFromFullConfigByName(Configuration.Get, newSettings.Name);
-                    queryStandartStore.Set(applicationConfig?.QueryStandartMenuStore?.GetAllItems());
-                    queryExtraStore.Set(applicationConfig?.QueryExtraMenuStore?.GetAllItems());
+                ConfigUnitStore applicationConfig = GetConfigUnitStoreFromFullConfigByName(Configuration.Get, newSettings.Name);
+                queryStandartStore.Set(applicationConfig?.QueryStandartMenuStore?.GetAllItems());
+                queryExtraStore.Set(applicationConfig?.QueryExtraMenuStore?.GetAllItems());
                 //});
 
                 if (!(string.IsNullOrWhiteSpace(newSettings?.Database)))
@@ -293,10 +292,10 @@ namespace FlexibleDBMS
                     {
                         //await Task.Run(() =>
                         //{
-                            AddLineAtTextboxLog($"Выбрано подключение к серверу: '{newSettings?.Host}'{Environment.NewLine}" +
-                            $" БД: '{newSettings?.Database}'{Environment.NewLine}" +
-                            $" Основная таблица: '{newSettings?.Table}'{Environment.NewLine}");
-                            statusInfoMainText.SetConstText($"Выбрана база: {newSettings.Database}");
+                        AddLineAtTextboxLog($"Выбрано подключение к серверу: '{newSettings?.Host}'{Environment.NewLine}" +
+                        $" БД: '{newSettings?.Database}'{Environment.NewLine}" +
+                        $" Основная таблица: '{newSettings?.Table}'{Environment.NewLine}");
+                        statusInfoMainText.SetConstText($"Выбрана база: {newSettings.Database}");
                         //});
 
 
@@ -741,7 +740,7 @@ namespace FlexibleDBMS
                 { AddLineAtTextboxLog($"{m?.Text}: {m?.Tag}"); }
 
             AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsEqual}{Environment.NewLine}" +
-                
+
                 $"-= Query Extra =-");
             list = selectedConfig?.QueryExtraMenuStore?.GetAllItems();
             if (list?.Count > 0)
@@ -779,7 +778,7 @@ namespace FlexibleDBMS
 
         void WriteCfgInFile(ConfigFull<ConfigAbstract> config, string fileName)
         {
-           CommonExtensions.Logger(LogTypes.Info,fileName);
+            CommonExtensions.Logger(LogTypes.Info, fileName);
             IWriterable writer = new FileWriter();
             // (writer as FileWriter).EvntInfoMessage -= AddLineAtTextboxLog;
             (writer as FileWriter).EvntInfoMessage += AddLineAtTextboxLog;
@@ -814,8 +813,8 @@ namespace FlexibleDBMS
             {
                 target.DropDownItems.Clear();
 
-                method = System.Reflection.MethodBase.GetCurrentMethod().Name;
-               CommonExtensions.Logger(LogTypes.Info,"-= " + method + " =-");
+                method = MethodBase.GetCurrentMethod().Name;
+                CommonExtensions.Logger(LogTypes.Info, "-= " + method + " =-");
 
                 IList<ToolStripMenuItem> sourceList = new List<ToolStripMenuItem>();
                 foreach (var m in source.ToArray())
@@ -1731,9 +1730,9 @@ namespace FlexibleDBMS
             (queryStandartStore as MenuItemStore).EvntCollectionChanged -= QueryStandartStore_EvntCollectionChanged;
             (tableNameStore as MenuItemStore).EvntCollectionChanged -= TablesStore_EvntCollectionChanged;
             statusInfoMainText.EvntSetText -= StatusInfoMainText_SetTemporaryText;
-           CommonExtensions.Logger(LogTypes.Info,"");
-           CommonExtensions.Logger(LogTypes.Info,"");
-           CommonExtensions.Logger(LogTypes.Info,$"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
+            CommonExtensions.Logger(LogTypes.Info, "");
+            CommonExtensions.Logger(LogTypes.Info, "");
+            CommonExtensions.Logger(LogTypes.Info, $"{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}");
 
 
             dtForShow?.Dispose();
@@ -1805,11 +1804,11 @@ namespace FlexibleDBMS
             if (OperatingModes == AppModes.Admin)
             {
                 txtbResultShow.AppendLine($"{text}");
-                CommonExtensions.Logger(LogTypes.Info,$"{text}");
+                CommonExtensions.Logger(LogTypes.Info, $"{text}");
             }
             else
             {
-               CommonExtensions.Logger(LogTypes.Info,$"{text}");
+                CommonExtensions.Logger(LogTypes.Info, $"{text}");
             }
         }
 
