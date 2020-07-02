@@ -82,7 +82,8 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Data.SQLite">
+    <Reference Include="System.Data.SQLite, Version=1.0.103.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>Resources\System.Data.SQLite.dll</HintPath>
       <Private>False</Private>
     </Reference>
@@ -249,14 +250,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\SQLite.Designer.dll" />
-    <Content Include="Resources\System.Data.SQLite.EF6.dll" />
-    <Content Include="Resources\System.Data.SQLite.Linq.dll" />
-    <Content Include="Resources\System.Data.SQLite.x64.dll" />
-    <Content Include="Resources\System.Data.SQLite.x86.dll" />
     <Content Include="RYIK40.ico" />
     <None Include="README.md" />
-    <None Include="System.Data.SQLite.dll" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\AutoUpdater.NET.dll.deflated" />
