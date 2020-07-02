@@ -107,103 +107,103 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums\LogTypes.cs" />
-    <Compile Include="Extentions\AssemblyLoader.cs" />
-    <Compile Include="Extentions\ForEachAsyncExtension.cs" />
-    <Compile Include="Models\ControlStateStore.cs" />
-    <Compile Include="DBTools\MsSqlUtils.cs" />
-    <Compile Include="DBTools\SQLSelector.cs" />
-    <Compile Include="DBTools\SQLiteImportedDB.cs" />
-    <Compile Include="Extentions\MenuItemToToolStripMenuItemExtensions.cs" />
-    <Compile Include="Models\BoolEventArgs.cs" />
-    <Compile Include="Models\Config.cs" />
-    <Compile Include="Models\ConfigAbstract.cs" />
-    <Compile Include="Models\ConfigFull.cs" />
-    <Compile Include="Models\ConfigStore.cs" />
-    <Compile Include="Models\DataTableStore.cs" />
-    <Compile Include="Models\IModels.cs" />
-    <Compile Include="DBTools\SQLiteDbAbstract.cs" />
-    <Compile Include="Enums\SQLProvider.cs" />
-    <Compile Include="Extentions\CompareTwoStrings.cs" />
-    <Compile Include="Models\ConfigDictionaryTo.cs" />
-    <Compile Include="DBTools\ISQLConnectionSettings.cs" />
-    <Compile Include="Extentions\CommonConst.cs" />
-    <Compile Include="DBTools\SQLConnectionExtensions.cs" />
-    <Compile Include="Models\DBColumnModel.cs" />
-    <Compile Include="Models\DBFilterModel.cs" />
-    <Compile Include="Models\DBModel.cs" />
-    <Compile Include="Models\IModelEntityDB.cs" />
-    <Compile Include="Models\ItemFlipper.cs" />
-    <Compile Include="Models\IWriterable.cs" />
-    <Compile Include="BL\FileReader.cs" />
-    <Compile Include="BL\FileWriter.cs" />
-    <Compile Include="DBTools\SqlAbstractConnector.cs" />
-    <Compile Include="DBTools\MySQLUtils.cs" />
-    <Compile Include="Models\ModelCommon.cs" />
-    <Compile Include="Models\ModelCommonStore.cs" />
-    <Compile Include="DBTools\SQLConnectionData.cs" />
-    <Compile Include="DBTools\SQLConnectionSettings.cs" />
-    <Compile Include="Enums\ConfigType.cs" />
-    <Compile Include="Enums\EnumExtensions.cs" />
-    <Compile Include="Enums\AppModes.cs" />
-    <Compile Include="BL\CommandLineArguments.cs" />
-    <Compile Include="DBTools\SQLConnectionStore.cs" />
-    <Compile Include="Models\ModelCommonStringStore.cs" />
-    <Compile Include="Models\TextEventArgs.cs" />
-    <Compile Include="BL\EppExtension.cs" />
-    <Compile Include="BL\MenuFiltersMaker.cs" />
-    <Compile Include="DBTools\DbColumn.cs" />
-    <Compile Include="DBTools\DbIndex.cs" />
-    <Compile Include="DBTools\DbSchema.cs" />
-    <Compile Include="DBTools\DbTable.cs" />
-    <Compile Include="DBTools\DbUpgradeException.cs" />
-    <Compile Include="DBTools\SQLiteDbWrapper.cs" />
-    <Compile Include="DBTools\SQLiteModelDBOperations.cs" />
-    <Compile Include="BL\FileReaderModels.cs" />
-    <Compile Include="Extentions\CommonExtentions.cs" />
-    <Compile Include="Models\MenuItemStore.cs" />
-    <Compile Include="Models\ColorEventArgs.cs" />
-    <Compile Include="Update\ApplicationUpdater.cs" />
-    <Compile Include="Update\UserAD.cs" />
-    <Compile Include="Update\UpdateOptions.cs" />
-    <Compile Include="Views\AdministratorForm.cs">
+    <Compile Include="Project\Enums\LogTypes.cs" />
+    <Compile Include="Project\Extentions\AssemblyLoader.cs" />
+    <Compile Include="Project\Extentions\ForEachAsyncExtension.cs" />
+    <Compile Include="Project\Models\ControlStateStore.cs" />
+    <Compile Include="Project\DBTools\MsSqlUtils.cs" />
+    <Compile Include="Project\DBTools\SQLSelector.cs" />
+    <Compile Include="Project\DBTools\SQLiteImportedDB.cs" />
+    <Compile Include="Project\Extentions\MenuItemToToolStripMenuItemExtensions.cs" />
+    <Compile Include="Project\Models\BoolEventArgs.cs" />
+    <Compile Include="Project\Models\Config.cs" />
+    <Compile Include="Project\Models\ConfigAbstract.cs" />
+    <Compile Include="Project\Models\ConfigFull.cs" />
+    <Compile Include="Project\Models\ConfigStore.cs" />
+    <Compile Include="Project\Models\DataTableStore.cs" />
+    <Compile Include="Project\Models\IModels.cs" />
+    <Compile Include="Project\DBTools\SQLiteDbAbstract.cs" />
+    <Compile Include="Project\Enums\SQLProvider.cs" />
+    <Compile Include="Project\Extentions\CompareTwoStrings.cs" />
+    <Compile Include="Project\Models\ConfigDictionaryTo.cs" />
+    <Compile Include="Project\DBTools\ISQLConnectionSettings.cs" />
+    <Compile Include="Project\Extentions\CommonConst.cs" />
+    <Compile Include="Project\DBTools\SQLConnectionExtensions.cs" />
+    <Compile Include="Project\Models\DBColumnModel.cs" />
+    <Compile Include="Project\Models\DBFilterModel.cs" />
+    <Compile Include="Project\Models\DBModel.cs" />
+    <Compile Include="Project\Models\IModelEntityDB.cs" />
+    <Compile Include="Project\Models\ItemFlipper.cs" />
+    <Compile Include="Project\Models\IWriterable.cs" />
+    <Compile Include="Project\BL\FileReader.cs" />
+    <Compile Include="Project\BL\FileWriter.cs" />
+    <Compile Include="Project\DBTools\SqlAbstractConnector.cs" />
+    <Compile Include="Project\DBTools\MySQLUtils.cs" />
+    <Compile Include="Project\Models\ModelCommon.cs" />
+    <Compile Include="Project\Models\ModelCommonStore.cs" />
+    <Compile Include="Project\DBTools\SQLConnectionData.cs" />
+    <Compile Include="Project\DBTools\SQLConnectionSettings.cs" />
+    <Compile Include="Project\Enums\ConfigType.cs" />
+    <Compile Include="Project\Enums\EnumExtensions.cs" />
+    <Compile Include="Project\Enums\AppModes.cs" />
+    <Compile Include="Project\BL\CommandLineArguments.cs" />
+    <Compile Include="Project\DBTools\SQLConnectionStore.cs" />
+    <Compile Include="Project\Models\ModelCommonStringStore.cs" />
+    <Compile Include="Project\Models\TextEventArgs.cs" />
+    <Compile Include="Project\BL\EppExtension.cs" />
+    <Compile Include="Project\BL\MenuFiltersMaker.cs" />
+    <Compile Include="Project\DBTools\DbColumn.cs" />
+    <Compile Include="Project\DBTools\DbIndex.cs" />
+    <Compile Include="Project\DBTools\DbSchema.cs" />
+    <Compile Include="Project\DBTools\DbTable.cs" />
+    <Compile Include="Project\DBTools\DbUpgradeException.cs" />
+    <Compile Include="Project\DBTools\SQLiteDbWrapper.cs" />
+    <Compile Include="Project\DBTools\SQLiteModelDBOperations.cs" />
+    <Compile Include="Project\BL\FileReaderModels.cs" />
+    <Compile Include="Project\Extentions\CommonExtentions.cs" />
+    <Compile Include="Project\Models\MenuItemStore.cs" />
+    <Compile Include="Project\Models\ColorEventArgs.cs" />
+    <Compile Include="Project\Update\ApplicationUpdater.cs" />
+    <Compile Include="Project\Update\UserAD.cs" />
+    <Compile Include="Project\Update\UpdateOptions.cs" />
+    <Compile Include="Project\Views\AdministratorForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Views\AdministratorForm.Designer.cs">
+    <Compile Include="Project\Views\AdministratorForm.Designer.cs">
       <DependentUpon>AdministratorForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Views\MainForm.cs">
+    <Compile Include="Project\Views\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Views\MainForm.Designer.cs">
+    <Compile Include="Project\Views\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Extentions\ToolStripDropDownItemExtentions.cs" />
-    <Compile Include="Models\IModel.cs" />
-    <Compile Include="Models\MenuItem.cs" />
-    <Compile Include="BL\ParserRowTo.cs" />
-    <Compile Include="Models\DBTableModel.cs" />
+    <Compile Include="Project\Extentions\ToolStripDropDownItemExtentions.cs" />
+    <Compile Include="Project\Models\IModel.cs" />
+    <Compile Include="Project\Models\MenuItem.cs" />
+    <Compile Include="Project\BL\ParserRowTo.cs" />
+    <Compile Include="Project\Models\DBTableModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BL\RegistryManager.cs" />
-    <Compile Include="Views\HelpForm.cs">
+    <Compile Include="Project\BL\RegistryManager.cs" />
+    <Compile Include="Project\Views\HelpForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Views\HelpForm.Designer.cs">
+    <Compile Include="Project\Views\HelpForm.Designer.cs">
       <DependentUpon>HelpForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Enums\MainViewMode.cs" />
-    <Compile Include="Views\GetNewConnectionForm.cs">
+    <Compile Include="Project\Enums\MainViewMode.cs" />
+    <Compile Include="Project\Views\GetNewConnectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Views\GetNewConnectionForm.Designer.cs">
+    <Compile Include="Project\Views\GetNewConnectionForm.Designer.cs">
       <DependentUpon>GetNewConnectionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Enums\ToolStripMenuType.cs" />
-    <EmbeddedResource Include="Views\AdministratorForm.resx">
+    <Compile Include="Project\Enums\ToolStripMenuType.cs" />
+    <EmbeddedResource Include="Project\Views\AdministratorForm.resx">
       <DependentUpon>AdministratorForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\MainForm.resx">
+    <EmbeddedResource Include="Project\Views\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -216,10 +216,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="Views\HelpForm.resx">
+    <EmbeddedResource Include="Project\Views\HelpForm.resx">
       <DependentUpon>HelpForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\GetNewConnectionForm.resx">
+    <EmbeddedResource Include="Project\Views\GetNewConnectionForm.resx">
       <DependentUpon>GetNewConnectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
@@ -232,12 +232,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Resources\EPPlus.dll.deflated" />
-    <EmbeddedResource Include="Resources\MySql.Data.dll.deflated" />
-    <EmbeddedResource Include="Resources\System.Data.SQLite.dll.deflated" />
-    <EmbeddedResource Include="Resources\System.IO.Abstractions.dll.deflated" />
-    <EmbeddedResource Include="Resources\x86\SQLite.Interop.dll.deflated" />
-    <EmbeddedResource Include="Resources\x64\SQLite.Interop.dll.deflated" />
+    <EmbeddedResource Include="Project\Resources\EPPlus.dll.deflated" />
+    <EmbeddedResource Include="Project\Resources\MySql.Data.dll.deflated" />
+    <EmbeddedResource Include="Project\Resources\System.Data.SQLite.dll.deflated" />
+    <EmbeddedResource Include="Project\Resources\System.IO.Abstractions.dll.deflated" />
+    <EmbeddedResource Include="Project\Resources\x86\SQLite.Interop.dll.deflated" />
+    <EmbeddedResource Include="Project\Resources\x64\SQLite.Interop.dll.deflated" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -254,10 +254,10 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\AutoUpdater.NET.dll.deflated" />
-    <None Include="Resources\RYIK_small.png" />
-    <None Include="Resources\LogoRYIK.png" />
-    <None Include="Resources\LogoRYIK.ico" />
+    <EmbeddedResource Include="Project\Resources\AutoUpdater.NET.dll.deflated" />
+    <None Include="Project\Resources\RYIK_small.png" />
+    <None Include="Project\Resources\LogoRYIK.png" />
+    <None Include="Project\Resources\LogoRYIK.ico" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
