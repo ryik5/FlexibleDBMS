@@ -232,12 +232,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Project\Resources\EPPlus.dll.deflated" />
-    <EmbeddedResource Include="Project\Resources\MySql.Data.dll.deflated" />
-    <EmbeddedResource Include="Project\Resources\System.Data.SQLite.dll.deflated" />
-    <EmbeddedResource Include="Project\Resources\System.IO.Abstractions.dll.deflated" />
-    <EmbeddedResource Include="Project\Resources\x86\SQLite.Interop.dll.deflated" />
-    <EmbeddedResource Include="Project\Resources\x64\SQLite.Interop.dll.deflated" />
+    <EmbeddedResource Include="Resources\EPPlus.dll.deflated" />
+    <EmbeddedResource Include="Resources\MySql.Data.dll.deflated" />
+    <EmbeddedResource Include="Resources\System.Data.SQLite.dll.deflated" />
+    <EmbeddedResource Include="Resources\System.IO.Abstractions.dll.deflated" />
+    <EmbeddedResource Include="Resources\x86\SQLite.Interop.dll.deflated" />
+    <EmbeddedResource Include="Resources\x64\SQLite.Interop.dll.deflated" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -254,10 +254,10 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Project\Resources\AutoUpdater.NET.dll.deflated" />
-    <None Include="Project\Resources\RYIK_small.png" />
-    <None Include="Project\Resources\LogoRYIK.png" />
-    <None Include="Project\Resources\LogoRYIK.ico" />
+    <EmbeddedResource Include="Resources\AutoUpdater.NET.dll.deflated" />
+    <None Include="Resources\RYIK_small.png" />
+    <None Include="Resources\LogoRYIK.png" />
+    <None Include="Resources\LogoRYIK.ico" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
