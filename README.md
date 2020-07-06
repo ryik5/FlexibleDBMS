@@ -3,6 +3,9 @@
 It is maintained by [@ryik5](https://github.com/ryik5).
 
 
+***
+
+
 ### Links
 * [What?](#What)
 * [Usage](#Usage)
@@ -16,6 +19,8 @@ It is maintained by [@ryik5](https://github.com/ryik5).
 Do easy using of flexible queries and hard coded queries on switchable DBs.
 This application provides the easy way to reuse SQL queries for different types and instances of  databases.
 
+
+***
 
 
 [Usage](#Usage)
@@ -36,9 +41,13 @@ Run FlexibleDBMS.exe
 ![Программа_Юра_3](https://user-images.githubusercontent.com/37776955/86589504-79f01c00-bf96-11ea-8029-c20ed5c5eab7.jpg)
 
 
+***
 
 
 [Additional helpers](#GuiPackager)
 ## GuiPackager
 Maker packed files for 'Resources' folder
 <a href='https://github.com/ryik5/GuiPackager'>GuiPackager</a>
+
+
+***
