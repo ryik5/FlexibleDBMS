@@ -3,19 +3,22 @@
 It is maintained by [@ryik5](https://github.com/ryik5).
 
 ### Links
-* [What?](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
-* [Usage](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
-* [Documentation](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
-* [Contributing](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
+* [What?](#What)
+* [Usage](#Usage)
+* [Documentation](#Quickstart)
+* [Additional helpers](#GuiPackager)
 
 
+#What
 ## What?
 
 Do easy using of flexible queries and hard coded queries on switchable DBs.
 This application provides the easy way to reuse SQL queries for different types and instances of  databases.
 
+#Quickstart
 ## Quickstart
 
+#Usage
 ### Usage
 
 before using it has to check and install .NET framework ver. 4.5 or above
@@ -34,5 +37,7 @@ Run FlexibleDBMS.exe
 ![Программа_Юра_3](https://user-images.githubusercontent.com/37776955/86589504-79f01c00-bf96-11ea-8029-c20ed5c5eab7.jpg)
 
 
-## Maker packed files for 'Resources' folder
+#GuiPackager
+## GuiPackager
+Maker packed files for 'Resources' folder
 <a href='https://github.com/ryik5/GuiPackager'>GuiPackager</a>
