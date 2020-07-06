@@ -24,6 +24,8 @@ Run FlexibleDBMS.exe
 
 
 ![Программа_Юра](https://user-images.githubusercontent.com/37776955/86589501-78265880-bf96-11ea-9072-edb8c3d691b5.jpg)
+![Программа_Юра_2](https://user-images.githubusercontent.com/37776955/86589503-79578580-bf96-11ea-9251-42371006642e.jpg)
+![Программа_Юра_3](https://user-images.githubusercontent.com/37776955/86589504-79f01c00-bf96-11ea-8029-c20ed5c5eab7.jpg)
 
 ### Links
 * [What?](https://github.com/ryik5/FlexibleDBMS/README.md)
