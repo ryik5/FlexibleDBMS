@@ -46,7 +46,7 @@ Run FlexibleDBMS.exe
 
 [Additional helpers](#GuiPackager)
 ## GuiPackager
-Maker packed files for 'Resources' folder
+Maker of packed files for 'Resources' folder
 <a href='https://github.com/ryik5/GuiPackager'>GuiPackager</a>
 
 
