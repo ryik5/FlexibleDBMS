@@ -3,9 +3,9 @@
 It is maintained by [@ryik5](https://github.com/ryik5).
 
 ### Links
-* [What?](Who#What)
-* [Usage](#Usage)
-* [Additional helpers](#GuiPackager)
+* [What?](Code#What)
+* [Usage]Code(Code#Usage)
+* [Additional helpers](Code#GuiPackager)
 
 
 
