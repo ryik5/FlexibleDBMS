@@ -23,6 +23,8 @@ Run FlexibleDBMS.exe
 - Add hard coded frequently used queries to seek in a DB with high changeable data tables.
 
 
+![Программа_Юра](https://user-images.githubusercontent.com/37776955/86589501-78265880-bf96-11ea-9072-edb8c3d691b5.jpg)
+
 ### Links
 * [What?](https://github.com/ryik5/FlexibleDBMS/README.md)
 * [Usage](https://github.com/ryik5/FlexibleDBMS/README.md)
