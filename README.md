@@ -3,22 +3,22 @@
 It is maintained by [@ryik5](https://github.com/ryik5).
 
 ### Links
-* [What?](# What)
-* [Usage](# Usage)
-* [Documentation](# Quickstart)
-* [Additional helpers](# GuiPackager)
+* [What?](#What)
+* [Usage](#Usage)
+* [Documentation](#Quickstart)
+* [Additional helpers](#GuiPackager)
 
 
-#What
+(#What)
 ## What?
 
 Do easy using of flexible queries and hard coded queries on switchable DBs.
 This application provides the easy way to reuse SQL queries for different types and instances of  databases.
 
-#Quickstart
+(#Quickstart)
 ## Quickstart
 
-#Usage
+(#Usage)
 ### Usage
 
 before using it has to check and install .NET framework ver. 4.5 or above
