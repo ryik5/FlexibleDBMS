@@ -2,6 +2,12 @@
 
 It is maintained by [@ryik5](https://github.com/ryik5).
 
+### Links
+* [What?](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
+* [Usage](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
+* [Documentation](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
+* [Contributing](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
+
 
 ## What?
 
@@ -27,11 +33,6 @@ Run FlexibleDBMS.exe
 ![Программа_Юра_2](https://user-images.githubusercontent.com/37776955/86589503-79578580-bf96-11ea-9251-42371006642e.jpg)
 ![Программа_Юра_3](https://user-images.githubusercontent.com/37776955/86589504-79f01c00-bf96-11ea-8029-c20ed5c5eab7.jpg)
 
-### Links
-* [What?](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
-* [Usage](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
-* [Documentation](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
-* [Contributing](https://github.com/ryik5/FlexibleDBMS/blob/master/README.md)
 
 ## Maker packed files for 'Resources' folder
 <a href='https://github.com/ryik5/GuiPackager'>GuiPackager</a>
