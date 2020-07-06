@@ -14,7 +14,7 @@ It is maintained by [@ryik5](https://github.com/ryik5).
 
 ***
 
-[What?](#What)
+## [What?](#What)
 
 Do easy using of flexible queries and hard coded queries on switchable DBs.
 This application provides the easy way to reuse SQL queries for different types and instances of  databases.
@@ -23,7 +23,7 @@ This application provides the easy way to reuse SQL queries for different types 
 ***
 
 
-[Usage](#Usage)
+## [Usage](#Usage)
 
 Before using the application has to check and install .NET framework ver. 4.5 or above
 
@@ -51,3 +51,4 @@ Maker packed files for 'Resources' folder
 
 
 ***
+[Go home](#MainPart)
