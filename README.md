@@ -8,7 +8,7 @@ It is maintained by [@ryik5](https://github.com/ryik5).
 * [Additional helpers](#GuiPackager)
 
 
-[What](#What)?
+[What?](#What)
 
 Do easy using of flexible queries and hard coded queries on switchable DBs.
 This application provides the easy way to reuse SQL queries for different types and instances of  databases.
