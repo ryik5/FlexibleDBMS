@@ -1,4 +1,4 @@
-## #[FlexibleDBMS](#MainPart)
+#FlexibleDBMS
 
 It is maintained by [@ryik5](https://github.com/ryik5).
 
@@ -51,4 +51,4 @@ Maker packed files for 'Resources' folder
 
 
 ***
-[Go home](#MainPart)
+[Go home](#FlexibleDBMS)
