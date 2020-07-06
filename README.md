@@ -3,10 +3,10 @@
 It is maintained by [@ryik5](https://github.com/ryik5).
 
 ### Links
-* [What?](#What)
-* [Usage](#Usage)
-* [Documentation](#Quickstart)
-* [Additional helpers](#GuiPackager)
+* [What?](# What)
+* [Usage](# Usage)
+* [Documentation](# Quickstart)
+* [Additional helpers](# GuiPackager)
 
 
 #What
