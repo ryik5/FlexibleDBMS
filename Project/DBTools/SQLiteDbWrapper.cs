@@ -26,6 +26,20 @@ namespace FlexibleDBMS
             return dt;
         }
 
+        /// <summary>
+        /// Search words in Cyrilic looks like - '"SELECT * from таблица WHERE CustomLike(столбец, 'текст')"'
+        /// </summary>
+        [SQLiteFunction(Name = "CustomLike", Arguments = 2, FuncType = FunctionType.Scalar)]
+        public class CustomLike : SQLiteFunction
+        {
+            public override object Invoke(object[] args)
+            {
+                if (args.Length != 2 || args[0] == null || args[1] == null) return null;
+                string val1 = args[0].ToString();
+                string val2 = args[1].ToString();
+                return val1.IndexOf(val2, StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+        }
         public IModelEntityDB<DBFilterModel> MakeFilterCollection(string table, string column, string alias)
         {
             IModelEntityDB<DBFilterModel> modelDBColumn = new DBColumnModel();

@@ -1508,7 +1508,7 @@ namespace FlexibleDBMS
         /// <summary>
         /// timeout of this task = 30 sec
         /// </summary>
-        /// <param name="query"></param>
+        /// <param name="query">Search words in Cyrilic looks like - '"SELECT * from таблица WHERE CustomLike(столбец, 'текст')"'</param>
         /// <returns></returns>
         async Task GetData(string query)
         {
@@ -1532,11 +1532,11 @@ namespace FlexibleDBMS
 
             if (!(string.IsNullOrWhiteSpace(newSettings?.Database)))
             {
-                //timeout = 30 sec
+                //timeout = 120 sec
                 var cancellation = new System.Threading.CancellationTokenSource();
-                cancellation.CancelAfter(30000);
+                cancellation.CancelAfter(120000);
                 var cancellationToken = cancellation.Token;// new System.Threading.CancellationTokenSource(30000).Token;
-                int timeout = 30000;
+                int timeout = 120000;
                 var task = GetTables(cancellationToken, newSettings, query);
                 if (await Task.WhenAny(task, Task.Delay(timeout, cancellationToken)) == task)
                 { await task; }
@@ -1579,6 +1579,7 @@ namespace FlexibleDBMS
             AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashedLong}");
         }
 
+       
         DataTableStore ResultData = new DataTableStore();
         Task GetTables(System.Threading.CancellationToken token, ISQLConnectionSettings settings, string query)
         {

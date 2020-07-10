@@ -11,7 +11,7 @@ namespace FlexibleDBMS
         public string Table { get; set; } = "MainData";
         public string Username { get; set; } = "";
         public string Password { get; set; } = "";
-        public string Name { get { return $"{Host} - {Database} - {Table}"; } set { Name = value; } }
+        public string Name { get { return $"{Host} - {Database}"; } set { Name = value; } }
         public SQLProvider? ProviderName { get; set; } = SQLProvider.SQLite;
 
         public SQLConnectionSettings() { }

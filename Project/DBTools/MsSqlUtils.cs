@@ -24,12 +24,10 @@ namespace FlexibleDBMS
         }
 
 
-        public override DataTable GetTable(string query, int timeout = 3600)
+        public override DataTable GetTable(string query, int timeout = 12000)
         {
-            if(timeout != 3600)
-            {
                 connString = SetConnectionString(settings, timeout);
-            }
+            
             DataTable dt = null;
             using (System.Data.SqlClient.SqlConnection connection = new System.Data.SqlClient.SqlConnection(connString))
             {

@@ -113,7 +113,7 @@
     <Compile Include="Project\Models\ControlStateStore.cs" />
     <Compile Include="Project\DBTools\MsSqlUtils.cs" />
     <Compile Include="Project\DBTools\SQLSelector.cs" />
-    <Compile Include="Project\DBTools\SQLiteImportedDB.cs" />
+    <Compile Include="Project\DBTools\SQLiteCheckImportedDB.cs" />
     <Compile Include="Project\Extentions\MenuItemToToolStripMenuItemExtensions.cs" />
     <Compile Include="Project\Models\BoolEventArgs.cs" />
     <Compile Include="Project\Models\Config.cs" />
@@ -141,7 +141,6 @@
     <Compile Include="Project\DBTools\MySQLUtils.cs" />
     <Compile Include="Project\Models\ModelCommon.cs" />
     <Compile Include="Project\Models\ModelCommonStore.cs" />
-    <Compile Include="Project\DBTools\SQLConnectionData.cs" />
     <Compile Include="Project\DBTools\SQLConnectionSettings.cs" />
     <Compile Include="Project\Enums\ConfigType.cs" />
     <Compile Include="Project\Enums\EnumExtensions.cs" />

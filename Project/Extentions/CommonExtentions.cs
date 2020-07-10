@@ -58,42 +58,7 @@ namespace FlexibleDBMS
             }
         }
 
-        /// <summary>
-        /// Replace substring of case insensetive in the text
-        /// </summary>
-        /// <param name="input">inputed text</param>
-        /// <param name="search">substring for replace</param>
-        /// <param name="replacement">new substring</param>
-        /// <returns>new string where old substring replaced by new one</returns>
-        public static string ReplaceCaseInsensitive(string input, string search, string replacement)
-        {
-            string result = Regex.Replace(
-                input,
-                Regex.Escape(search),
-                replacement.Replace("$", "$$"),
-                RegexOptions.IgnoreCase
-            );
-            return result;
-        }
-
-        public static bool CheckQueryToReplaceWords(string query)
-        {
-            string[] words = query?.Split(',', ' ', ')', '(', ';');
-
-            if (!(words?.Length > 0))
-            { return false; }
-
-            if
-              (!(words?.Count(x => x.ToLower().Equals("select")) > 0 &&
-                words?.Count(x => x.ToLower().Equals("from")) > 0 &&
-                words?.Count(x => x.ToLower().Equals("maindata")) > 0 &&
-                (words?.Count(x => x.ToLower().StartsWith("column")) > 0 ))) //|| words?.Count(x => x.Equals("*"))>0 
-            { return false; }
-
-
-            return true;
-        }
-        
+       
         /// <summary>
         /// Search translation of the word 'key' from the prepared dictionary 
         /// </summary>

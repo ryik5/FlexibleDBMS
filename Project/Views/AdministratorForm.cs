@@ -401,7 +401,7 @@ namespace FlexibleDBMS
                 IList<string> columnsLeave = new List<string>();
                 IList<string> columnsDelete = new List<string>();
 
-                bool isImportedDB = SQLiteImportedDB.Check(settings.Database);
+                bool isImportedDB = SQLiteCheckImportedDB.Check(settings.Database);
                 if (isImportedDB)
                 {
                     DbTable db = schemaDB.Tables.Values.First(x => x.TableName.Equals("MainData"));
@@ -488,7 +488,7 @@ namespace FlexibleDBMS
             MakeTextBoxResultShow();
             txtbResultShow.ReadOnly = true;
 
-            if (SQLiteImportedDB.Check(pathToSqliteDB))
+            if (SQLiteCheckImportedDB.Check(pathToSqliteDB))
             {
                 DbSchema schemaDB = DbSchema.LoadDB(pathToSqliteDB);
                 IList<string> tablesDB = new List<string>();
@@ -507,7 +507,7 @@ namespace FlexibleDBMS
                 bool isExistedColumnDistrictPlate = false; //row 'ColumnPlateDistrict is not existed in the table 'ColumnNameAndAlias'
                 string columnWithPlate = string.Empty;
 
-                bool isImportedDB = SQLiteImportedDB.Check(pathToSqliteDB);
+                bool isImportedDB = SQLiteCheckImportedDB.Check(pathToSqliteDB);
 
                 if (isImportedDB)
                 {

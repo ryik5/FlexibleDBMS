@@ -28,7 +28,7 @@ namespace FlexibleDBMS
             EvntInfoMessage?.Invoke(this, new TextEventArgs($"Установлено новое подключение{Environment.NewLine}{settings.Database}"));
             connString = SetConnectionString(settings);
 
-            if (SQLiteImportedDB.Check(settings.Database))
+            if (SQLiteCheckImportedDB.Check(settings.Database))
             {
                 if (!(columnsAndAliases?.Count > 0))
                 {
@@ -116,7 +116,7 @@ namespace FlexibleDBMS
 
             EvntInfoMessage?.Invoke(this, new TextEventArgs($"БД: {settings.Database}"));
 
-            if (SQLiteImportedDB.Check(settings.Database))
+            if (SQLiteCheckImportedDB.Check(settings.Database))
             {
                 string query = "SELECT ColumnName, ColumnAlias FROM ColumnNameAndAlias;";
                 using SqLiteDbWrapper readData = new SqLiteDbWrapper(connString);
@@ -145,12 +145,31 @@ namespace FlexibleDBMS
             columnsAndAliases = TryToSetColumnDictionary();
         }
 
+        bool CheckQueryToReplaceWords(string query)
+        {
+            if (query.Contains('|') || query.ToLower().Contains(" as "))
+                return false;
 
-        public  string ReplaceColumnByAlias(IDictionary<string ,string> dic, string query)
+            string[] words = query?.Split(',', ' ', ')', '(', ';');
+
+            if (!(words?.Length > 0))
+            { return false; }
+
+            if
+              (!(words?.Count(x => x.ToLower().Equals("select")) > 0 &&
+                words?.Count(x => x.ToLower().Equals("from")) > 0 &&
+                words?.Count(x => x.ToLower().Equals("maindata")) > 0 &&
+                (words?.Count(x => x.ToLower().StartsWith("column")) > 0))) //|| words?.Count(x => x.Equals("*"))>0 
+            { return false; }
+
+            return true;
+        }
+
+          string ReplaceColumnByAlias(IDictionary<string ,string> dic, string query)
         {
             EvntInfoMessage?.Invoke(this, new TextEventArgs($"Ищу в словаре из {dic?.Count} слов замену для слов в запросе:" +
                 $"{Environment.NewLine}'{query}"));
-            if (!(CommonExtensions.CheckQueryToReplaceWords(query)))
+            if (!CheckQueryToReplaceWords(query))
             {
                 return query;
             }
@@ -198,7 +217,7 @@ namespace FlexibleDBMS
             return result;
         }
 
-        public override DataTable GetTable(string query, int timeout = 3600)
+        public override DataTable GetTable(string query, int timeout = 6000)
         {
             DataTable dt = new DataTable();
 
@@ -210,7 +229,7 @@ namespace FlexibleDBMS
 
                 string newQuery = query;
 
-                if (SQLiteImportedDB.Check(settings.Database))
+                if (SQLiteCheckImportedDB.Check(settings.Database))
                 {
                     if (!(columnsAndAliases?.Count > 0))
                     { MakeNewDictionary(); }
@@ -232,7 +251,7 @@ namespace FlexibleDBMS
                         }
 
                         newQuery = $"{newQuery.TrimEnd(' ').TrimEnd(',')} FROM MAINDATA ";
-                        newQuery = CommonExtensions.ReplaceCaseInsensitive(query, CommonConst.QUERY_COMMON, newQuery);
+                        newQuery = ReplaceCaseInsensitive1(query, CommonConst.QUERY_COMMON, newQuery);
 
                         EvntInfoMessage?.Invoke(this, new TextEventArgs($"Произведена замена запроса на newQuery:{Environment.NewLine}'{query}'{Environment.NewLine}на: '{newQuery}'"));
                     }
@@ -256,13 +275,31 @@ namespace FlexibleDBMS
             return dt;
         }
 
+        /// <summary>
+        /// Replace substring of case insensetive in the text
+        /// </summary>
+        /// <param name="input">inputed text</param>
+        /// <param name="search">substring for replace</param>
+        /// <param name="replacement">new substring</param>
+        /// <returns>new string where old substring replaced by new one</returns>
+        string ReplaceCaseInsensitive1(string input, string search, string replacement)
+        {
+            string result = Regex.Replace(
+                input,
+                Regex.Escape(search),
+                replacement.Replace("$", "$$"),
+                RegexOptions.IgnoreCase
+            );
+            return result;
+        }
+
 
         public ModelCommonStringStore GetColumns(string table)
         {
             ModelCommonStringStore models = new ModelCommonStringStore();
             IModel model;
             
-            if ( SQLiteImportedDB.Check(settings.Database)&& table.Equals("MainData"))
+            if ( SQLiteCheckImportedDB.Check(settings.Database)&& table.Equals("MainData"))
             {
                 string query = "SELECT ColumnName, ColumnAlias FROM 'ColumnNameAndAlias';";
                 using (DataTable dt = GetTable(query))
@@ -357,6 +394,8 @@ namespace FlexibleDBMS
             }
         }
 
+
+
         public void PrepareTablesForCommonModel(IModels columnsAndAliases)
         {
             //create table MainData
@@ -375,7 +414,7 @@ namespace FlexibleDBMS
             //fill table ColumnNameAndAlias
             query = "INSERT INTO 'ColumnNameAndAlias' ('ColumnName', 'ColumnAlias') VALUES (@ColumnName, @ColumnAlias);";
 
-            if (SQLiteImportedDB.Check(settings.Database))
+            if (SQLiteCheckImportedDB.Check(settings.Database))
             {
              //   if (CheckUpDBStructure("ColumnNameAndAlias"))
            // {
@@ -418,7 +457,7 @@ namespace FlexibleDBMS
             query = query.TrimEnd(' ').TrimEnd(',');
             query += ");";
 
-            if (SQLiteImportedDB.Check(settings.Database))
+            if (SQLiteCheckImportedDB.Check(settings.Database))
             {
                 //   if (CheckUpDBStructure("MainData"))
                 //{

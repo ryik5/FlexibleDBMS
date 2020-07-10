@@ -16,5 +16,4 @@ namespace FlexibleDBMS
         delegate void WorkFinished(object sender, BoolEventArgs e);
         delegate void InfoMessage(object sender, TextEventArgs e);
     }
-
 }

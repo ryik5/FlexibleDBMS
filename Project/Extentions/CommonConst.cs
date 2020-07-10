@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Windows.Forms;
 
 namespace FlexibleDBMS
 {
@@ -13,14 +12,14 @@ namespace FlexibleDBMS
         public static DateTime DateTimeStamp { get { return DateTime.Now; } }
 
         public readonly static System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        public readonly static System.Diagnostics.FileVersionInfo appFileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+        public readonly static FileVersionInfo appFileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
         public readonly static string AppVersion = assembly.GetName().Version.ToString();
         public readonly static string LocalAppFolder= Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
         public readonly static string LocalBackupFolder = Path.Combine(LocalAppFolder, "bak");
         public readonly static string LocalLogFolder = Path.Combine(LocalAppFolder, "logs");
         public readonly static string LocalTempFolder = Path.Combine(LocalAppFolder, "Temp");
         public readonly static string LocalUpdateFolder = Path.Combine(LocalAppFolder, "Update");
-        public readonly static string AppName = Path.GetFileNameWithoutExtension(Application.ExecutablePath);
+        public readonly static string AppName = Path.GetFileNameWithoutExtension(System.Windows.Forms.Application.ExecutablePath);
         public readonly static string AppCfgFilePath = Path.Combine(LocalAppFolder, $"{AppName}.cfg");
         public  static string AppLogFilePath = Path.Combine(LocalLogFolder, $"{DayStamp}.log");
         public readonly static string AppFileUpdateXml = $"{AppName}.xml";

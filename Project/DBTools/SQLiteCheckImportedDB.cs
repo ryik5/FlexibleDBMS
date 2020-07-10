@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace FlexibleDBMS
 {
-    internal static class SQLiteImportedDB
+    internal static class SQLiteCheckImportedDB
     {
         public static bool Check(string filePath)
         {
