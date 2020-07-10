@@ -34,7 +34,7 @@ Run FlexibleDBMS.exe
 * Add links on different kind of databases to MRU.
 * Add flexible queries by use in a created query of pair symbols '{}' as replacing of a seek word in query while search in unchanged DB.
 * Add hard coded frequently used queries to seek in a DB with high changeable data tables.
-
+* Hard coded queries and soft ones work correctly on imported data  contained of SQLite DBs throw using a query like 'SELECT * FROM table WHERE CustomLike(column_name, 'mask_of_parameter');'
 
 ![Программа_Юра](https://user-images.githubusercontent.com/37776955/86589501-78265880-bf96-11ea-9072-edb8c3d691b5.jpg)
 ![Программа_Юра_2](https://user-images.githubusercontent.com/37776955/86589503-79578580-bf96-11ea-9251-42371006642e.jpg)
