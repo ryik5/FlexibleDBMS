@@ -10,7 +10,7 @@ namespace FlexibleDBMS
         public event InfoMessage EvntInfoMessage;
 
 
-        char FindUsedDelimiter(string text)
+    private  static  char FindUsedDelimiter(string text)
         {
             char delimiter = '-';
             if (text.Trim().StartsWith("-"))
@@ -43,16 +43,16 @@ namespace FlexibleDBMS
                     argumString += parameters[i] + " ";
                 }
 
-                char delim = FindUsedDelimiter(argumString);
+                char delimiter = FindUsedDelimiter(argumString);
 
-                arguments = argumString.Split(delim);
+                arguments = argumString.Split(delimiter);
             }
 
-            EvntInfoMessage.Invoke(this, new TextEventArgs(argumString));
+            EvntInfoMessage?.Invoke(this, new TextEventArgs(argumString));
 
-            arguments.Any(x => x.StartsWith("a")); //admin
+            arguments.Any(x => x.StartsWith("a")); //mode is admin
 
-            arguments.Any(x => x.StartsWith("c")); //configuration db
+            arguments.Any(x => x.StartsWith("c")); //mode is configuration db
 
             //if (args?.Length > 1)
             //{
