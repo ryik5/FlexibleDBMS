@@ -35,20 +35,20 @@ namespace FlexibleDBMS
             //Get args
             //  string args = ToString(Environment.GetCommandLineArgs());
 
-            string argumString = string.Empty;
+            string argumentsString = string.Empty;
             if (parameters?.Length > 0)
             {
                 for (int i = 1; i < parameters?.Length; i++)
                 {
-                    argumString += parameters[i] + " ";
+                    argumentsString += parameters[i] + " ";
                 }
 
-                char delimiter = FindUsedDelimiter(argumString);
+                char delimiter = FindUsedDelimiter(argumentsString);
 
-                arguments = argumString.Split(delimiter);
+                arguments = argumentsString.Split(delimiter);
             }
 
-            EvntInfoMessage?.Invoke(this, new TextEventArgs(argumString));
+            EvntInfoMessage?.Invoke(this, new TextEventArgs(argumentsString));
 
             arguments.Any(x => x.StartsWith("a")); //mode is admin
 
