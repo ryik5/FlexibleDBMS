@@ -12,8 +12,5 @@ namespace FlexibleDBMS
         Task Write(string filePath, string content, Encoding encoding);
         Task Write(string filePath, IList<string> content, Encoding encoding);
         void Write(string filePath, ConfigFull<ConfigAbstract> config);
-
-        delegate void WorkFinished(object sender, BoolEventArgs e);
-        delegate void InfoMessage(object sender, TextEventArgs e);
     }
 }

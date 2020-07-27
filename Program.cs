@@ -47,10 +47,9 @@ namespace FlexibleDBMS
             //        return;
             //    }
 
-            //    //Running jnly one copy. Try to run the main application's form
+            //    //Running only one copy. Try to run the main application's form
             //    Application.Run(new MainForm());
             //}
-
 
             Application.Run(new MainForm());
         }
