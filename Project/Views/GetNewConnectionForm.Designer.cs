@@ -45,9 +45,7 @@
             // 
             // tbResultShow
             // 
-            this.tbResultShow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbResultShow.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.tbResultShow.Location = new System.Drawing.Point(0, 125);
             this.tbResultShow.Multiline = true;
             this.tbResultShow.Name = "tbResultShow";
@@ -115,8 +113,7 @@
             // 
             // cmbDataBases
             // 
-            this.cmbDataBases.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbDataBases.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbDataBases.FormattingEnabled = true;
             this.cmbDataBases.Location = new System.Drawing.Point(393, 12);
             this.cmbDataBases.Name = "cmbDataBases";
@@ -143,8 +140,7 @@
             // 
             // cmbTables
             // 
-            this.cmbTables.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbTables.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbTables.FormattingEnabled = true;
             this.cmbTables.Location = new System.Drawing.Point(393, 39);
             this.cmbTables.Name = "cmbTables";
@@ -182,23 +178,22 @@
             this.Load += new System.EventHandler(this.SelectDBForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
-        #endregion
-
-        private System.Windows.Forms.TextBox tbResultShow;
-        private System.Windows.Forms.Button btnCheck;
-        private System.Windows.Forms.ComboBox cmbSQLProvider;
-        private System.Windows.Forms.TextBox tbHost;
-        private System.Windows.Forms.TextBox tbPort;
-        private System.Windows.Forms.TextBox tbPassword;
-        private System.Windows.Forms.TextBox tbUserName;
-        private System.Windows.Forms.TextBox tbName;
-        private System.Windows.Forms.ComboBox cmbDataBases;
-        private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Button btnCheck;
+        private System.Windows.Forms.Button btnSave;
+        private System.Windows.Forms.ComboBox cmbDataBases;
+        private System.Windows.Forms.ComboBox cmbSQLProvider;
         private System.Windows.Forms.ComboBox cmbTables;
         private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.TextBox tbHost;
+        private System.Windows.Forms.TextBox tbName;
+        private System.Windows.Forms.TextBox tbPassword;
+        private System.Windows.Forms.TextBox tbPort;
+        private System.Windows.Forms.TextBox tbResultShow;
+        private System.Windows.Forms.TextBox tbUserName;
+
+        #endregion
     }
 }

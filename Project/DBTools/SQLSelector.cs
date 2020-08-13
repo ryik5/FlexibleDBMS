@@ -198,7 +198,7 @@ namespace FlexibleDBMS
                 }
                 dt?.Dispose();
             }
-            catch (Exception err) { }
+            catch { }
 
             return models;
         }

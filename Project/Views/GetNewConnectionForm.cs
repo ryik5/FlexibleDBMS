@@ -43,22 +43,14 @@ namespace FlexibleDBMS
             ISQLConnectionSettings oldSettings = currentSQLConnectionStore?.GetPrevious();
             ISQLConnectionSettings newSettings = currentSQLConnectionStore?.GetCurrent();
 
-            if (oldSettings == null)
+            if (oldSettings != null)
             {
-                ModelCommonStringStore tables = SQLSelector.GetTables(currentSQLConnectionStore?.GetCurrent());
-                tableStore.Set(tables);
+                if (oldSettings.Name == newSettings.Name) return;
+                if (oldSettings.Database == newSettings.Database) return;
             }
-            else
-            {
-                if (oldSettings.Name != newSettings.Name)
-                {
-                    if (oldSettings.Database != newSettings.Database)
-                    {
-                        ModelCommonStringStore tables = SQLSelector.GetTables(currentSQLConnectionStore?.GetCurrent());
-                        tableStore.Set(tables);
-                    }
-                }
-            }
+            
+            ModelCommonStringStore tables = SQLSelector.GetTables(currentSQLConnectionStore?.GetCurrent());
+            tableStore.Set(tables);
         }
 
         private void TableStore_EvntCollectionChanged(object sender, BoolEventArgs e)
@@ -104,8 +96,7 @@ namespace FlexibleDBMS
                     { tb.Enabled = false; }
                     tp.SetToolTip(tbPort, "Port doesn't set");
                     break;
-                case SQLProvider.None:
-                default:
+                 default:
                     btnCheck.Enabled = false;
                     tbPort.Text = "0";
                     tp.SetToolTip(tbPort, "Port doesn't set");
@@ -152,7 +143,7 @@ namespace FlexibleDBMS
 
             tbResultShow.AppendLine("Will check:");
 
-            bool existDB = false;
+            bool existDb = false;
 
             switch (newSettings.ProviderName)
             {
@@ -163,7 +154,7 @@ namespace FlexibleDBMS
                             newSettings = CheckMySQLDB(newSettings);
 
                             if (cmbDataBases?.Items?.Count > 0 && newSettings != null)
-                            { existDB = true; }
+                            { existDb = true; }
                         }
                         else
                         {
@@ -181,7 +172,7 @@ namespace FlexibleDBMS
                             newSettings = CheckMSSQLDB(newSettings);
 
                             if (cmbDataBases?.Items?.Count > 0 && newSettings != null)
-                            { existDB = true; }
+                            { existDb = true; }
                         }
                         else
                         {
@@ -197,17 +188,16 @@ namespace FlexibleDBMS
                         newSettings = CheckSQLiteDB();
 
                         if (!string.IsNullOrWhiteSpace(newSettings?.Database))
-                        { existDB = true; }
+                        { existDb = true; }
 
                         break;
                     }
-                default:
-                    break;
+                
             }
 
             tbResultShow.AppendLine("Новые настройки.");
 
-            if (existDB)
+            if (existDb)
             {
                 if (cmbTables?.Items?.Count > 0)
                 { cmbTables.Enabled = cmbTables?.Items?.Count > 1; }
@@ -240,42 +230,36 @@ namespace FlexibleDBMS
 
             try
             {
-                using (DataTable dt = mySQL.GetTable("SHOW DATABASES", 5))
+                using DataTable dt = mySQL.GetTable("SHOW DATABASES", 5);
+                tbResultShow.AppendLine(mySQL.GetConnection().ToString());
+                tbResultShow.AppendLine("Строка подключения: " + mySQL.connString);
+
+                IList<string> list = (from DataRow r in dt.Rows select r[0]?.ToString()).ToList();
+
+                if (list?.Count > 0)
                 {
-                    tbResultShow.AppendLine(mySQL.GetConnection().ToString());
-                    tbResultShow.AppendLine("Строка подключения: " + mySQL.connString);
+                    cmbDataBases.DataSource = list;
+                    cmbDataBases.Enabled = true;
+                    newSettings.Database = list[0];
 
-                    IList<string> list = new List<string>();
-                    foreach (DataRow r in dt.Rows)
-                    {
-                        list.Add(r[0].ToString());
-                    }
-
-                    if (list?.Count > 0)
-                    {
-                        cmbDataBases.DataSource = list;
-                        cmbDataBases.Enabled = true;
-                        newSettings.Database = list[0];
-
-                        tbResultShow.AppendLine("The inputed data are correct.");
-                    }
-                    else
-                    {
-                        tbResultShow.AppendLine("Указаны некорректны данные или отсутствует подключение к серверу!");
-                    }
+                    tbResultShow.AppendLine("The inputed data are correct.");
+                }
+                else
+                {
+                    tbResultShow.AppendLine("Указаны некорректны данные или отсутствует подключение к серверу!");
                 }
             }
-            catch (MySqlException excpt)
+            catch (MySqlException error)
             {
                 newSettings = null;
-                tbResultShow.AppendLine("My SQL error - " + excpt.Message + ":");
-                tbResultShow.AppendLine(excpt.ToString());
+                tbResultShow.AppendLine("My SQL error - " + error.Message + ":");
+                tbResultShow.AppendLine(error.ToString());
             }
-            catch (Exception excpt)
+            catch (Exception error)
             {
                 newSettings = null;
-                tbResultShow.AppendLine(excpt.Message + ":");
-                tbResultShow.AppendLine(excpt.ToString());
+                tbResultShow.AppendLine(error.Message + ":");
+                tbResultShow.AppendLine(error.ToString());
             }
 
             return newSettings;
@@ -333,7 +317,7 @@ namespace FlexibleDBMS
             using (OpenFileDialog ofd = new OpenFileDialog())
             { db = ofd.OpenFileDialogReturnPath(Properties.Resources.DialogDbFile, "Выберите файл с БД SQLite:"); }
 
-            ISQLConnectionSettings newSettings = new SQLConnectionSettings()
+            ISQLConnectionSettings newSettings = new SQLConnectionSettings
             {
                 Database = db,
                 ProviderName = SQLProvider.SQLite
@@ -341,25 +325,19 @@ namespace FlexibleDBMS
 
             if (!string.IsNullOrWhiteSpace(newSettings.Database) && File.Exists(newSettings.Database))
             {
-                DbSchema schemaDB = null;
-                IList<string> tablesDB;
+                DbSchema schemaDb = null;
 
                 try
                 {
-                    schemaDB = DbSchema.LoadDB(newSettings.Database);
-                    tablesDB = new List<string>();
+                    schemaDb = DbSchema.LoadDB(newSettings.Database);
+                    IList<string> tablesDb = schemaDb.Tables.Select(tbl => tbl.Value.TableName).ToList();
 
-                    foreach (var tbl in schemaDB.Tables)
+                    if (tablesDb?.Count > 0)
                     {
-                        tablesDB.Add(tbl.Value.TableName);
-                    }
+                        newSettings.Table = tablesDb[0];
 
-                    if (tablesDB?.Count > 0)
-                    {
-                        newSettings.Table = tablesDB[0];
-
-                        cmbDataBases.DataSource = new List<string>() { newSettings.Database };
-                        cmbTables.DataSource = tablesDB;
+                        cmbDataBases.DataSource = new List<string> { newSettings.Database };
+                        cmbTables.DataSource = tablesDb;
                         tbResultShow.AppendLine("The inputed data are correct.");
                     }
                 }
@@ -367,11 +345,11 @@ namespace FlexibleDBMS
                 {
                     newSettings = null;
                     tbResultShow.AppendLine($"Ошибка в БД: {e.Message}");
-                    tbResultShow.AppendLine($"{e.ToString()}");
+                    tbResultShow.AppendLine($"{e}");
                 }
                 finally
                 {
-                    if (schemaDB?.Tables?.Count == 0)
+                    if (schemaDb?.Tables?.Count == 0)
                     {
                         newSettings = null;
                         tbResultShow.AppendLine("Подключенная база данных пустая или же в ней отсутствуют какие-либо таблицы с данными!");
@@ -464,7 +442,6 @@ namespace FlexibleDBMS
 
             cmbSQLProvider.DataSource = SQLConnectionExtensions.GetSQLProvider();
 
-
             if (currentSQLConnectionStore?.GetCurrent() != null)
             {
                 tbResultShow.AppendLine(currentSQLConnectionStore?.GetCurrent()?.ToString());
@@ -496,7 +473,7 @@ namespace FlexibleDBMS
         {
             btnSave.Enabled = false;
 
-            TextBox tb = (sender as TextBox);
+            TextBox tb = sender as TextBox;
 
             if (tb.Name == nameof(tbPort))
             { tb.Text = "0"; }
@@ -526,7 +503,7 @@ namespace FlexibleDBMS
             {
                 string text = tb.Text;
 
-                if (!(int.TryParse(text, out int result)))
+                if (!int.TryParse(text, out int result))
                 {
                     ShowMessage("Номер порта может содержать только цифры!");
                     tb.Text = "0";
@@ -559,11 +536,9 @@ namespace FlexibleDBMS
 
         private void TbPort_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar != 8 && (e.KeyChar < 48 || e.KeyChar > 57))
-            {
-                ShowMessage("Номер порта может содержать только цифры!");
-                e.Handled = true;
-            }
+            if (e.KeyChar == 8 || e.KeyChar >= 48 && e.KeyChar <= 57) return;
+            ShowMessage(@"Номер порта может содержать только цифры!");
+            e.Handled = true;
         }
     }
 }

@@ -101,7 +101,7 @@ namespace FlexibleDBMS
             }
         }
 
-        void ImportExcelFile(string filePath, int maxElementsInDictionary)
+        private void ImportExcelFile(string filePath, int maxElementsInDictionary)
         {
             string nameColumns = null;
             string currentRow;
@@ -130,50 +130,43 @@ namespace FlexibleDBMS
 
                     currentRow = currentRow?.TrimEnd('|');
 
-                    if (currentRow.Contains("|"))
+                    if (!currentRow.Contains("|")) continue;
+                    if (nameColumns == null)
                     {
-                        if (nameColumns == null)
-                        {
-                            importedRows = 0;
+                        importedRows = 0;
 
-                            parsedModel = new ParserRowModelCommon(currentRow);
-                            columnNames = parsedModel.MatchColumnToAlias();
-                            nameColumns = parsedModel.ImportedColumnName;
+                        parsedModel = new ParserRowModelCommon(currentRow);
+                        columnNames = parsedModel.MatchColumnToAlias();
+                        nameColumns = parsedModel.ImportedColumnName;
 
-                            EvntHeaderReady?.Invoke(this, new BoolEventArgs(true));//cHeader is ready                         
-                        } //first found not_empty_line containes name columns
-                        else
-                        {
-                            parsedModel = new ParserRowModelCommon(currentRow, nameColumns);
+                        EvntHeaderReady?.Invoke(this, new BoolEventArgs(true));//cHeader is ready                         
+                    } //first found not_empty_line will be contained name columns
+                    else
+                    {
+                        parsedModel = new ParserRowModelCommon(currentRow, nameColumns);
 
-                            models = parsedModel?.ConvertRowToModels();
+                        models = parsedModel?.ConvertRowToModels();
 
-                            if (models?.list?.Count > 0)
-                            {
-                                importedRows++;
-                                listCommonModels.Add(models);
+                        if (!(models?.list?.Count > 0)) continue;
+                        importedRows++;
+                        listCommonModels.Add(models);
 
-                                if (importedRows > 0 && importedRows % maxElementsInDictionary == 0)
-                                {
-                                    EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//collection is full
-                                    EvntInfoMessage?.Invoke(this, new TextEventArgs($"lastRow: {currentRow}" +
-                                        $"{Environment.NewLine}parsed: {models.ToString()}" +
-                                        $"{Environment.NewLine}Ожидаю пока данные запишутся (до 5 сек.)..."));
+                        if (importedRows <= 0 || importedRows % maxElementsInDictionary != 0) continue;
+                        EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//collection is full
+                        EvntInfoMessage?.Invoke(this, new TextEventArgs($"lastRow: {currentRow}" +
+                                                                        $"{Environment.NewLine}parsed: {models.ToString()}" +
+                                                                        $"{Environment.NewLine}Ожидаю пока данные запишутся (до 5 сек.)..."));
 
-                                    FileReaderModels.evntWaitHandle.WaitOne(5000);
-                                    listCommonModels = new List<IModels>(maxElementsInDictionary);
-                                }
-                            }
-                        }
+                        FileReaderModels.evntWaitHandle.WaitOne(5000);
+                        listCommonModels = new List<IModels>(maxElementsInDictionary);
                     }
                 }
             }
-            if (listCommonModels?.Count > 0)
-            {
-                EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//last part of the collection
-                EvntInfoMessage?.Invoke(this, new TextEventArgs($"Ожидаю пока запишется последняя часть данных (до 5 сек.)..."));
-                FileReaderModels.evntWaitHandle.WaitOne(5000);
-            }
+
+            if (!(listCommonModels?.Count > 0)) return;
+            EvntCollectionFull?.Invoke(this, new BoolEventArgs(true));//last part of the collection
+            EvntInfoMessage?.Invoke(this, new TextEventArgs($"Ожидаю пока запишется последняя часть данных (до 5 сек.)..."));
+            FileReaderModels.evntWaitHandle.WaitOne(5000);
         }
     }
 

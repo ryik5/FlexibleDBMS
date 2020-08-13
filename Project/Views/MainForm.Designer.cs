@@ -47,10 +47,12 @@
             this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
             this.configurationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadConfigMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.selectedConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.printConfigMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.printCurrentConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.writeConfigMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.applyLoadedConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prepareUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -73,8 +75,6 @@
             this.PresenterTabCotrol = new System.Windows.Forms.TabControl();
             this.tabPageTextBox = new System.Windows.Forms.TabPage();
             this.tabPageTable = new System.Windows.Forms.TabPage();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.applyLoadedConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.StatusStripInfo.SuspendLayout();
             this.statusFilters.SuspendLayout();
@@ -84,9 +84,7 @@
             // 
             // txtbResultShow
             // 
-            this.txtbResultShow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtbResultShow.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.txtbResultShow.Location = new System.Drawing.Point(0, 0);
             this.txtbResultShow.Multiline = true;
             this.txtbResultShow.Name = "txtbResultShow";
@@ -96,10 +94,7 @@
             // 
             // menuStrip
             // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mainMenu,
-            this.managerMenu,
-            this.helpMenu});
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.mainMenu, this.managerMenu, this.helpMenu});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(865, 24);
@@ -108,17 +103,7 @@
             // 
             // mainMenu
             // 
-            this.mainMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.changeBaseMenuItem,
-            this.toolStripSeparator6,
-            this.ExportMenuItem,
-            this.toolStripSeparator5,
-            this.queryStandartMenu,
-            this.queryExtraMenu,
-            this.toolStripSeparator1,
-            this.updateFiltersMenuItem,
-            this.toolStripSeparator4,
-            this.quitMenuItem});
+            this.mainMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.changeBaseMenuItem, this.toolStripSeparator6, this.ExportMenuItem, this.toolStripSeparator5, this.queryStandartMenu, this.queryExtraMenu, this.toolStripSeparator1, this.updateFiltersMenuItem, this.toolStripSeparator4, this.quitMenuItem});
             this.mainMenu.Name = "mainMenu";
             this.mainMenu.Size = new System.Drawing.Size(46, 20);
             this.mainMenu.Text = "Main";
@@ -182,12 +167,7 @@
             // 
             // managerMenu
             // 
-            this.managerMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.administratorMenuItem,
-            this.toolStripSeparator11,
-            this.configurationToolStripMenuItem,
-            this.toolStripSeparator7,
-            this.updateToolStripMenuItem});
+            this.managerMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.administratorMenuItem, this.toolStripSeparator11, this.configurationToolStripMenuItem, this.toolStripSeparator7, this.updateToolStripMenuItem});
             this.managerMenu.Name = "managerMenu";
             this.managerMenu.Size = new System.Drawing.Size(62, 20);
             this.managerMenu.Text = "Manage";
@@ -196,26 +176,19 @@
             // administratorMenuItem
             // 
             this.administratorMenuItem.Name = "administratorMenuItem";
-            this.administratorMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.administratorMenuItem.Size = new System.Drawing.Size(178, 22);
             this.administratorMenuItem.Text = "Admininstration DB";
             // 
             // toolStripSeparator11
             // 
             this.toolStripSeparator11.Name = "toolStripSeparator11";
-            this.toolStripSeparator11.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator11.Size = new System.Drawing.Size(175, 6);
             // 
             // configurationToolStripMenuItem
             // 
-            this.configurationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.loadConfigMenuItem,
-            this.toolStripSeparator3,
-            this.selectedConfigToolStripMenuItem,
-            this.printConfigMenuItem,
-            this.printCurrentConfigToolStripMenuItem,
-            this.writeConfigMenuItem,
-            this.applyLoadedConfigToolStripMenuItem});
+            this.configurationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.loadConfigMenuItem, this.toolStripSeparator3, this.selectedConfigToolStripMenuItem, this.printConfigMenuItem, this.printCurrentConfigToolStripMenuItem, this.writeConfigMenuItem, this.applyLoadedConfigToolStripMenuItem});
             this.configurationToolStripMenuItem.Name = "configurationToolStripMenuItem";
-            this.configurationToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.configurationToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.configurationToolStripMenuItem.Text = "Configuration";
             // 
             // loadConfigMenuItem
@@ -223,6 +196,11 @@
             this.loadConfigMenuItem.Name = "loadConfigMenuItem";
             this.loadConfigMenuItem.Size = new System.Drawing.Size(180, 22);
             this.loadConfigMenuItem.Text = "LoadConfig";
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
             // 
             // selectedConfigToolStripMenuItem
             // 
@@ -248,46 +226,47 @@
             this.writeConfigMenuItem.Size = new System.Drawing.Size(180, 22);
             this.writeConfigMenuItem.Text = "WriteConfig";
             // 
+            // applyLoadedConfigToolStripMenuItem
+            // 
+            this.applyLoadedConfigToolStripMenuItem.Name = "applyLoadedConfigToolStripMenuItem";
+            this.applyLoadedConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.applyLoadedConfigToolStripMenuItem.Text = "ApplyLoadedConfig";
+            // 
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(175, 6);
             // 
             // updateToolStripMenuItem
             // 
-            this.updateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.prepareUpdateToolStripMenuItem,
-            this.uploadUpdateToolStripMenuItem,
-            this.downloadUpdateToolStripMenuItem});
+            this.updateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.prepareUpdateToolStripMenuItem, this.uploadUpdateToolStripMenuItem, this.downloadUpdateToolStripMenuItem});
             this.updateToolStripMenuItem.Name = "updateToolStripMenuItem";
-            this.updateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.updateToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.updateToolStripMenuItem.Text = "Update";
             // 
             // prepareUpdateToolStripMenuItem
             // 
             this.prepareUpdateToolStripMenuItem.Name = "prepareUpdateToolStripMenuItem";
-            this.prepareUpdateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.prepareUpdateToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
             this.prepareUpdateToolStripMenuItem.Text = "Prepare Update";
             // 
             // uploadUpdateToolStripMenuItem
             // 
             this.uploadUpdateToolStripMenuItem.Name = "uploadUpdateToolStripMenuItem";
-            this.uploadUpdateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.uploadUpdateToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
             this.uploadUpdateToolStripMenuItem.Text = "Upload Update";
             this.uploadUpdateToolStripMenuItem.Click += new System.EventHandler(this.UploadUpdateMenuItem_Click);
             // 
             // downloadUpdateToolStripMenuItem
             // 
             this.downloadUpdateToolStripMenuItem.Name = "downloadUpdateToolStripMenuItem";
-            this.downloadUpdateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.downloadUpdateToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
             this.downloadUpdateToolStripMenuItem.Text = "Download Update";
             this.downloadUpdateToolStripMenuItem.Click += new System.EventHandler(this.CheckUpdateMenuItem_Click);
             // 
             // helpMenu
             // 
-            this.helpMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.helpAboutMenuItem,
-            this.helpUsingMenuItem});
+            this.helpMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.helpAboutMenuItem, this.helpUsingMenuItem});
             this.helpMenu.Name = "helpMenu";
             this.helpMenu.Size = new System.Drawing.Size(44, 20);
             this.helpMenu.Text = "Help";
@@ -306,11 +285,7 @@
             // 
             // StatusStripInfo
             // 
-            this.StatusStripInfo.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.StatusApp,
-            this.StatusInfoMain,
-            this.SplitImage1,
-            this.StatusTables});
+            this.StatusStripInfo.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.StatusApp, this.StatusInfoMain, this.SplitImage1, this.StatusTables});
             this.StatusStripInfo.Location = new System.Drawing.Point(0, 428);
             this.StatusStripInfo.Name = "StatusStripInfo";
             this.StatusStripInfo.Size = new System.Drawing.Size(865, 22);
@@ -334,7 +309,7 @@
             // SplitImage1
             // 
             this.SplitImage1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.SplitImage1.Image = ((System.Drawing.Image)(resources.GetObject("SplitImage1.Image")));
+            this.SplitImage1.Image = ((System.Drawing.Image) (resources.GetObject("SplitImage1.Image")));
             this.SplitImage1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.SplitImage1.Name = "SplitImage1";
             this.SplitImage1.Size = new System.Drawing.Size(29, 20);
@@ -343,7 +318,7 @@
             // StatusTables
             // 
             this.StatusTables.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.StatusTables.Image = ((System.Drawing.Image)(resources.GetObject("StatusTables.Image")));
+            this.StatusTables.Image = ((System.Drawing.Image) (resources.GetObject("StatusTables.Image")));
             this.StatusTables.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.StatusTables.Name = "StatusTables";
             this.StatusTables.Size = new System.Drawing.Size(55, 20);
@@ -351,9 +326,7 @@
             // 
             // statusFilters
             // 
-            this.statusFilters.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.StatusInfoFilter,
-            this.progressBar});
+            this.statusFilters.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.StatusInfoFilter, this.progressBar});
             this.statusFilters.Location = new System.Drawing.Point(0, 406);
             this.statusFilters.Name = "statusFilters";
             this.statusFilters.Size = new System.Drawing.Size(865, 22);
@@ -373,8 +346,7 @@
             // 
             // txtBodyQuery
             // 
-            this.txtBodyQuery.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtBodyQuery.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.txtBodyQuery.Location = new System.Drawing.Point(352, 4);
             this.txtBodyQuery.Name = "txtBodyQuery";
             this.txtBodyQuery.Size = new System.Drawing.Size(308, 20);
@@ -389,7 +361,7 @@
             // 
             // comboBoxColumns
             // 
-            this.comboBoxColumns.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBoxColumns.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBoxColumns.FormattingEnabled = true;
             this.comboBoxColumns.Location = new System.Drawing.Point(667, 3);
             this.comboBoxColumns.Name = "comboBoxColumns";
@@ -398,9 +370,7 @@
             // 
             // PresenterTabCotrol
             // 
-            this.PresenterTabCotrol.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.PresenterTabCotrol.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.PresenterTabCotrol.Controls.Add(this.tabPageTextBox);
             this.PresenterTabCotrol.Controls.Add(this.tabPageTable);
             this.PresenterTabCotrol.Location = new System.Drawing.Point(0, 30);
@@ -430,17 +400,6 @@
             this.tabPageTable.Text = "Таблица";
             this.tabPageTable.UseVisualStyleBackColor = true;
             // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
-            // 
-            // applyLoadedConfigToolStripMenuItem
-            // 
-            this.applyLoadedConfigToolStripMenuItem.Name = "applyLoadedConfigToolStripMenuItem";
-            this.applyLoadedConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.applyLoadedConfigToolStripMenuItem.Text = "ApplyLoadedConfig";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -469,57 +428,56 @@
             this.tabPageTextBox.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
-        #endregion
-
-        private System.Windows.Forms.TextBox txtbResultShow;
-        private System.Windows.Forms.MenuStrip menuStrip;
-        private System.Windows.Forms.ToolStripMenuItem managerMenu;
-        private System.Windows.Forms.StatusStrip StatusStripInfo;
-        private System.Windows.Forms.ToolStripStatusLabel StatusInfoMain;
-        private System.Windows.Forms.TextBox txtBodyQuery;
-        private System.Windows.Forms.ToolStripDropDownButton SplitImage1;
+        private System.Windows.Forms.ToolStripMenuItem administratorMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem applyLoadedConfigToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem changeBaseMenuItem;
+        private System.Windows.Forms.ComboBox comboBoxColumns;
+        private System.Windows.Forms.ToolStripMenuItem configurationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem downloadUpdateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ExportMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem helpAboutMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem helpMenu;
+        private System.Windows.Forms.ToolStripMenuItem helpUsingMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadConfigMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mainMenu;
-        private System.Windows.Forms.ToolStripMenuItem queryStandartMenu;
+        private System.Windows.Forms.ToolStripMenuItem managerMenu;
+        private System.Windows.Forms.MenuStrip menuStrip;
+        private System.Windows.Forms.ToolStripMenuItem prepareUpdateToolStripMenuItem;
+        private System.Windows.Forms.TabControl PresenterTabCotrol;
+        private System.Windows.Forms.ToolStripMenuItem printConfigMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem printCurrentConfigToolStripMenuItem;
+        private System.Windows.Forms.ToolStripProgressBar progressBar;
         private System.Windows.Forms.ToolStripMenuItem queryExtraMenu;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
-        private System.Windows.Forms.TextBox txtbNameQuery;
+        private System.Windows.Forms.ToolStripMenuItem queryStandartMenu;
+        private System.Windows.Forms.ToolStripMenuItem quitMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem selectedConfigToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton SplitImage1;
+        private System.Windows.Forms.ToolStripStatusLabel StatusApp;
         private System.Windows.Forms.StatusStrip statusFilters;
         private System.Windows.Forms.ToolStripStatusLabel StatusInfoFilter;
-        private System.Windows.Forms.ToolStripStatusLabel StatusApp;
-        private System.Windows.Forms.ToolStripMenuItem helpMenu;
-        private System.Windows.Forms.ToolStripMenuItem helpAboutMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem helpUsingMenuItem;
-        private System.Windows.Forms.ToolStripProgressBar progressBar;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
-        private System.Windows.Forms.ToolStripMenuItem loadConfigMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem writeConfigMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem printConfigMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem quitMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem ExportMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
-        private System.Windows.Forms.ToolStripMenuItem changeBaseMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem administratorMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem updateFiltersMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripStatusLabel StatusInfoMain;
+        private System.Windows.Forms.StatusStrip StatusStripInfo;
         private System.Windows.Forms.ToolStripSplitButton StatusTables;
-        private System.Windows.Forms.ComboBox comboBoxColumns;
-        private System.Windows.Forms.ToolStripMenuItem printCurrentConfigToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
-        private System.Windows.Forms.TabControl PresenterTabCotrol;
-        private System.Windows.Forms.TabPage tabPageTextBox;
         private System.Windows.Forms.TabPage tabPageTable;
-        private System.Windows.Forms.ToolStripMenuItem uploadUpdateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem downloadUpdateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem prepareUpdateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem configurationToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem updateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem selectedConfigToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabPageTextBox;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripMenuItem applyLoadedConfigToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+        private System.Windows.Forms.TextBox txtbNameQuery;
+        private System.Windows.Forms.TextBox txtBodyQuery;
+        private System.Windows.Forms.TextBox txtbResultShow;
+        private System.Windows.Forms.ToolStripMenuItem updateFiltersMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem updateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem uploadUpdateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem writeConfigMenuItem;
+
+        #endregion
     }
 }
 

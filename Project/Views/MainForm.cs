@@ -544,7 +544,6 @@ namespace FlexibleDBMS
             MenuAbstractStore recent = null;
             string version = null;
             DateTime timeStamp = DateTime.Now;
-            string result;
 
             if (tmpConfigFull?.Count() > 0)
             {
