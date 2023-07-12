@@ -6,7 +6,6 @@ namespace FlexibleDBMS
 {
     public interface IWriterable
     {
-      //  Task Delete(string filePath);
         Task Write(string filePath, string content);
         Task Write(string filePath, IList<string> content);
         Task Write(string filePath, string content, Encoding encoding);
