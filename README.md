@@ -1,5 +1,6 @@
 # [FlexibleDBMS](#FlexibleDBMS)
-
+***Flexible DB management system (works and keeps with frequently used queries and a different types of
+DB)***
 It is maintained by [@ryik5](https://github.com/ryik5).
 
 
