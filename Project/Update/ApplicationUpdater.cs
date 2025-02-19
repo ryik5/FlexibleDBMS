@@ -167,10 +167,13 @@ namespace FlexibleDBMS
             AutoUpdater.CheckForUpdateEvent += new AutoUpdater.CheckForUpdateEventHandler(CheckUpdate_Event); //write errors if had no access to the folder
             AutoUpdater.ApplicationExitEvent += new AutoUpdater.ApplicationExitEventHandler(ApplicationExit);    //https://archive.codeplex.com/?p=autoupdaterdotnet
 
-            AutoUpdater.Start(Options.appUpdateURL, new System.Net.NetworkCredential(_userAD.Login, _userAD.Password, _userAD.Domain));
+            if (_userAD.Login != null && _userAD.Password != null && _userAD.Domain != null)
+            {
+                AutoUpdater.Start(Options.appUpdateURL, new System.Net.NetworkCredential(_userAD.Login, _userAD.Password, _userAD.Domain));
 
-            //AutoUpdater.CheckForUpdateEvent -= CheckUpdate_Event;
-            //AutoUpdater.ApplicationExitEvent -= ApplicationExit;
+                //AutoUpdater.CheckForUpdateEvent -= CheckUpdate_Event;
+                //AutoUpdater.ApplicationExitEvent -= ApplicationExit;
+            }
         }
 
         private void ApplicationExit()
