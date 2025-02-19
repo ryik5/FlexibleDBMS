@@ -105,7 +105,7 @@ namespace FlexibleDBMS
             CheckEnvironment();
 
             //Turn Up Application
-            TurnAplication();
+            PrepareAplication();
 
             //Turn Up Menu
             TurnUpToolStripMenuItems();
@@ -117,7 +117,7 @@ namespace FlexibleDBMS
             ISQLConnectionSettings tmpConnection = GetDefaultConnectionFromConfig(tmpConfig);
 
             AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
-            AddLineAtTextboxLog($"Имя последнего коннекта:{Environment.NewLine}{tmpConnection?.Name}");
+            AddLineAtTextboxLog($"Name of the last connection:{Environment.NewLine}{tmpConnection?.Name}");
 
             if (tmpConfig != null && !(string.IsNullOrWhiteSpace(tmpConnection?.Name)))
             {
@@ -130,12 +130,14 @@ namespace FlexibleDBMS
 
                 recentStore.Set(tmpConfig?.GetUnitConfigNames()?.ToToolStripMenuItemList());
 
-                //Установить полную конфигурацию(Иначе считать, что это первый запуск ПО и конфигурация - пустая)
+                // Set the full configuration (Otherwise, consider this as the first launch of the software and the configuration is empty)
                 Configuration.Set(tmpConfig);
             }
 
             if (string.IsNullOrWhiteSpace(tmpConnection?.Name) || string.IsNullOrWhiteSpace(tmpConnection?.Database))
-            { RunAdministratorForm(); }
+            {
+                RunAdministratorForm();
+            }
 
             currentSQLConnectionStore.EvntConfigChanged += new SQLConnectionStore.ConfigChanged<BoolEventArgs>(CurrentSQLConnectionStore_EvntConfigChanged);
             (recentStore as MenuItemStore).EvntCollectionChanged += new MenuItemStore.ItemAddedInCollection<BoolEventArgs>(RecentStore_EvntCollectionChanged);
@@ -146,7 +148,6 @@ namespace FlexibleDBMS
             menuStrip.Update();
             menuStrip.Refresh();
 
-            // Переключиться на лог
             SelectLog();
             Task.Run(() => CheckUpdatePeriodicaly()).Wait();
         }
@@ -167,10 +168,14 @@ namespace FlexibleDBMS
             ConfigFull<ConfigAbstract> configFull = newConfig;
 
             if (newConfig == null)
-            { configFull = new ConfigFull<ConfigAbstract>(); }
+            {
+                configFull = new ConfigFull<ConfigAbstract>();
+            }
 
             if (newConnection == null)
-            { newConnection = currentSQLConnectionStore?.GetCurrent(); }
+            {
+                newConnection = currentSQLConnectionStore?.GetCurrent();
+            }
 
             ConfigAbstract configUnit = new Config
             {
@@ -226,7 +231,9 @@ namespace FlexibleDBMS
             };
             configUnit.ConfigDictionary[config.Name] = config;
             if (!string.IsNullOrWhiteSpace(configUnit.Name))
-            { configFull.Add(configUnit); }
+            {
+                configFull.Add(configUnit);
+            }
 
 
             ////
@@ -270,7 +277,7 @@ namespace FlexibleDBMS
             //await Task.Run(() =>
             //{
             AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashedLong}{Environment.NewLine}" +
-                $"Переключаюсь на новые настройки...");
+                $"Switching to new settings...");
             //});
 
 
@@ -292,46 +299,47 @@ namespace FlexibleDBMS
                     {
                         //await Task.Run(() =>
                         //{
-                        AddLineAtTextboxLog($"Выбрано подключение к серверу: '{newSettings?.Host}'{Environment.NewLine}" +
-                        $" БД: '{newSettings?.Database}'{Environment.NewLine}" +
-                        $" Основная таблица: '{newSettings?.Table}'{Environment.NewLine}");
-                        statusInfoMainText.SetConstText($"Выбрана база: {newSettings.Database}");
+                        AddLineAtTextboxLog($"Selected server connection: '{newSettings?.Host}'{Environment.NewLine}" +
+                                                $" Database: '{newSettings?.Database}'{Environment.NewLine}" +
+                                                $" Main table: '{newSettings?.Table}'{Environment.NewLine}");
+                        statusInfoMainText.SetConstText($"Selected database: {newSettings.Database}");
                         //});
 
 
                         //fix the case when a DB on the server was not found - cancelation task after 10 sec waiting
-                        statusInfoMainText.SetTempText($"Получаю список таблиц...");
+                        statusInfoMainText.SetTempText($"Fetching table list...");
                         var cancellationToken = new System.Threading.CancellationTokenSource(10000).Token;//timeout = 10 sec
                         int timeout = 10000; //timeout = 10 sec
                         var task = SetTables(cancellationToken, newSettings);
                         if (await Task.WhenAny(task, Task.Delay(timeout, cancellationToken)) == task)
-                        { await task; }
-
+                        {
+                            await task;
+                        }
 
                         if (tableNameStore?.GetAllItems()?.Count > 0)
                         {
-                            AddLineAtTextboxLog($"Список таблиц содержит: {tableNameStore?.GetAllItems()?.Count} элемента(ов)");
+                            AddLineAtTextboxLog($"The table list contains: {tableNameStore?.GetAllItems()?.Count} items");
                         }
                         else
                         {
                             tableNameStore.Clear();
                             AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}{Properties.Resources.SymbolsSosSlashBack}" +
                                 $"            " +
-                                $"Список таблиц с сервера не получен." +
+                                $"The list of tables from the server was not received." +
                                 $"            " +
                                 $"{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Properties.Resources.SymbolsSosSlash}{Environment.NewLine}");
                         }
                     }
                     else if (oldSettings?.Database == newSettings?.Database && oldSettings?.Table != newSettings?.Table)
                     {
-                        statusInfoMainText.SetTempText($"База: {newSettings.Database}, сменилась таблица на {newSettings.Table}");
+                        statusInfoMainText.SetTempText($"Database: {newSettings.Database}, table changed to {newSettings.Table}");
                     }
                 }
             }
 
             AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashedLong}");
 
-            //Восстановить предыдущее состояние контролов
+            //Restore previous state of controls
             await Task.Run(() => RestoreControlState());
         }
 
@@ -343,10 +351,10 @@ namespace FlexibleDBMS
 
 
         /// <summary>
-        /// Переключение текста  временно при установке текста как временного
+        /// Switching text temporarily when setting text as temporary
         /// </summary>
         /// <param name="sender">StatusInfoMain</param>
-        /// <param name="e">true - временно, false - постоянно</param>
+        /// <param name="e">true - temporary, false - permanent</param>
         async void StatusInfoMainText_SetTemporaryText(object sender, TextEventArgs e)
         {
             CommonExtensions.Logger(LogTypes.Info, "StatusInfoMainText: " + e.Message);
@@ -358,7 +366,9 @@ namespace FlexibleDBMS
         }
 
         void TablesStore_EvntCollectionChanged(object sender, BoolEventArgs e)
-        { StatusTables_anotherThreadAccess(); }
+        {
+            StatusTables_anotherThreadAccess();
+        }
 
         void StatusTables_anotherThreadAccess() //add string into  from other threads
         {
@@ -374,7 +384,7 @@ namespace FlexibleDBMS
                         StatusTables.DropDownItems.AddRange(tableNameStore.GetAllItems().ToArray());
 
                     StatusTables.DropDown.Refresh();
-                    StatusTables.Text = "Таблицы";
+                    StatusTables.Text = "Tables";
                     StatusTables.Enabled = true;
                 }));
             else
@@ -388,7 +398,7 @@ namespace FlexibleDBMS
                     StatusTables.DropDownItems.AddRange(tableNameStore.GetAllItems().ToArray());
 
                 StatusTables.DropDown.Refresh();
-                StatusTables.Text = "Таблицы";
+                StatusTables.Text = "Tables";
                 StatusTables.Enabled = true;
             }
         }
@@ -429,7 +439,7 @@ namespace FlexibleDBMS
             }
             else
             {
-                statusInfoMainText.SetTempText("Адрес сервера с обновлениями не найден.");
+                statusInfoMainText.SetTempText("The update server address was not found.");
             }
         }
 
@@ -454,14 +464,14 @@ namespace FlexibleDBMS
         void UploadUpdate()
         {
             UserAD user = new UserAD();
-            //настройки имени и пароля вставить в конфиг - файл
+            //insert username and password settings into config file
             string serverURL = null;
             string pathToExternalUpdateZip = null;
 
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
                 pathToExternalUpdateZip = ofd.OpenFileDialogReturnPath(Properties.Resources.DialogZipFile,
-                    "Выберите заранее подготовленный архив с обновлением или нажмите Отмена, для автоматической генерации системой:");
+                    "Select a pre-prepared update archive or click Cancel to generate automatically by the system:");
             }
 
             _ = Updater.SetOptionsAsync(user, serverURL, pathToExternalUpdateZip);
@@ -477,7 +487,7 @@ namespace FlexibleDBMS
             }
             else
             {
-                statusInfoMainText.SetTempText("Адрес сервера с обновлениями не найден.");
+                statusInfoMainText.SetTempText("Update server address not found.");
             }
         }
         #endregion
@@ -520,14 +530,14 @@ namespace FlexibleDBMS
             string pathToFile = null;
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
-                pathToFile = ofd.OpenFileDialogReturnPath(Properties.Resources.DialogBakFile, "Выберите файл с конфигурацией:");
+                pathToFile = ofd.OpenFileDialogReturnPath(Properties.Resources.DialogBakFile, "Select the configuration file:");
                 if (ofd.CheckFileExists)
                 {
                     loadedExternalConfig = LoadConfig(CommonConst.AppCfgFilePath);
                     tmpConfigStore.Set(loadedExternalConfig.GetUnitConfigNames().ToToolStripMenuItemList());
                     MakeMenuItemDropDownFromMenuStore(selectedConfigToolStripMenuItem, tmpConfigStore, ToolStripMenuType.ExternalConfig);
-                    selectedConfigToolStripMenuItem.Text = $"Загружена конфигурация - {loadedExternalConfig.Version} от ({loadedExternalConfig.LastModification})";
-                    applyLoadedConfigToolStripMenuItem.ToolTipText = $"Загружена конфигурация - {loadedExternalConfig.Version} от ({loadedExternalConfig.LastModification})";
+                    selectedConfigToolStripMenuItem.Text = $"Loaded configuration - {loadedExternalConfig.Version} from ({loadedExternalConfig.LastModification})";
+                    applyLoadedConfigToolStripMenuItem.ToolTipText = $"Loaded configuration - {loadedExternalConfig.Version} from ({loadedExternalConfig.LastModification})";
                 }
             }
         }
@@ -535,7 +545,7 @@ namespace FlexibleDBMS
         ConfigUnitStore GetConfigUnitStoreFromFullConfigByName(ConfigFull<ConfigAbstract> tmpConfigFull, string text)
         {
             AddLineAtTextboxLog($"{Properties.Resources.SymbolsEqual}{Properties.Resources.SymbolsEqual}");
-            AddLineAtTextboxLog("Ищу: " + text);
+            AddLineAtTextboxLog("Searching for: " + text);
             AddLineAtTextboxLog();
 
             ISQLConnectionSettings connection = null;
@@ -571,7 +581,7 @@ namespace FlexibleDBMS
 
                     if (confUnit.Key.Equals(text) && unit?.ConfigDictionary?.Count() > 0) //Нашел!
                     {
-                        AddLineAtTextboxLog("Нашел!");
+                        AddLineAtTextboxLog("Found!");
 
                         ConfigAbstract tmpConfigUnit;
 
@@ -736,7 +746,9 @@ namespace FlexibleDBMS
             IList<ToolStripMenuItem> list = selectedConfig?.QueryStandartMenuStore?.GetAllItems();
             if (list?.Count > 0)
                 foreach (var m in list)
-                { AddLineAtTextboxLog($"{m?.Text}: {m?.Tag}"); }
+                {
+                    AddLineAtTextboxLog($"{m?.Text}: {m?.Tag}");
+                }
 
             AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsEqual}{Environment.NewLine}" +
 
@@ -744,7 +756,9 @@ namespace FlexibleDBMS
             list = selectedConfig?.QueryExtraMenuStore?.GetAllItems();
             if (list?.Count > 0)
                 foreach (var m in list)
-                { AddLineAtTextboxLog($"{m?.Text}: {m?.Tag}"); }
+                {
+                    AddLineAtTextboxLog($"{m?.Text}: {m?.Tag}");
+                }
 
             AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsEqual}{Environment.NewLine}");
         }
@@ -756,7 +770,7 @@ namespace FlexibleDBMS
             using (SaveFileDialog sfd = new SaveFileDialog())
             {
                 filePath = sfd.SaveFileDialogReturnPath($"{CommonConst.AppName}", Properties.Resources.DialogCfgFile,
-                    "Укажите месторасположение и имя файла:");
+                    "Specify the file location and name:");
             }
 
             WriteConfig(filePath ?? CommonConst.AppCfgFilePath);
@@ -792,13 +806,19 @@ namespace FlexibleDBMS
 
         #region Dynamical Menues - RecentConnection, QueryStandart, QueryExtra
         void QueryExtraStore_EvntCollectionChanged(object sender, BoolEventArgs e)
-        { MakeMenuItemDropDownFromMenuStore(queryExtraMenu, queryExtraStore, ToolStripMenuType.ExtraQuery); }
+        {
+            MakeMenuItemDropDownFromMenuStore(queryExtraMenu, queryExtraStore, ToolStripMenuType.ExtraQuery);
+        }
 
         void QueryStandartStore_EvntCollectionChanged(object sender, BoolEventArgs e)
-        { MakeMenuItemDropDownFromMenuStore(queryStandartMenu, queryStandartStore, ToolStripMenuType.StandartQuery); }
+        {
+            MakeMenuItemDropDownFromMenuStore(queryStandartMenu, queryStandartStore, ToolStripMenuType.StandartQuery);
+        }
 
         void RecentStore_EvntCollectionChanged(object sender, BoolEventArgs e)
-        { MakeMenuItemDropDownFromMenuStore(changeBaseMenuItem, recentStore, ToolStripMenuType.RecentConnection); }
+        {
+            MakeMenuItemDropDownFromMenuStore(changeBaseMenuItem, recentStore, ToolStripMenuType.RecentConnection);
+        }
 
         void MakeMenuItemDropDownFromMenuStore(ToolStripMenuItem target, MenuAbstractStore source, ToolStripMenuType menuType)
         {
@@ -849,7 +869,7 @@ namespace FlexibleDBMS
                 }
                 target.DropDownItems.AddRange(sourceList.ToArray());
 
-                statusInfoMainText.SetTempText($"В меню '{target.Text}' добавлено - {source.Count} запросов");
+                statusInfoMainText.SetTempText($"Added {source.Count} queries to the '{target.Text}' menu");
                 menuStrip.Update();
                 menuStrip.Refresh();
             }
@@ -875,7 +895,7 @@ namespace FlexibleDBMS
                 case MouseButtons.Right:
                     {
                         queryExtraStore.Remove(text);
-                        statusInfoMainText.SetTempText($"Из меню '{queryExtraMenu.Text}' удален запрос '{Text}'");
+                        statusInfoMainText.SetTempText($"Query '{Text}' has been removed from the '{queryExtraMenu.Text}' menu");
                         break;
                     }
             }
@@ -897,7 +917,7 @@ namespace FlexibleDBMS
                 case MouseButtons.Right:
                     {
                         queryStandartStore.Remove(text);
-                        statusInfoMainText.SetTempText($"Из меню '{queryStandartMenu.Text}' удален запрос '{Text}'");
+                        statusInfoMainText.SetTempText($"Query '{Text}' has been removed from the '{queryStandartMenu.Text}' menu");
                         break;
                     }
             }
@@ -917,7 +937,9 @@ namespace FlexibleDBMS
 
                         ISQLConnectionSettings tmpConnection = applicationConfig.SQLConnection;
                         if (!(string.IsNullOrWhiteSpace(tmpConnection?.Name)))
-                        { currentSQLConnectionStore.Set(tmpConnection); }
+                        {
+                            currentSQLConnectionStore.Set(tmpConnection);
+                        }
                     }
                     break;
 
@@ -926,17 +948,19 @@ namespace FlexibleDBMS
                         if (recentStore?.GetAllItems().Count > 0)
                         {
                             recentStore.Remove(text);
-                            statusInfoMainText.SetTempText($"Из меню '{queryStandartMenu.Text}' удален запрос '{Text}'");
+                            statusInfoMainText.SetTempText($"Query '{Text}' has been removed from the '{queryStandartMenu.Text}' menu");
                             try
                             {
                                 ConfigFull<ConfigAbstract> configFull = Configuration?.Get;
                                 configFull.Remove(text);
                                 Configuration.Set(configFull);
 
-                                AddLineAtTextboxLog($"Блок {text} из конфигурации удален");
+                                AddLineAtTextboxLog($"Block {text} has been removed from the configuration");
                             }
                             catch
-                            { AddLineAtTextboxLog($"Блок {text} в конфигурации отсутствует"); }
+                            {
+                                AddLineAtTextboxLog($"Block {text} is not found in the configuration");
+                            }
                         }
                         break;
                     }
@@ -969,7 +993,7 @@ namespace FlexibleDBMS
 
         void ApplySelectedConfig(string text)
         {
-            DialogResult dialog = MessageBox.Show("Применить выбранную конфигурацию в систему?", $"Применить {text}:", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult dialog = MessageBox.Show("Apply the selected configuration to the system?", $"Apply {text}:", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (dialog == DialogResult.OK)
             {
                 ConfigAbstract selectedConfig = loadedExternalConfig.GetUnit(text);
@@ -978,27 +1002,27 @@ namespace FlexibleDBMS
                 Configuration.Set(tmpConfig);
                 recentStore.Set(tmpConfig?.GetUnitConfigNames()?.ToToolStripMenuItemList());
 
-                statusInfoMainText.SetTempText($"В конфигурацию добавлено '{text}' ver. '{(selectedConfig as Config).Version}' от '{(selectedConfig as Config).LastModification}'");
+                statusInfoMainText.SetTempText($"Configuration added '{text}' ver. '{(selectedConfig as Config).Version}' from '{(selectedConfig as Config).LastModification}'");
             }
             else
             {
-                statusInfoMainText.SetTempText($"Конфигурация не изменилась. Запросов '{Configuration.Get.GetUnitConfigNames().Count}' - " +
-                    $"ver. '{Configuration.Get.Version}' от '{Configuration.Get.LastModification}'");
+                statusInfoMainText.SetTempText($"Configuration not changed. Queries '{Configuration.Get.GetUnitConfigNames().Count}' - " +
+                    $"ver. '{Configuration.Get.Version}' from '{Configuration.Get.LastModification}'");
             }
         }
 
         void ApplyLoadedConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DialogResult dialog = MessageBox.Show("Заменить конфигурацию системы на загруженную?", $"Заменить на {loadedExternalConfig.Version} от  {loadedExternalConfig.LastModification}:", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult dialog = MessageBox.Show("Replace system configuration with the loaded one?", $"Replace with {loadedExternalConfig.Version} from {loadedExternalConfig.LastModification}:", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (dialog == DialogResult.OK)
             {
                 Configuration.Set(loadedExternalConfig);
 
-                statusInfoMainText.SetTempText($"Заменена конфигурация на ver. '{loadedExternalConfig.Version}' от '{loadedExternalConfig.LastModification}'");
+                statusInfoMainText.SetTempText($"Configuration replaced with ver. '{loadedExternalConfig.Version}' from '{loadedExternalConfig.LastModification}'");
             }
             else
             {
-                statusInfoMainText.SetTempText($"Загруженная конфигурация проигнорирована.");
+                statusInfoMainText.SetTempText($"Loaded configuration has been ignored.");
             }
         }
 
@@ -1012,7 +1036,7 @@ namespace FlexibleDBMS
                 if (queryName?.Length > 0)
                 {
                     txtbNameQuery.Text = queryName;
-                    AddLineAtTextboxLog($"Выполняется запрос - '{queryName}':");
+                    AddLineAtTextboxLog($"Executing query - '{queryName}':");
                 }
             }
             return queryBody;
@@ -1031,12 +1055,12 @@ namespace FlexibleDBMS
         {
             statusInfoMainText.SetConstText("");
 
-            StatusInfoFilter.Text = "Фильтры";
-            StatusInfoFilter.ToolTipText = "Чтоб использовать фильтры предварительно необходимо выбрать пункт меню 'Вид', а затем -'Обновить фильтры'";
+            StatusInfoFilter.Text = "Filters";
+            StatusInfoFilter.ToolTipText = "To use filters, you must first select the 'View' menu item, and then 'Update filters'";
             StatusApp.Text = $"{CommonConst.appFileVersionInfo.ProductName} ver.{CommonConst.AppVersion}";
 
 
-            StatusTables.Text = "Таблицы";
+            StatusTables.Text = "Tables";
 
             StatusTables.DropDownItemClicked -= Menu_DropDownItemClicked;
             StatusTables.DropDownItemClicked += Menu_DropDownItemClicked;
@@ -1073,7 +1097,7 @@ namespace FlexibleDBMS
             }
         }
 
-        void TurnAplication()
+        void PrepareAplication()
         {
             //Main Application
             bmpLogo = Properties.Resources.LogoRYIK;
@@ -1100,7 +1124,7 @@ namespace FlexibleDBMS
 
             //Other controls
             txtBodyQuery.KeyPress += new KeyPressEventHandler(TxtbQuery_KeyPress);
-            tooltip.SetToolTip(txtBodyQuery, "Составьте (напишите) SQL-запрос к базе данных и нажмите ENTER");
+            tooltip.SetToolTip(txtBodyQuery, "Compose (write) an SQL query to the database and press ENTER");
             txtBodyQuery.LostFocus += new EventHandler(SetToolTipFromTextBox);
             txtbNameQuery.LostFocus += new EventHandler(SetToolTipFromTextBox);
 
@@ -1122,88 +1146,90 @@ namespace FlexibleDBMS
         void TurnUpToolStripMenuItems()
         {
             #region Main
-            mainMenu.Text = "Главное";
-            mainMenu.ToolTipText = "Смена БД, работа с сохраненными запросами, печать отчетов";
+            mainMenu.Text = "Main";
+            mainMenu.ToolTipText = "Switch Database, work with saved queries, print reports";
 
-            updateFiltersMenuItem.Text = "Обновить фильтры";
-            updateFiltersMenuItem.ToolTipText = "Процедура обновления фильтров длительная по времени(до 30 минут) и затратная по ресурсам!";
+            updateFiltersMenuItem.Text = "Update Filters";
+            updateFiltersMenuItem.ToolTipText = "Filter update procedure is time-consuming (up to 30 minutes) and resource-intensive!";
             updateFiltersMenuItem.Click += new EventHandler(UpdateFiltersMenuItem_Click);
 
-            ExportMenuItem.Text = "Експорт отчета в Excel";
+            ExportMenuItem.Text = "Export Report to Excel";
             ExportMenuItem.Click += new EventHandler(ExportMenuItem_Click);
 
-            quitMenuItem.Text = "Выход";
+            quitMenuItem.Text = "Exit";
             quitMenuItem.Click += new EventHandler(ApplicationExit);
 
-            changeBaseMenuItem.Text = "Сменить базу";
-            changeBaseMenuItem.ToolTipText = "Сменить базу на одну из ранее сохраненных";
+            changeBaseMenuItem.Text = "Switch Database";
+            changeBaseMenuItem.ToolTipText = "Switch to one of the previously saved databases";
 
-            queryStandartMenu.Text = "Стандартные запросы (запросы по маске)";
-            queryStandartMenu.ToolTipText = "Предустановленные поисковые запросы." +
-                " Формат слова замена которого будет искаться {}. " +
-                "Вставить в запросе в месте, где должна быть подмена искомого";
+            queryStandartMenu.Text = "Standard Queries (Queries by Mask)";
+            queryStandartMenu.ToolTipText = "Pre-set search queries." +
+                " The format of the word to be searched for is {}. " +
+                "Insert in the query where the search word should be replaced";
 
-            queryExtraMenu.Text = "Пользовательские запросы";
-            queryExtraMenu.ToolTipText = "Сохраненые поисковые запросы, созданные ранее на данном ПК";
+            queryExtraMenu.Text = "User Queries";
+            queryExtraMenu.ToolTipText = "Saved search queries created earlier on this PC";
 
             // queriesExtraMenu.DropDown.Closing += (o, e) => { e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked; };//не закрывать меню при отметке
             #endregion
 
             #region Manager
-            managerMenu.Text = "Управление";
-            managerMenu.ToolTipText = "Управление функционалом системы, его настройка, управление базами данных (БД)";
+            managerMenu.Text = "Management";
+            managerMenu.ToolTipText = "Management of system functionality, its configuration, and database managemen";
 
-            administratorMenuItem.Text = "Администратор баз данных(БД)";
+            administratorMenuItem.Text = "Database Administrator";
             administratorMenuItem.Click += new EventHandler(administratorMenu_Click);
 
-            configurationToolStripMenuItem.Text = "Конфигурация";
-            configurationToolStripMenuItem.ToolTipText = "Конфигурация приложения";
+            configurationToolStripMenuItem.Text = "Configuration";
+            configurationToolStripMenuItem.ToolTipText = "Application configuration";
 
-            loadConfigMenuItem.Text = "Загрузить конфигурацию с диска";
-            loadConfigMenuItem.ToolTipText = "Прочитать конфигурацию";
+            loadConfigMenuItem.Text = "Load Configuration from Disk";
+            loadConfigMenuItem.ToolTipText = "Read configuration";
             loadConfigMenuItem.Click += new EventHandler(LoadConfigMenuItem_Click);
 
-            printConfigMenuItem.Text = "Печать всей конфигурации";
-            printConfigMenuItem.ToolTipText = "Печать всей конфигурации на экран";
+            printConfigMenuItem.Text = "Print Entire Configuration";
+            printConfigMenuItem.ToolTipText = "Print entire configuration on screen";
             printConfigMenuItem.Click += new EventHandler(PrintConfigToolStripMenuItem_Click);
 
-            printCurrentConfigToolStripMenuItem.Text = "Печать конфигурации активного соединения";
-            printCurrentConfigToolStripMenuItem.ToolTipText = "Печать конфигурации данного подключения на экран";
+            printCurrentConfigToolStripMenuItem.Text = "Print Active Connection Configuration";
+            printCurrentConfigToolStripMenuItem.ToolTipText = "Print configuration of the current connection on screen";
             printCurrentConfigToolStripMenuItem.Click += new EventHandler(PrintSelectedConfigConnectionMenuItem_Click);
-            selectedConfigToolStripMenuItem.Text = "Выбрать конфигурацию";
-            selectedConfigToolStripMenuItem.ToolTipText = "Работа с выбраной конфигурацией подключения";
+            selectedConfigToolStripMenuItem.Text = "Select Configuration";
+            selectedConfigToolStripMenuItem.ToolTipText = "Work with the selected connection configuration";
 
-
-
-            writeConfigMenuItem.Text = "Записать конфигурацию";
-            writeConfigMenuItem.ToolTipText = "Сохранить конфигурацию в файл на диске";
+            writeConfigMenuItem.Text = "Write Configuration";
+            writeConfigMenuItem.ToolTipText = "Save configuration to a file on disk";
             writeConfigMenuItem.Click += new EventHandler(WriteFileToolStripMenuItem_Click);
 
-            applyLoadedConfigToolStripMenuItem.Text = "Заменить всю конфигурацию на загруженную";
+            applyLoadedConfigToolStripMenuItem.Text = "ЗReplace Entire Configuration with Loaded One";
             applyLoadedConfigToolStripMenuItem.Click += new EventHandler(ApplyLoadedConfigToolStripMenuItem_Click);
 
-            updateToolStripMenuItem.Text = "Обновление приложения";
-            updateToolStripMenuItem.ToolTipText = "Работа с обновлениями приложения - подготовка, деплой, получение";
-            downloadUpdateToolStripMenuItem.Text = "Скачивание/проверка нового обновления";
-            uploadUpdateToolStripMenuItem.Text = "Деплой обновления на сервер";
-            prepareUpdateToolStripMenuItem.Text = "Подготовить пакет обновлений";
-            prepareUpdateToolStripMenuItem.ToolTipText = "Подготовить пакет обновлений для выгрузки его на сервер вручную";
+            updateToolStripMenuItem.Text = "Application Update";
+            updateToolStripMenuItem.ToolTipText = "Work with application updates - preparation, deployment, and retrieval";
+            downloadUpdateToolStripMenuItem.Text = "Download/Check for New Update";
+            uploadUpdateToolStripMenuItem.Text = "Deploy Update to Server";
+            prepareUpdateToolStripMenuItem.Text = "Prepare Update Package";
+            prepareUpdateToolStripMenuItem.ToolTipText = "Prepare update package for manual upload to server";
             prepareUpdateToolStripMenuItem.Click += new EventHandler(PrepareUpdateMenuItem_Click);
             #endregion
 
             #region help
-            helpMenu.Text = "Помощь";
-            helpAboutMenuItem.Text = "О программе";
+            helpMenu.Text = "Help";
+            helpAboutMenuItem.Text = "About";
             helpAboutMenuItem.Click += new EventHandler(HelpAbout);
-            helpUsingMenuItem.Text = "Порядок использования программы";
+            helpUsingMenuItem.Text = "Program Usage Instructions";
             #endregion
 
             foreach (var m in menuStrip.Items)
             {
                 if (m is ToolStripMenuItem)
-                { (m as ToolStripMenuItem).MouseHover += new EventHandler(ToolStripMenuItem_MouseHover); }
+                {
+                    (m as ToolStripMenuItem).MouseHover += new EventHandler(ToolStripMenuItem_MouseHover);
+                }
                 else if (m is ToolStripItem)
-                { (m as ToolStripItem).MouseHover += new EventHandler(ToolStripMenuItem_MouseHover); }
+                {
+                    (m as ToolStripItem).MouseHover += new EventHandler(ToolStripMenuItem_MouseHover);
+                }
             }
         }
         #endregion
@@ -1277,14 +1303,9 @@ namespace FlexibleDBMS
 
 
         #region Filters
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         async void UpdateFiltersMenuItem_Click(object sender, EventArgs e)
         {
-            statusInfoMainText.SetTempText("Построение фильтров...");
+            statusInfoMainText.SetTempText("Building filters...");
 
             dgv.Enabled = false;
             txtbResultShow.Enabled = false;
@@ -1299,7 +1320,7 @@ namespace FlexibleDBMS
             StatusInfoFilter.Name = "StatusInfoFilter";
             StatusInfoFilter.Size = new Size(71, 22);
             //   StatusInfoFilter.Tag = "http://search.microsoft.com/search/search.aspx?";
-            StatusInfoFilter.ToolTipText = "Поиск с использованием выбранных фильтров в текущей таблице";
+            StatusInfoFilter.ToolTipText = "Search using selected filters in the current table";
             StatusInfoFilter.Click += new EventHandler(StatusInfoFilter_Click);
 
             txtBodyQuery.Enabled = true;
@@ -1307,7 +1328,7 @@ namespace FlexibleDBMS
             mainMenu.Enabled = true;
             dgv.Enabled = true;
 
-            statusInfoMainText.SetTempText("Построение фильтров завершено.");
+            statusInfoMainText.SetTempText("Building filters completed.");
         }
 
         void StatusInfoFilter_Click(object sender, EventArgs e)
@@ -1344,14 +1365,18 @@ namespace FlexibleDBMS
                         {
                             //Учесть выводимые колонки!!!
                             if (res?.Length > 0)
-                            { res += " AND " + tag + " LIKE '" + txt + "' "; }
+                            {
+                                res += " AND " + tag + " LIKE '" + txt + "' ";
+                            }
                             else
-                            { res += tag + " LIKE '" + txt + "' "; }
+                            {
+                                res += tag + " LIKE '" + txt + "' ";
+                            }
                         }
                     }
                 }
             }
-            AddLineAtTextboxLog("К таблице применен фильтр: " + res);
+            AddLineAtTextboxLog("A filter has been applied to the table: " + res);
 
             if (dgv != null && dtForStore?.Rows?.Count > 0 && dtForStore?.Columns?.Count > 0)
             {
@@ -1365,8 +1390,8 @@ namespace FlexibleDBMS
         SqlAbstractConnector dBOperations;// = new SQLiteDBOperations(sqLiteConnectionString, dbFileInfo);
         async Task BuildFilters()
         {
-            AddLineAtTextboxLog("Выполняется чтение базы и формирование библиотеки уникальных слов.");
-            AddLineAtTextboxLog("Фильтры строятся на основе данных алиасов колонок:");
+            AddLineAtTextboxLog("Reading database and forming a library of unique words.");
+            AddLineAtTextboxLog("Filters are built based on column alias data:");
             AddLineAtTextboxLog(string.Join(", ", CommonConst.TRANSLATION.Values.ToArray()));
             AddLineAtTextboxLog();
 
@@ -1375,7 +1400,7 @@ namespace FlexibleDBMS
 
             await Task.Run(() => filtersTable = (dBOperations as SQLiteModelDBOperations).GetFilterList(CommonConst.TRANSLATION, "CarAndOwner"));
 
-            AddLineAtTextboxLog("Построение фильтров завершено");
+            AddLineAtTextboxLog("Filter construction completed.");
         }
 
         void DBOperations_EvntInfoMessage(object sender, TextEventArgs e)
@@ -1417,7 +1442,7 @@ namespace FlexibleDBMS
             }
         }
 
-        //выбранный пункт из ДропДаунМеню сделать названием фильтра
+        // Selected item from DropDown menu to make filter name
         void Menu_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             string text = (e.ClickedItem.Text).Split('(')[0].Trim();
@@ -1427,7 +1452,7 @@ namespace FlexibleDBMS
             tmpSettings.Table = text;
             if (currentSQLConnectionStore?.GetCurrent()?.Table.Equals(tmpSettings.Table) == false)
             {
-                statusInfoMainText.SetTempText($"База: {tmpSettings.Database}, сменилась таблица на {tmpSettings.Table}");
+                statusInfoMainText.SetTempText($"Database: {tmpSettings.Database}, table changed to {tmpSettings.Table}");
             }
 
             lstColumn.Clear();
@@ -1450,7 +1475,7 @@ namespace FlexibleDBMS
         readonly ControlStateCaretaker controlState = new ControlStateCaretaker();
 
         /// <summary>
-        /// Запомнить текущее состояние контролов
+        /// Remember the current state of controls
         /// </summary>
         void SaveControlState()
         {
@@ -1466,13 +1491,13 @@ namespace FlexibleDBMS
                         StatusStripInfo.Enabled
                         };
 
-            //Запомнить текущее состояние контролов
+            //Remember the current state of controls
             state.SetState(enabledControls);
             controlState?.History?.Push(state?.SaveState());
         }
 
         /// <summary>
-        /// Заблокировать контролы
+        /// Block controls
         /// </summary>
         void BlockControl()
         {
@@ -1487,7 +1512,7 @@ namespace FlexibleDBMS
         }
 
         /// <summary>
-        /// Восстановить предыдущее состояние контролов
+        /// Restore previous state of controls
         /// </summary>
         void RestoreControlState()
         {
@@ -1507,7 +1532,7 @@ namespace FlexibleDBMS
         /// <summary>
         /// timeout of this task = 30 sec
         /// </summary>
-        /// <param name="query">Search words in Cyrilic looks like - '"SELECT * from таблица WHERE CustomLike(столбец, 'текст')"'</param>
+        /// <param name="query">Search words in Cyrilic looks like - '"SELECT * from таблиці WHERE CustomLike(стовпчик, 'текст')"'</param>
         /// <returns></returns>
         async Task GetData(string query)
         {
@@ -1515,12 +1540,12 @@ namespace FlexibleDBMS
             ISQLConnectionSettings newSettings = currentSQLConnectionStore?.GetCurrent();
 
             AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsDashedLong}" +
-                $"{Environment.NewLine}Выполнен запрос{Environment.NewLine}{Properties.Resources.SymbolsResult}{query}" +
-                $"{Environment.NewLine}к базе данных{Environment.NewLine}{Properties.Resources.SymbolsResult}{newSettings.Database}" +
+                $"{Environment.NewLine}Query executed{Environment.NewLine}{Properties.Resources.SymbolsResult}{query}" +
+                $"{Environment.NewLine}to database{Environment.NewLine}{Properties.Resources.SymbolsResult}{newSettings.Database}" +
                 $"{Environment.NewLine}{Properties.Resources.SymbolsDashed}{Environment.NewLine}");
 
             string constText = statusInfoMainText.GetConstText;
-            statusInfoMainText.SetConstText($"Ждите. Выполняется поиск в БД {Properties.Resources.SymbolsResult} '{newSettings.Database}'...");
+            statusInfoMainText.SetConstText($"Please wait. Searching in DB {Properties.Resources.SymbolsResult} '{newSettings.Database}'...");
             statusInfoMainText.SetTempText(constText);
 
             //Save a current state of the interface Controls
@@ -1538,7 +1563,9 @@ namespace FlexibleDBMS
                 int timeout = 120000;
                 var task = GetTables(cancellationToken, newSettings, query);
                 if (await Task.WhenAny(task, Task.Delay(timeout, cancellationToken)) == task)
-                { await task; }
+                {
+                    await task;
+                }
 
                 await Task.Run(() => statusInfoMainText.SetConstText(constText));
 
@@ -1546,25 +1573,25 @@ namespace FlexibleDBMS
                 {
                     dtForStore = ResultData.GetDataTable();
 
-                    // Переключиться на таблицу
+                    // Switch to table
                     SelectTable();
 
-                    AddLineAtTextboxLog($"В '{newSettings.Database}' найдено: {dtForStore?.Rows?.Count} записей");
-                    statusInfoMainText.SetTempText($"Найдено записей: {dtForStore?.Rows?.Count}");
+                    AddLineAtTextboxLog($"In '{newSettings.Database}' found: {dtForStore?.Rows?.Count} records");
+                    statusInfoMainText.SetTempText($"Found records: {dtForStore?.Rows?.Count}");
                 }
                 else
                 {
                     dtForStore = new DataTable();
 
-                    // Переключиться на лог
+                    // Switch to log
                     SelectLog();
 
                     AddLineAtTextboxLog($"{Environment.NewLine}{Properties.Resources.SymbolsSosSlashBack}{Environment.NewLine}" +
-                        $"Ошибка получения данных{Environment.NewLine}{Properties.Resources.SymbolsResult}" +
+                        $"Error retrieving data{Environment.NewLine}{Properties.Resources.SymbolsResult}" +
                         $"{ResultData?.Errors}{Environment.NewLine}" +
-                        $"Проверьте доступность БД{Environment.NewLine}{Properties.Resources.SymbolsResult}" +
+                        $"Check database availability{Environment.NewLine}{Properties.Resources.SymbolsResult}" +
                         $"{newSettings.Database}{Environment.NewLine}" +
-                        $"и корректность запроса{Environment.NewLine}{Properties.Resources.SymbolsResult}" +
+                        $"and query correctness{Environment.NewLine}{Properties.Resources.SymbolsResult}" +
                         $"{query}{Environment.NewLine}{Properties.Resources.SymbolsSosSlashBack}{Environment.NewLine}");
                 }
 
@@ -1578,7 +1605,7 @@ namespace FlexibleDBMS
             AddLineAtTextboxLog($"{Properties.Resources.SymbolsDashedLong}");
         }
 
-       
+
         DataTableStore ResultData = new DataTableStore();
         Task GetTables(System.Threading.CancellationToken token, ISQLConnectionSettings settings, string query)
         {
@@ -1594,7 +1621,7 @@ namespace FlexibleDBMS
         #region Export to Excel
         async void ExportMenuItem_Click(object sender, EventArgs e)
         {
-            statusInfoMainText.SetTempText($"Идет генерация отчетов...");
+            statusInfoMainText.SetTempText("Generating reports...");
             dgv.Enabled = false;
             mainMenu.Enabled = false;
             txtBodyQuery.Enabled = false;
@@ -1614,14 +1641,16 @@ namespace FlexibleDBMS
                 filePath = $"{CommonConst.appFileVersionInfo.ProductName}";
 
                 if (!string.IsNullOrWhiteSpace(report))
-                { filePath += $"_{report}"; }
+                {
+                    filePath += $"_{report}";
+                }
             }
 
 
             using (SaveFileDialog sfd = new SaveFileDialog())
             {
                 filePath = sfd.SaveFileDialogReturnPath(filePath, Properties.Resources.DialogExcelFile,
-                    "Укажите месторасположение и имя файла, если необходимо:");
+                    "Specify the file location and name, if necessary:");
             }
 
             await WriteDataTableInTableExcel(dtForShow, filePath);
@@ -1657,7 +1686,9 @@ namespace FlexibleDBMS
 
 
                     if (muliplier > 1)
-                    { fileName += $"_{part}"; }
+                    {
+                        fileName += $"_{part}";
+                    }
 
                     fileName += $".xlsx";
 
@@ -1675,7 +1706,7 @@ namespace FlexibleDBMS
             }
             else
             {
-                AddLineAtTextboxLog("В отчете отсутствуют какие-либо данные");
+                AddLineAtTextboxLog("The report does not contain any data");
             }
         }
 
@@ -1684,13 +1715,13 @@ namespace FlexibleDBMS
             try
             {
                 await Task.Run(() =>
-               dtTemp.ExportToExcel($"{fi.FullName}", nameSheet, TypeOfPivot.NonePivot, null, null, true));
+                dtTemp.ExportToExcel($"{fi.FullName}", nameSheet, TypeOfPivot.NonePivot, null, null, true));
 
-                statusInfoMainText.SetTempText($"Результаты отчета сохранены в файле: '{fi.FullName}'");
+                statusInfoMainText.SetTempText($"Report results saved to file: '{fi.FullName}'");
             }
             catch (Exception err)
             {
-                statusInfoMainText.SetTempText($"Ошибка сохранения отчета {nameSheet}");
+                statusInfoMainText.SetTempText($"Error saving report {nameSheet}");
                 AddLineAtTextboxLog(err.ToString());
             }
         }
@@ -1721,7 +1752,7 @@ namespace FlexibleDBMS
 
         void ApplicationQuit()
         {
-            Text = @"Closing application...";
+            Text = "Closing application...";
 
             currentSQLConnectionStore.EvntConfigChanged -= CurrentSQLConnectionStore_EvntConfigChanged;
 
@@ -1767,7 +1798,7 @@ namespace FlexibleDBMS
 
         #region Control Behavior
         /// <summary>
-        ///  Переключиться на лог
+        /// Switch to log
         /// </summary>
         void SelectLog()
         {
@@ -1777,7 +1808,7 @@ namespace FlexibleDBMS
         }
 
         /// <summary>
-        /// Переключиться на вкладку с табличной формой отображения
+        /// Switch to the tab with the table display form
         /// </summary>
         void SelectTable()
         {
@@ -1797,7 +1828,9 @@ namespace FlexibleDBMS
         }
 
         void AddLineAtTextboxLog(object sender, TextEventArgs text)
-        { AddLineAtTextboxLog(text?.Message); }
+        {
+            AddLineAtTextboxLog(text?.Message);
+        }
 
         void AddLineAtTextboxLog(string text = null)
         {
@@ -1824,7 +1857,7 @@ namespace FlexibleDBMS
 
         void TxtbQuery_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar == (char)13)//если нажата Enter
+            if (e.KeyChar == (char)13)//if pressed 'Enter'
             {
                 AddLineAtTextboxLog(Properties.Resources.SymbolsDashed);
 
@@ -1850,40 +1883,40 @@ namespace FlexibleDBMS
                         if (query.Contains(@"{}"))
                         {
                             queryStandartStore.Add(menu);
-                            statusInfoMainText.SetTempText($"В меню Стандартные запросы сохранен запрос '{nameQuery}'");
-                            AddLineAtTextboxLog($"В меню Стандартные запросы сохранен запрос - '{nameQuery}':{Environment.NewLine}{query}");
+                            statusInfoMainText.SetTempText($"Query saved to Standard Queries menu: '{nameQuery}'");
+                            AddLineAtTextboxLog($"Query saved to Standard Queries menu - '{nameQuery}':{Environment.NewLine}{query}");
                             return;
                         }
                         else
                         {
                             queryExtraStore.Add(menu);
-                            statusInfoMainText.SetTempText($"В меню Пользовательские запросы сохранен запрос '{nameQuery}'");
-                            AddLineAtTextboxLog($"В меню Пользовательские запросы сохранен запрос - '{nameQuery}' :{Environment.NewLine}{query}");
+                            statusInfoMainText.SetTempText($"Query saved to Custom Queries menu: '{nameQuery}'");
+                            AddLineAtTextboxLog($"Query saved to Custom Queries menu - '{nameQuery}' :{Environment.NewLine}{query}");
                         }
                     }
 
                     if (arrQuery.Length < 3)
                     {
-                        MessageBox.Show("Для использования Стандартных запросов, после ввода параметра в строке поиска, " +
-                            "вам нужно выбрать в меню один из ранее сохраненных Стандартных запросов");
+                        MessageBox.Show("To use standard queries, after entering the parameter in the search box, " +
+                            "you need to select one of the previously saved standard queries from the menu.");
                         return;
                     }
 
                     DialogResult doQuery =
-                        MessageBox.Show($"Выполнить ваш запрос?\r\n{query}", "Проверьте свой запрос", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+                        MessageBox.Show($"Execute your query?\r\n{query}", "Check your query", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
                     if (doQuery == DialogResult.OK)
                     {
                         _ = GetData(query);
                     }
                     else
                     {
-                        AddLineAtTextboxLog("Отмена задания.");
+                        AddLineAtTextboxLog("Canceling task.");
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Разрешено использование только выборок без модификации БД!\r\nПроверьте свой запрос на правльность!",
-                        "Ошибка!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Only non-modifying database queries are allowed!\r\nPlease check your query for correctness!",
+                   "Error!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
         }
@@ -1933,6 +1966,11 @@ namespace FlexibleDBMS
             }
 
             arguments.EvntInfoMessage -= AddLineAtTextboxLog;
+        }
+
+        private void helpUsingMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
         #endregion
 
