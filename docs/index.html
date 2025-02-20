@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexibleDBMS</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; line-height: 1.6; }
+        h1, h2, h3 { color: #333; }
+        a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        hr { border: none; border-top: 2px solid #ddd; margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin-bottom: 10px; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        img { width: 100%; max-width: 600px; display: block; margin-bottom: 20px; border-radius: 8px; }
+        .container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #fafafa; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 id="FlexibleDBMS">FlexibleDBMS</h1>
+        <p><em>Flexible DB management system (works and keeps with frequently used queries and different types of databases)</em></p>
+        <p>Maintained by <a href="https://github.com/ryik5">@ryik5</a>.</p>
+        
+        <hr>
+
+        <h2>Links</h2>
+        <ul>
+            <li><a href="#What">What?</a></li>
+            <li><a href="#Usage">Usage</a></li>
+            <li><a href="#GuiPackager">Additional helpers</a></li>
+        </ul>
+
+        <hr>
+
+        <h2 id="What">What?</h2>
+        <p>Do easy using of flexible queries and hard-coded queries on switchable databases.</p>
+        <p>This application provides an easy way to reuse SQL queries for different types and instances of databases.</p>
+
+        <hr>
+
+        <h2 id="Usage">Usage</h2>
+        <p>Before using the application, ensure that .NET Framework version 4.5 or above is installed.</p>
+        <p><strong>Run <code>FlexibleDBMS.exe</code></strong></p>
+
+        <ul>
+            <li>📥 Import text files or Excel files into a local SQLite database.</li>
+            <li>📌 Compress the database by removing unneeded or empty columns.</li>
+            <li>🔗 Add links to different kinds of databases to MRU (Most Recently Used).</li>
+            <li>🔄 Add flexible queries by using <code>{}</code> as placeholders in queries.</li>
+            <li>📌 Add hard-coded frequently used queries for searching in databases with frequently changing data.</li>
+            <li>🔎 Hard-coded and flexible queries work correctly on imported SQLite data using:</li>
+        </ul>
+
+        <pre>SELECT * FROM table WHERE CustomLike(column_name, 'mask_of_parameter');</pre>
+
+        <h3>Screenshots</h3>
+        <img src="https://user-images.githubusercontent.com/37776955/86589501-78265880-bf96-11ea-9072-edb8c3d691b5.jpg" alt="FlexibleDBMS Interface">
+        <img src="https://user-images.githubusercontent.com/37776955/86589503-79578580-bf96-11ea-9251-42371006642e.jpg" alt="FlexibleDBMS Second View">
+        <img src="https://user-images.githubusercontent.com/37776955/86589504-79f01c00-bf96-11ea-8029-c20ed5c5eab7.jpg" alt="FlexibleDBMS Third View">
+
+        <hr>
+
+        <h2 id="GuiPackager">GuiPackager</h2>
+        <p>Maker of packed files for the 'Resources' folder.</p>
+        <p><a href="https://github.com/ryik5/GuiPackager">GuiPackager Repository</a></p>
+
+        <hr>
+
+        <p><a href="#FlexibleDBMS">Go home</a></p>
+
+    </div>
+
+</body>
+</html>
